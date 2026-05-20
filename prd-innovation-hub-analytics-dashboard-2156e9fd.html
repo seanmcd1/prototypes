@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Innovation Hub Analytics Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 12px 12px 0 0;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 0;
+        }
+
+        .header h1 {
+            color: #2d3748;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #718096;
+            font-size: 14px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .control-group {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .control-group label {
+            color: #4a5568;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        select, input[type="date"] {
+            padding: 8px 12px;
+            border: 1px solid #cbd5e0;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            background: white;
+            color: #2d3748;
+        }
+
+        select:hover, input[type="date"]:hover {
+            border-color: #667eea;
+        }
+
+        select:focus, input[type="date"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .metric-card {
+            background: white;
+            padding: 24px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .metric-label {
+            color: #718096;
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+        }
+
+        .metric-value {
+            color: #2d3748;
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .metric-change {
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .metric-change.positive {
+            color: #48bb78;
+        }
+
+        .metric-change.negative {
+            color: #f56565;
+        }
+
+        .content {
+            background: white;
+            border-radius: 0 0 12px 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .section {
+            padding: 30px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .section:last-child {
+            border-bottom: none;
+        }
+
+        .section-title {
+            color: #2d3748;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .geo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+        }
+
+        .geo-card {
+            background: #f7fafc;
+            padding: 16px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            transition: background 0.2s;
+        }
+
+        .geo-card:hover {
+            background: #edf2f7;
+        }
+
+        .geo-region {
+            color: #2d3748;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .geo-stat {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+            font-size: 13px;
+        }
+
+        .geo-stat-label {
+            color: #718096;
+        }
+
+        .geo-stat-value {
+            color: #2d3748;
+            font-weight: 600;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #e2e8f0;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.3s ease;
+        }
+
+        .engagement-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .engagement-table thead {
+            background: #f7fafc;
+        }
+
+        .engagement-table th {
+            color: #4a5568;
+            font-size: 13px;
+            font-weight: 600;
+            text-align: left;
+            padding: 12px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .engagement-table td {
+            color: #2d3748;
+            font-size: 14px;
+            padding: 12px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .engagement-table tbody tr:hover {
+            background: #f7fafc;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-badge.active {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+
+        .status-badge.inactive {
+            background: #fed7d7;
+            color: #742a2a;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #718096;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            border: 3px solid #e2e8f0;
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-bottom: 12px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .chart-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .chart-container {
+                grid-template-columns: 1fr;
+            }
+
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+
+            .section {
+                padding: 20px;
+            }
+
+            .metric-value {
+                font-size: 28px;
+            }
+        }
+
+        .bar-chart {
+            display: flex;
+            align-items: flex-end;
+            gap: 8px;
+            height: 200px;
+            margin-top: 16px;
+        }
+
+        .bar {
+            flex: 1;
+            background: linear-gradient(180deg, #667eea, #764ba2);
+            border-radius: 4px 4px 0 0;
+            position: relative;
+            min-height: 30px;
+            transition: opacity 0.2s;
+        }
+
+        .bar:hover {
+            opacity: 0.8;
+        }
+
+        .bar-label {
+            position: absolute;
+            bottom: -24px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 12px;
+            color: #718096;
+            font-weight: 500;
+        }
+
+        .bar-value {
+            position: absolute;
+            top: -24px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 12px;
+            font-weight: 600;
+            color: #2d3748;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Innovation Hub Analytics Dashboard</h1>
+            <p>Real-time engagement metrics and geographic insights</p>
+            
+            <div class="controls">
+                <div class="control-group">
+                    <label for="period-select">Time Period:</label>
+                    <select id="period-select">
+                        <option value="7days">Last 7 Days</option>
+                        <option value="30days" selected>Last 30 Days</option>
+                        <option value="90days">Last 90 Days</option>
+                        <option value="custom">Custom Range</option>
+                    </select>
+                </div>
+                <div class="control-group" id="custom-date-group" style="display: none;">
+                    <input type="date" id="start-date">
+                    <span>to</span>
+                    <input type="date" id="end-date">
+                </div>
+                <div class="control-group">
+                    <button onclick="refreshData()" style="padding: 8px 16px; background: #667eea; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 500;">↻ Refresh</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard" id="metrics-container">
+            <div class="metric-card">
+                <div class="metric-label">Monthly Active Users</div>
+                <div class="metric-value" id="mau-value">--</div>
+                <div class="metric-change positive" id="mau-change">+ loading...</div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-label">Monthly Unique Visitors</div>
+                <div class="metric-value" id="visitors-value">--</div>
+                <div class="metric-change positive" id="visitors-change">+ loading...</div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-label">Avg Session Duration</div>
+                <div class="metric-value" id="session-value">--</div>
+                <div class="metric-change positive" id="session-change">loading...</div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-label">Total Page Views</div>
+                <div class="metric-value" id="pageviews-value">--</div>
+                <div class="metric-change positive" id="pageviews-change">+ loading...</div>
+            </div>
+        </div>
+
+        <div class="content">
+            <div class="section">
+                <h2 class="section-title">Geographic Breakdown</h2>
+                <div class="geo-grid" id="geo-container">
+                    <div style="grid-column: 1/-1; text-align: center; padding: 20px;">
+                        <div class="spinner"></div>
+                        <p>Loading geographic data...</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2 class="section-title">Engagement Metrics</h2>
+                <div class="chart-container">
+                    <div>
+                        <h3 style="color: #4a5568; font-size: 14px; margin-bottom: 12px;">Visitors by Region</h3>
+                        <div class="bar-chart" id="region-chart"></div>
+                    </div>
+                    <div>
+                        <h3 style="color: #4a5568; font-size: 14px; margin-bottom: 12px;">Daily Active Users</h3>
+                        <div class="bar-chart" id="daily-chart"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2 class="section-title">Session Details</h2>
+                <table class="engagement-table">
+                    <thead>
+                        <tr>
+                            <th>Region</th>
+                            <th>Sessions</th>
+                            <th>Avg Duration</th>
+                            <th>Bounce Rate</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="session-table-body">
+                        <tr style="text-align: center;">
+                            <td colspan="5">Loading data...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Mock data generator
+        function generateMockData(days = 30) {
+            const regions = ['North America', 'Europe', 'Asia Pacific', 'Latin America', 'Middle East & Africa'];
+            const regionData = {};
+            let totalMAU = 0;
+            let totalVisitors = 0;
+            let totalSessions = 0;
+            let totalDuration = 0;
+
+            regions.forEach(region => {
+                const visitors = Math.floor(Math.random() * 5000) + 2000;
+                const sessions = Math.floor(visitors * (0.8 + Math.random() * 0.4));
+                const avgDuration = Math.floor(Math.random() * 10 + 3);
+                const bounceRate = Math.floor(Math.random() * 40 + 20);
+
+                regionData[region] = {
+                    visitors,
+                    sessions,
+                    avgDuration,
+                    bounceRate,
+                    growth: Math.floor(Math.random() * 40 - 10)
+                };
+
+                totalVisitors += visitors;
+                totalSessions += sessions;
+                totalDuration += avgDuration;
+            });
+
+            totalMAU = Math.floor(totalVisitors * 0.95);
+            const avgSessionDuration = Math.floor(totalDuration / regions.length);
