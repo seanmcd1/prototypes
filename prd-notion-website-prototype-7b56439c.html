@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notion – Your connected workspace for wiki, docs & projects</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.5;
+            color: #37352f;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+        
+        /* Navigation */
+        nav {
+            position: sticky;
+            top: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid #e9e9e7;
+            z-index: 100;
+        }
+        
+        .nav-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 24px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .logo {
+            font-size: 20px;
+            font-weight: 700;
+            color: #000;
+            text-decoration: none;
+        }
+        
+        .nav-links {
+            display: none;
+            gap: 32px;
+            list-style: none;
+        }
+        
+        .nav-links a {
+            text-decoration: none;
+            color: #37352f;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        
+        .nav-links a:hover {
+            color: #2383e2;
+        }
+        
+        .nav-cta {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.2s;
+            cursor: pointer;
+            border: none;
+            font-size: 14px;
+        }
+        
+        .btn-secondary {
+            background: #f7f6f3;
+            color: #37352f;
+        }
+        
+        .btn-secondary:hover {
+            background: #e9e9e7;
+        }
+        
+        .btn-primary {
+            background: #2383e2;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #1f7bd7;
+        }
+        
+        /* Homepage Hero */
+        .hero {
+            text-align: center;
+            padding: 80px 0 40px;
+        }
+        
+        .hero h1 {
+            font-size: 48px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            line-height: 1.2;
+        }
+        
+        .hero p {
+            font-size: 20px;
+            color: #787774;
+            margin-bottom: 48px;
+        }
+        
+        /* Choose Your Path */
+        .path-section {
+            margin-bottom: 80px;
+        }
+        
+        .path-title {
+            text-align: center;
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 32px;
+        }
+        
+        .path-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin-bottom: 48px;
+        }
+        
+        .path-card {
+            background: white;
+            border: 2px solid #e9e9e7;
+            border-radius: 12px;
+            padding: 32px 24px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .path-card:hover {
+            border-color: #2383e2;
+            box-shadow: 0 4px 20px rgba(35, 131, 226, 0.15);
+        }
+        
+        .path-card.active {
+            border-color: #2383e2;
+            background: #f8fbff;
+        }
+        
+        .path-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+        
+        .path-card h3 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .path-card p {
+            color: #787774;
+            font-size: 14px;
+        }
+        
+        .demo-preview {
+            display: none;
+            background: #f8fbff;
+            border: 1px solid #2383e2;
+            border-radius: 12px;
+            padding: 32px;
+            margin-top: 24px;
+        }
+        
+        .demo-preview.active {
+            display: block;
+        }
+        
+        .demo-preview h4 {
+            font-size: 18px;
+            margin-bottom: 16px;
+        }
+        
+        .demo-example {
+            background: white;
+            border: 1px solid #e9e9e7;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+            font-size: 14px;
+        }
+        
+        .demo-outcomes {
+            display: flex;
+            gap: 24px;
+            margin-top: 16px;
+        }
+        
+        .outcome {
+            flex: 1;
+            text-align: left;
+        }
+        
+        .outcome-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .outcome-desc {
+            color: #787774;
+            font-size: 14px;
+        }
+        
+        /* Role Templates */
+        .templates-section {
+            background: #f7f6f3;
+            padding: 80px 0;
+            margin-top: 80px;
+        }
+        
+        .templates-header {
+            text-align: center;
+            margin-bottom: 48px;
+        }
+        
+        .templates-header h2 {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+        
+        .role-filter {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 48px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-btn {
+            padding: 8px 16px;
+            background: white;
+            border: 1px solid #e9e9e7;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .filter-btn.active {
+            background: #2383e2;
+            color: white;
+            border-color: #2383e2;
+        }
+        
+        .template-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 24px;
+        }
+        
+        .template-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            border: 1px solid #e9e9e7;
+            transition: all 0.2s;
+        }
+        
+        .template-card:hover {
+            border-color: #2383e2;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .template-tag {
+            display: inline-block;
+            background: #f1f5f9;
+            color: #2383e2;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-bottom: 12px;
+        }
+        
+        .template-card h4 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .template-card p {
+            color: #787774;
+            font-size: 14px;
+            margin-bottom: 16px;
+        }
+        
+        .template-workflow {
+            font-size: 12px;
+            color: #2383e2;
+            font-weight: 500;
+        }
+        
+        /* Page Content */
+        .page-content {
+            display: none;
+            padding: 40px 0 80px;
+        }
+        
+        .page-content.active {
+            display: block;
+        }
+        
+        .page-header {
+            text-align: center;
+            margin-bottom: 48px;
+        }
+        
+        .page-header h1 {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+        
+        .page-header p {
+            font-size: 18px;
+            color: #787774;
+        }
+        
+        /* Pricing */
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-bottom: 48px;
+        }
+        
+        .pricing-card {
+            background: white;
+            border: 2px solid #e9e9e7;
+            border-radius: 12px;
+            padding: 32px 24px;
+            text-align: center;
+        }
+        
+        .pricing-card.featured {
+            border-color: #2383e2;
+            position: relative;
+        }
+        
+        .featured-badge {
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #2383e2;
+            color: white;
+            padding: 4px 16px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .pricing-plan {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .pricing-price {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        
+        .pricing-period {
+            color: #787774;
+            font-size: 14px;
+            margin-bottom: 24px;
+        }
+        
+        .pricing-features {
+            text-align: left;
+            list-style: none;
+            margin-bottom: 32px;
+        }
+        
+        .pricing-features li {
+            padding: 4px 0;
+            font-size: 14px;
+        }
+        
+        .pricing-features li:before {
+            content: "✓";
+            color: #2383e2;
+            margin-right: 8px;
+            font-weight: bold;
+        }
+        
+        .pricing-audience {
+            background: #f7f6f3;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+        }
+        
+        .pricing-audience-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+            font-size: 14px;
+        }
+        
+        .pricing-audience-desc {
+            color: #787774;
+            font-size: 12px;
+        }
+        
+        /* Security */
+        .security-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 32px;
+            margin-bottom: 48px;
+        }
+        
+        .security-category h3 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+        
+        .security-list {
+            list-style: none;
+        }
+        
+        .security-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid #f1f1ef;
+            font-size: 14px;
+        }
+        
+        .compliance-badges {
+            display: flex;
+            gap: 16px;
+            margin-top: 32px;
+            flex-wrap: wrap;
+        }
+        
+        .badge {
+            background: #f7f6f3;
+            border: 1px solid #e9e9e7;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        /* Product Tour */
+        .tour-section {
+            margin-bottom: 48px;
+        }
+        
+        .tour-section h2 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 24px;
+        }
+        
+        .tour-demo {
+            background: #f7f6f3;
+            border-radius: 12px;
+            padding: 32px;
+            margin-bottom: 24px;
+        }
+        
+        .tour-example {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 16px;
+            border-left: 4px solid #2383e2;
+        }
+        
+        .workflow-steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 24px;
+            margin-top: 32px;
+        }
+        
+        .workflow-step {
+            background: white;
+            border: 1px solid #e9e9e7;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        
+        .step-number {
+            background: #2383e2;
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 12px;
+        }
+        
+        .step-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .step-desc {
+            font-size: 14px;
+            color: #787774;
+        }
+        
+        /* Mobile Responsive */
+        @media (min-width: 768px) {
+            .nav-links {
+                display: flex;
+            }
+            
+            .hero h1 {
+                font-size: 64px;
+            }
+            
+            .hero p {
+                font-size: 24px;
+            }
+        }
+        
+        @media (max-width: 767px) {
+            .container {
+                padding: 0 16px;
+            }
+            
+            .nav-content {
+                padding: 12px 16px;
+            }
+            
+            .hero {
+                padding: 48px 0 32px;
+            }
+            
+            .hero h1 {
+                font-size: 36px;
+            }
+            
+            .hero p {
+                font-size: 18px;
+            }
+            
+            .path-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .demo-outcomes {
+                flex-direction: column;
+                gap: 16px;
+            }
+            
+            .templates-section {
+                padding: 48px 0;
+            }
+            
+            .templates-header h2 {
+                font-size: 28px;
+            }
+            
+            .template-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .pricing-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .security-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .workflow-steps {
+                grid-template-columns: 1fr;
+            }
+            
+            .compliance-badges {
+                justify-content: center;
+            }
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #2383e2;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            z-index: 1000;
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="nav-content">
+            <a href="#" class="logo" onclick="showPage('home')">Notion</a>
+            <ul class="nav-links">
+                <li><a href="#" onclick="showPage('product-tour')">Product</a></li>
+                <li><a href="#" onclick="showPage('templates')">Templates</a></li>
+                <li><a href="#" onclick="showPage('pricing')">Pricing</a></li>
+                <li><a href="#" onclick="showPage('security')">Security</a></li>
+            </ul>
+            <div class="nav-cta">
+                <a href="#" class="btn btn-secondary">Log in</a>
+                <a href="#" class="btn btn-primary">Get Notion free</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Homepage -->
+    <div id="home" class="page-content active">
+        <div class="container">
+            <div class="hero">
+                <h1>Your connected workspace for wiki, docs & projects</h1>
+                <p>Notion is the all-in-one workspace where you can write, plan, collaborate and get organized.</p>
+            </div>
+
+            <div class="path-section">
+                <h2 class="path-title">What are you trying to do?</h2>
+                <div class="path-grid">
+                    <div class="path-card" onclick="selectPath('docs')">
+                        <div class="path-icon">📝</div>
+                        <h3>Write & Document</h3>
+                        <p>Create docs, notes, and wikis with rich formatting and collaboration</p>
+                    </div>
+                    <div class="path-card" onclick="selectPath('projects')">
+                        <div class="path-icon">📋</div>
+                        <h3>Manage Projects</h3>
+                        <p>Plan, track, and organize work with databases, kanban boards, and timelines</p>
+                    </div>
+                    <div class="path-card" onclick="selectPath('wiki')">
+                        <div class="path-icon">📚</div>
+                        <h3>Build Knowledge Base</h3>
+                        <p>Organize company knowledge, processes, and resources in one searchable place</p>
+                    </div>
+                    <div class="path-card" onclick="selectPath('ai')">
+                        <div class="path-icon">🤖</div>
+                        <h3>AI-Powered Work</h3>
+                        <p>Draft, brainstorm, and automate tasks with Notion AI assistance</p>
+                    </div>
+                </div>
+
+                <div id="docs-demo" class="demo-preview">
+                    <h4>Write & Document Example</h4>
+                    <div class="demo-example">
+                        <strong>📄 Product Requirements Doc</strong><br>
+                        <em>Feature: Enhanced Mobile Navigation</em><br><br>
+                        <strong>Problem:</strong> Users report difficulty navigating on mobile...<br>
+                        <strong>Solution:</strong> Implement bottom tab navigation with...<br>
+                        <strong>Success Metrics:</strong> 40% increase in mobile engagement...
+                    </div>
+                    <div class="demo-outcomes">
+                        <div class="outcome">
+                            <div class="outcome-title">Rich Formatting</div>
+                            <div class="outcome-desc">Embed images, videos, code, and databases directly in your docs</div>
+                        </div>
+                        <div class="outcome">
+                            <div class="outcome-title">Real-time Collaboration</div>
+                            <div class="outcome-desc">Comment, mention teammates, and edit together simultaneously</div>
+                        </div>
+                        <div class="outcome">
+                            <div class="outcome-title">Version History</div>
+                            <div class="outcome-desc">Track changes and restore previous versions with full audit trail</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="projects-demo" class="demo-preview">
+                    <h4>Project Management Example</h4>
+                    <div class="demo-example">
+                        <strong>🚀 Product Launch Tracker</strong><br><br>
+                        <strong>📋 Tasks:</strong> Design review (In Progress) → Copy finalization (To Do) → QA testing (Blocked)<br>
+                        <strong>📅 Timeline:</strong> Launch date: March 15th<br>
+                        <strong>👥 Team:</strong> @sarah (Design), @mike (Engineering), @jen (Marketing)
+                    </div>
+                    <div class="demo-outcomes">
+                        <div class="outcome">
+                            <div class="outcome-title">Multiple Views</div>
+                            <div class="outcome-desc">Switch between kanban, calendar, timeline, and table views</div>
+                        </div>
+                        <div class="outcome">
+                            <div class="outcome-title">Connected Data</div>
+                            <div class="outcome-desc">Link tasks to docs, specs, and other project resources</div>
+                        </div>
+                        <div class="outcome">
+                            <div class="outcome-title">Automated Workflows</div>
+                            <div class="outcome-desc">Set up rules to automatically update status and notify team members</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="wiki-demo" class="demo-preview">
+                    <h4>Knowledge Base Example</h4>
+                    <div class="demo-example">
+                        <strong>📖 Engineering Wiki</strong><br><br>
+                        <strong>🔧 Setup Guides:</strong> Local development → API documentation → Deployment process<br>
+                        <strong>📚 Best Practices:</strong> Code review guidelines → Security protocols<br>
+                        <strong>🆘 Troubleshooting:</strong> Common issues → Emergency procedures
+                    </div>
+                    <div class="demo-outcomes">
+                        <div class="outcome">
+                            <div class="outcome-title">Searchable Content</div>
+                            <div class="outcome-desc">Find any information instantly across all pages and databases</div>
+                        </div>
+                        <div class="outcome">
+                            <div class="outcome-title">Structured Organization</div>
+                            <div class="outcome-desc">Create hierarchies with pages, subpages, and cross-references</div>
+                        </div>
+                        <div class="outcome">
+                            <div class="outcome-title">Access Controls</div>
+                            <div class="outcome-desc">Set permissions to control who can view and edit sensitive information</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="ai-demo" class="demo-preview">
+                    <h4>AI-Powered Work Example</h4>
+                    <div class="demo-example">
+                        <strong>🤖 AI Assistant in Action</strong><br><br>
+                        <strong>✍️ Draft:</strong> "Write a project kickoff email for Q2 marketing campaign"<br>
+                        <strong>📊 Analyze:</strong> "Summarize key insights from this customer feedback database"<br>
+                        <strong>🎯 Brainstorm:</strong> "Generate 10 blog post ideas for SaaS productivity tools"
+                    </div>
+                    <div class="demo-outcomes">
+                        <div class="outcome">
+                            <div class="outcome-title">Content Creation</div>
+                            <div class="outcome-desc">Generate drafts, outlines, and ideas tailored to your context</div>
+                        </div>
+                        <div class="outcome">
+                            <div class="outcome-title">Data Analysis</div>
+                            <div class="outcome-desc">Extract insights and summaries from your databases and documents</div>
+                        </div>
+                        <div class="outcome">
+                            <div class="outcome-title">Writing Enhancement</div>
+                            <div class="outcome-desc">Improve tone, fix grammar, and adapt content for different audiences</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="templates-section">
+            <div class="container">
+                <div class="templates-header">
+                    <h2>Templates for your role</h2>
+                    <p>Get started with proven workflows and examples from your industry</p>
+                </div>
+
+                <div class="role-filter">
+                    <button class="filter-btn active" onclick="filterTemplates('marketing')">Marketing</button>
+                    <button class="filter-btn" onclick="filterTemplates('product')">Product</button>
+                    <button class="filter-btn" onclick="filterTemplates('engineering')">Engineering</button>
+                    <button class="filter-btn" onclick="filterTemplates('hr')">HR</button>
+                    <button class="filter-btn" onclick="filterTemplates('sales')">Sales</button>
+                </div>
+
+                <div id="templates-grid" class="template-grid">
+                    <!-- Templates will be populated by JavaScript -->
+                </div>
+
+                <div style="text-align: center; margin-top: 32px;">
+                    <a href="#" class="btn btn-primary" onclick="showPage('templates')">View all templates</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Templates Page -->
+    <div id="templates" class="page-content">
+        <div class="container">
+            <div class="page-header">
+                <h1>Marketing Templates & Workflows</h1>
+                <p>Proven templates to streamline your marketing operations and campaigns</p>
+            </div>
+
+            <div class="role-filter">
+                <button class="filter-btn" onclick="filterPageTemplates('all')">All Templates</button>
+                <button class="filter-btn active" onclick="filterPageTemplates('campaigns')">Campaigns</button>
+                <button class="filter-btn" onclick="filterPageTemplates('content')">Content</button>
+                <button class="filter-btn" onclick="filterPageTemplates('planning')">Planning</button>
+                <button class="filter-btn" onclick="filterPageTemplates('analytics')">Analytics</button>
+            </div>
+
+            <div class="template-grid" style="margin-top: 48px;">
+                <div class="template-card" data-category="campaigns">
+                    <div class="template-tag">Campaign</div>
+                    <h4>Product Launch Campaign</h4>
+                    <p>End-to-end campaign planning from strategy to execution and measurement</p>
+                    <div class="template-workflow">Strategy → Creative Brief → Asset Creation → Launch Timeline → Performance Tracking</div>
+                </div>
+
+                <div class="template-card" data-category="content">
+                    <div class="template-tag">Content</div>
+                    <h4>Content Calendar</h4>
+                    <p>Plan, schedule, and track all your content across channels and campaigns</p>
+                    <div class="template-workflow">Content Ideas → Editorial Calendar → Asset Production → Publishing Schedule → Performance Review</div>
+                </div>
+
+                <div class="template-card" data-category="planning">
+                    <div class="template-tag">Planning</div>
+                    <h4>Marketing OKRs & Goals</h4>
+                    <p>Set quarterly objectives, track progress, and align team efforts</p>
+                    <div class="template-workflow">Goal Setting → KPI Definition → Weekly Check-ins → Monthly Reviews → Quarterly Planning</div>
+                </div>
+
+                <div class="template-card" data-category="campaigns">
+                    <div class="template-tag">Campaign</div>
+                    <h4>Event Marketing Hub</h4>
+                    <p>Coordinate all aspects of event marketing from planning to follow-up</p>
+                    <div class="template-workflow">Event Planning → Promotion Strategy → Registration Management → Event Execution → Lead Follow-up</div>
+                </div>
+
+                <div class="template-card" data-category="content">
+                    <div class="template-tag">Content</div>
+                    <h4>SEO Content Strategy</h4>
+                    <p>Research keywords, plan content, and track organic performance</p>
+                    <div class="template-workflow">Keyword Research → Content Gap Analysis → Editorial Planning → SEO Optimization → Performance Monitoring</div>
+                </div>
+
+                <div class="template-card" data-category="analytics">
+                    <div class="template-tag">Analytics</div>
+                    <h4>Marketing Dashboard</h4>
+                    <p>Track key metrics, campaign performance, and ROI in one central view</p>
+                    <div class="template-workflow">Metric Definition → Data Collection → Dashboard Creation → Weekly Reports → Monthly Analysis</div>
+                </div>
+
+                <div class="template-card" data-category="planning">
+                    <div class="template-tag">Planning</div>
+                    <h4>Competitive Intelligence</h4>
+                    <p>Monitor competitors, analyze trends, and inform strategic decisions</p>
+                    <div class="template-workflow">Competitor Identification → Feature Comparison → Pricing Analysis → Campaign Monitoring → Strategic Insights</div>
+                </div>
+
+                <div class="template-card" data-category="campaigns">
+                    <div class="template-tag">Campaign</div>
+                    <h4>Email Marketing Campaigns</h4>
+                    <p>Design, execute, and optimize email marketing workflows</p>
+                    <div class="template-workflow">Campaign Strategy → Email Design → Audience Segmentation → A/B Testing → Performance Analysis</div>
+                </div>
+            </div>
+
+            <div style="background: #f7f6f3; padding: 32px; border-radius: 12px; margin-top: 48px; text-align: center;">
+                <h3 style="margin-bottom: 16px;">Import your existing work</h3>
+                <p style="color: #787774; margin-bottom: 24px;">Seamlessly migrate from Google Docs, Confluence, Asana, Trello, and more</p>
+                <div style="display: flex
