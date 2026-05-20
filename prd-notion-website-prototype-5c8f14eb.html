@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notion - The all-in-one workspace</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #fff;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header */
+        header {
+            background: #fff;
+            border-bottom: 1px solid #e5e5e5;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 0;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            text-decoration: none;
+            color: #333;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 32px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #555;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: #2383e2;
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 80px 0 60px;
+            text-align: center;
+            background: linear-gradient(135deg, #f8f9fa 0%, #fff 100%);
+        }
+
+        .hero h1 {
+            font-size: 48px;
+            font-weight: 700;
+            margin-bottom: 24px;
+            line-height: 1.1;
+        }
+
+        .hero p {
+            font-size: 20px;
+            color: #666;
+            margin-bottom: 48px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Choose Your Path */
+        .choose-path {
+            padding: 80px 0;
+        }
+
+        .choose-path h2 {
+            text-align: center;
+            font-size: 36px;
+            margin-bottom: 16px;
+        }
+
+        .choose-path .subtitle {
+            text-align: center;
+            font-size: 18px;
+            color: #666;
+            margin-bottom: 48px;
+        }
+
+        .path-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin-bottom: 48px;
+        }
+
+        .path-card {
+            background: #fff;
+            border: 2px solid #e5e5e5;
+            border-radius: 12px;
+            padding: 32px 24px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .path-card:hover {
+            border-color: #2383e2;
+            box-shadow: 0 8px 24px rgba(35, 131, 226, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .path-card.active {
+            border-color: #2383e2;
+            background: #f8fcff;
+        }
+
+        .path-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            display: block;
+        }
+
+        .path-card h3 {
+            font-size: 24px;
+            margin-bottom: 12px;
+        }
+
+        .path-card p {
+            color: #666;
+            font-size: 16px;
+        }
+
+        /* Demo Strip */
+        .demo-strip {
+            display: none;
+            background: #f8fcff;
+            padding: 40px 0;
+            margin: 48px 0;
+            border-radius: 12px;
+            border: 1px solid #e3f2fd;
+        }
+
+        .demo-strip.active {
+            display: block;
+        }
+
+        .demo-content {
+            display: flex;
+            gap: 40px;
+            align-items: center;
+        }
+
+        .demo-text {
+            flex: 1;
+        }
+
+        .demo-text h4 {
+            font-size: 24px;
+            margin-bottom: 16px;
+        }
+
+        .demo-text p {
+            color: #666;
+            margin-bottom: 24px;
+        }
+
+        .demo-visual {
+            flex: 1;
+            background: #fff;
+            border-radius: 8px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .btn {
+            display: inline-block;
+            background: #2383e2;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        .btn:hover {
+            background: #1976d2;
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: #2383e2;
+            border: 2px solid #2383e2;
+        }
+
+        .btn-outline:hover {
+            background: #2383e2;
+            color: white;
+        }
+
+        /* Templates Section */
+        .templates {
+            padding: 80px 0;
+            background: #f8f9fa;
+        }
+
+        .templates h2 {
+            text-align: center;
+            font-size: 36px;
+            margin-bottom: 16px;
+        }
+
+        .templates .subtitle {
+            text-align: center;
+            font-size: 18px;
+            color: #666;
+            margin-bottom: 48px;
+        }
+
+        .filter-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+
+        .filter-tab {
+            padding: 8px 20px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+
+        .filter-tab:hover,
+        .filter-tab.active {
+            background: #2383e2;
+            color: white;
+            border-color: #2383e2;
+        }
+
+        .template-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+        }
+
+        .template-card {
+            background: white;
+            border-radius: 8px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+
+        .template-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+        }
+
+        .template-card h4 {
+            font-size: 18px;
+            margin-bottom: 12px;
+        }
+
+        .template-card p {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 16px;
+        }
+
+        .template-tags {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .tag {
+            background: #f0f0f0;
+            color: #666;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+        }
+
+        /* Footer */
+        footer {
+            background: #333;
+            color: white;
+            padding: 48px 0 24px;
+            margin-top: 80px;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 32px;
+            margin-bottom: 32px;
+        }
+
+        .footer-section h4 {
+            margin-bottom: 16px;
+            font-size: 16px;
+        }
+
+        .footer-section a {
+            color: #ccc;
+            text-decoration: none;
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .footer-section a:hover {
+            color: white;
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 24px;
+            border-top: 1px solid #555;
+            color: #999;
+        }
+
+        /* Page Specific Styles */
+        .page-header {
+            background: #f8f9fa;
+            padding: 60px 0;
+            text-align: center;
+        }
+
+        .page-header h1 {
+            font-size: 42px;
+            margin-bottom: 16px;
+        }
+
+        .page-header p {
+            font-size: 18px;
+            color: #666;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .content-section {
+            padding: 60px 0;
+        }
+
+        .pricing-tiers {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin: 48px 0;
+        }
+
+        .pricing-card {
+            background: white;
+            border: 2px solid #e5e5e5;
+            border-radius: 12px;
+            padding: 32px 24px;
+            text-align: center;
+            position: relative;
+        }
+
+        .pricing-card.featured {
+            border-color: #2383e2;
+            transform: scale(1.05);
+        }
+
+        .pricing-card h3 {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        .pricing-card .price {
+            font-size: 36px;
+            font-weight: 700;
+            color: #2383e2;
+            margin-bottom: 16px;
+        }
+
+        .pricing-card .price span {
+            font-size: 16px;
+            color: #666;
+        }
+
+        .pricing-features {
+            list-style: none;
+            margin: 24px 0;
+            text-align: left;
+        }
+
+        .pricing-features li {
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .pricing-features li:before {
+            content: "✓";
+            color: #2383e2;
+            margin-right: 12px;
+            font-weight: bold;
+        }
+
+        .security-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 32px;
+            margin: 48px 0;
+        }
+
+        .security-item {
+            text-align: center;
+        }
+
+        .security-icon {
+            font-size: 48px;
+            color: #2383e2;
+            margin-bottom: 16px;
+            display: block;
+        }
+
+        .compliance-badges {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            flex-wrap: wrap;
+            margin: 48px 0;
+        }
+
+        .badge {
+            background: #f8f9fa;
+            border: 1px solid #e5e5e5;
+            border-radius: 8px;
+            padding: 16px 24px;
+            text-align: center;
+            font-weight: 600;
+            color: #333;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .hero h1 {
+                font-size: 36px;
+            }
+
+            .hero p {
+                font-size: 18px;
+            }
+
+            .choose-path h2 {
+                font-size: 28px;
+            }
+
+            .demo-content {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .path-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .template-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .pricing-tiers {
+                grid-template-columns: 1fr;
+            }
+
+            .pricing-card.featured {
+                transform: none;
+            }
+        }
+
+        /* Hidden pages initially */
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <!-- Homepage -->
+    <div id="homepage" class="page active">
+        <header>
+            <nav class="container">
+                <a href="#" class="logo" onclick="showPage('homepage')">Notion</a>
+                <ul class="nav-links">
+                    <li><a href="#" onclick="showPage('product-tours')" class="nav-link">Product</a></li>
+                    <li><a href="#" onclick="showPage('templates')" class="nav-link">Templates</a></li>
+                    <li><a href="#" onclick="showPage('pricing')" class="nav-link">Pricing</a></li>
+                    <li><a href="#" onclick="showPage('security')" class="nav-link">Security</a></li>
+                    <li><a href="#" class="btn">Get Started</a></li>
+                </ul>
+                <button class="mobile-menu-btn">☰</button>
+            </nav>
+        </header>
+
+        <section class="hero">
+            <div class="container">
+                <h1>The all-in-one workspace</h1>
+                <p>Write, plan, organize, and collaborate. Notion adapts to your needs, whether you're taking notes, managing projects, or building a knowledge base.</p>
+            </div>
+        </section>
+
+        <section class="choose-path">
+            <div class="container">
+                <h2>What are you trying to do?</h2>
+                <p class="subtitle">Choose your path to see how Notion can help</p>
+                
+                <div class="path-grid">
+                    <a href="#" class="path-card" onclick="showDemo('docs')" data-path="docs">
+                        <span class="path-icon">📝</span>
+                        <h3>Write & Document</h3>
+                        <p>Create beautiful docs, take notes, and collaborate on content with your team.</p>
+                    </a>
+                    
+                    <a href="#" class="path-card" onclick="showDemo('projects')" data-path="projects">
+                        <span class="path-icon">📋</span>
+                        <h3>Manage Projects</h3>
+                        <p>Track tasks, set deadlines, and coordinate team work with powerful databases.</p>
+                    </a>
+                    
+                    <a href="#" class="path-card" onclick="showDemo('wiki')" data-path="wiki">
+                        <span class="path-icon">🏛️</span>
+                        <h3>Build Knowledge</h3>
+                        <p>Create a central hub for company knowledge, processes, and documentation.</p>
+                    </a>
+                    
+                    <a href="#" class="path-card" onclick="showDemo('ai')" data-path="ai">
+                        <span class="path-icon">🤖</span>
+                        <h3>Work with AI</h3>
+                        <p>Get writing assistance, generate summaries, and automate tasks with AI.</p>
+                    </a>
+                </div>
+
+                <!-- Demo Strips -->
+                <div id="demo-docs" class="demo-strip">
+                    <div class="container">
+                        <div class="demo-content">
+                            <div class="demo-text">
+                                <h4>Write docs that bring ideas to life</h4>
+                                <p>Create rich documents with embedded databases, media, and interactive elements. Perfect for meeting notes, product specs, and team wikis.</p>
+                                <a href="#" class="btn" onclick="showPage('product-tours')">See Docs in Action</a>
+                            </div>
+                            <div class="demo-visual">
+                                <h5>📄 Product Requirements Doc</h5>
+                                <p><strong>Status:</strong> In Review</p>
+                                <p><strong>Owner:</strong> Product Team</p>
+                                <hr style="margin: 12px 0;">
+                                <p>💡 <strong>Problem Statement</strong></p>
+                                <p>Users need a faster way to...</p>
+                                <p>📊 <strong>Success Metrics</strong></p>
+                                <p>• Increase user engagement by 25%</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="demo-projects" class="demo-strip">
+                    <div class="container">
+                        <div class="demo-content">
+                            <div class="demo-text">
+                                <h4>Keep projects on track</h4>
+                                <p>Manage tasks, track progress, and coordinate with your team using flexible databases and multiple views.</p>
+                                <a href="#" class="btn" onclick="showPage('product-tours')">See Projects in Action</a>
+                            </div>
+                            <div class="demo-visual">
+                                <h5>🚀 Launch Planning Board</h5>
+                                <div style="display: flex; gap: 12px; margin-top: 12px;">
+                                    <div style="flex: 1; background: #f0f0f0; padding: 8px; border-radius: 4px;">
+                                        <strong>To Do</strong>
+                                        <div style="background: white; padding: 8px; margin-top: 4px; border-radius: 3px; font-size: 12px;">Design review</div>
+                                    </div>
+                                    <div style="flex: 1; background: #fff3cd; padding: 8px; border-radius: 4px;">
+                                        <strong>In Progress</strong>
+                                        <div style="background: white; padding: 8px; margin-top: 4px; border-radius: 3px; font-size: 12px;">Copy writing</div>
+                                    </div>
+                                    <div style="flex: 1; background: #d1edff; padding: 8px; border-radius: 4px;">
+                                        <strong>Done</strong>
+                                        <div style="background: white; padding: 8px; margin-top: 4px; border-radius: 3px; font-size: 12px;">User research</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="demo-wiki" class="demo-strip">
+                    <div class="container">
+                        <div class="demo-content">
+                            <div class="demo-text">
+                                <h4>Build your team's knowledge base</h4>
+                                <p>Create interconnected pages that grow with your team. Perfect for onboarding, processes, and company knowledge.</p>
+                                <a href="#" class="btn" onclick="showPage('product-tours')">See Wiki in Action</a>
+                            </div>
+                            <div class="demo-visual">
+                                <h5>📚 Team Handbook</h5>
+                                <p><strong>🏠 Getting Started</strong></p>
+                                <p style="margin-left: 20px; font-size: 14px;">↳ Onboarding Checklist</p>
+                                <p style="margin-left: 20px; font-size: 14px;">↳ Team Directory</p>
+                                <p><strong>⚙️ Processes</strong></p>
+                                <p style="margin-left: 20px; font-size: 14px;">↳ Code Review Guidelines</p>
+                                <p style="margin-left: 20px; font-size: 14px;">↳ Meeting Templates</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="demo-ai" class="demo-strip">
+                    <div class="container">
+                        <div class="demo-content">
+                            <div class="demo-text">
+                                <h4>Supercharge your work with AI</h4>
+                                <p>Get writing help, generate summaries, and automate routine tasks. AI that works within your existing workflow.</p>
+                                <a href="#" class="btn" onclick="showPage('product-tours')">See AI in Action</a>
+                            </div>
+                            <div class="demo-visual">
+                                <h5>🤖 AI Assistant</h5>
+                                <p style="background: #f8f9fa; padding: 8px; border-radius: 4px; font-size: 14px; margin-bottom: 8px;">
+                                    <strong>You:</strong> Summarize this meeting note
+                                </p>
+                                <p style="background: #e3f2fd; padding: 8px; border-radius: 4px; font-size: 14px;">
+                                    <strong>AI:</strong> Key decisions: Launch moved to Q2, Sarah leads design, need user feedback by Friday.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="templates">
+            <div class="container">
+                <h2>Templates for your role</h2>
+                <p class="subtitle">Get started quickly with templates designed for your work</p>
+                
+                <div class="filter-tabs">
+                    <div class="filter-tab active" onclick="filterTemplates('all')">All</div>
+                    <div class="filter-tab" onclick="filterTemplates('marketing')">Marketing</div>
+                    <div class="filter-tab" onclick="filterTemplates('product')">Product</div>
+                    <div class="filter-tab" onclick="filterTemplates('engineering')">Engineering</div>
+                    <div class="filter-tab" onclick="filterTemplates('hr')">HR</div>
+                </div>
+
+                <div class="template-grid" id="template-grid">
+                    <div class="template-card" data-category="marketing">
+                        <h4>Marketing Campaign Planner</h4>
+                        <p>Plan launches, track deliverables, and coordinate cross-functional work.</p>
+                        <div class="template-tags">
+                            <span class="tag">Marketing</span>
+                            <span class="tag">Projects</span>
+                        </div>
+                    </div>
+                    
+                    <div class="template-card" data-category="product">
+                        <h4>Product Requirements Doc</h4>
+                        <p>Define features, track decisions, and align stakeholders on product direction.</p>
+                        <div class="template-tags">
+                            <span class="tag">Product</span>
+                            <span class="tag">Docs</span>
+                        </div>
+                    </div>
+                    
+                    <div class="template-card" data-category="engineering">
+                        <h4>Sprint Planning</h4>
+                        <p>Organize development work, track progress, and coordinate releases.</p>
+                        <div class="template-tags">
+                            <span class="tag">Engineering</span>
+                            <span class="tag">Projects</span>
+                        </div>
+                    </div>
+                    
+                    <div class="template-card" data-category="hr">
+                        <h4>Employee Onboarding</h4>
+                        <p>Create structured onboarding experiences and track new hire progress.</p>
+                        <div class="template-tags">
+                            <span class="tag">HR</span>
+                            <span class="tag">Process</span>
+                        </div>
+                    </div>
+                    
+                    <div class="template-card" data-category="marketing">
+                        <h4>Content Calendar</h4>
+                        <p>Plan content across channels, track publishing schedules, and manage assets.</p>
+                        <div class="template-tags">
+                            <span class="tag">Marketing</span>
+                            <span class="tag">Planning</span>
+                        </div>
+                    </div>
+                    
+                    <div class="template-card" data-category="product">
+                        <h4>User Research Hub</h4>
+                        <p>Organize research findings, track insights, and share with stakeholders.</p>
+                        <div class="template-tags">
+                            <span class="tag">Product</span>
+                            <span class="tag">Research</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="text-align: center; margin-top: 32px;">
+                    <a href="#" class="btn-outline btn" onclick="showPage('templates')">View All Templates</a>
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            <div class="container">
+                <div class="footer-content">
+                    <div class="footer-section">
+                        <h4>Product</h4>
+                        <a href="#" onclick="showPage('product-tours')">Features</a>
+                        <a href="#" onclick="showPage('templates')">Templates</a>
+                        <a href="#" onclick="showPage('pricing')">Pricing</a>
+                        <a href="#">What's New</a>
+                    </div>
+                    <div class="footer-section">
+                        <h4>Solutions</h4>
+                        <a href="#">For Teams</a>
+                        <a href="#">For Enterprise</a>
+                        <a href="#">For Education</a>
+                        <a href="#">For Personal</a>
+                    </div>
+                    <div class="footer-section">
+                        <h4>Resources</h4>
+                        <a href="#">Help Center</a>
+                        <a href="#">API</a>
+                        <a href="#">Community</a>
+                        <a href="#">Blog</a>
+                    </div>
+                    <div class="footer-section">
+                        <h4>Company</h4>
+                        <a href="#">About</a>
+                        <a href="#">Careers</a>
+                        <a href="#" onclick="showPage('security')">Security</a>
+                        <a href="#">Privacy</a>
+                    </div>
+                </div>
+                <div class="footer-bottom">
+                    <p>&copy; 2024 Notion Labs, Inc. All rights reserved.</p>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Product Tours Page -->
+    <div id="product-tours" class="page">
+        <header>
+            <nav class="container">
+                <a href="#" class="logo" onclick="showPage('homepage')">Notion</a>
+                <ul class="nav-links">
+                    <li><a href="#" onclick="showPage('product-tours')" class="nav-link active">Product</a></li>
+                    <li><a href="#" onclick="showPage('templates')" class="nav-link">Templates</a></li>
+                    <li><a href="#" onclick="showPage('pricing')" class="nav-link">Pricing</a></li>
+                    <li><a href="#" onclick="showPage('security')" class="nav-link">Security</a></li>
+                    <li><a href="#" class="btn">Get Started</a></li>
+                </ul>
+                <button class="mobile-menu-btn">☰</button>
+            </nav>
+        </header>
+
+        <div class="page-header">
+            <div class="container">
+                <h1>See Notion in Action</h1>
+                <p>Explore how teams use Notion to write, plan, organize, and collaborate more effectively.</p>
+            </div>
+        </div>
+
+        <section class="content-section">
+            <div class="container">
+                <div class="path-grid">
+                    <div class="path-card">
+                        <span class="path-icon">📝</span>
+                        <h3>Docs & Notes</h3>
+                        <p>Create rich documents with real-time collaboration. Perfect for meeting notes, specs, and knowledge sharing.</p>
+                        <div style="margin-top: 20px;">
+                            <strong>Example workflow:</strong><br>
+                            Weekly team meeting → Meeting notes → Action items → Follow-up docs
+                        </div>
+                    </div>
+                    
+                    <div class="path-card">
+                        <span class="path-icon">📋</span>
+                        <h3>Project Management</h3>
+                        <p>Track tasks, coordinate work, and hit deadlines with flexible project views and workflows.</p>
+                        <div style="margin-top: 20px;">
+                            <strong>Example workflow:</strong><br>
+                            Product launch → Task breakdown → Sprint planning → Status tracking
+                        </div>
+                    </div>
+                    
+                    <div class="path-card">
+                        <span class="path-icon">🏛️</span>
+                        <h3>Knowledge Base</h3>
+                        <p>Build your team's central source of truth. Onboarding guides, processes, and institutional knowledge.</p>
+                        <div style="margin-top: 20px;">
+                            <strong>Example workflow:</strong><br>
+                            New hire → Onboarding checklist → Process docs → Team handbook
+                        </div>
+                    </div>
+                </div>
+
+                <div style="background: #f8f9fa; padding: 40px; border-radius: 12px; margin: 48px 0; text-align: center;">
+                    <h3>Import from your current tools</h3>
+                    <p style="margin: 16px 0;">Bring your existing content from Google Docs, Confluence, Asana, Trello, and more.</p>
+                    <div style="display: flex; justify-content: center; gap: 24px; flex-wrap: wrap; margin-top: 24px;">
+                        <div
