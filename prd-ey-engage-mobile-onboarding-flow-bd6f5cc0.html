@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EY Engage — Onboarding</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f9fafb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            width: 390px;
+            height: 844px;
+            background: white;
+            border-radius: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .screens-wrapper {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .screen {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+            padding: 60px 32px 100px 32px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .screen.active {
+            opacity: 1;
+            transform: translateX(0);
+            position: relative;
+        }
+
+        .screen.prev {
+            transform: translateX(-100%);
+        }
+
+        /* Screen 1 - Welcome */
+        .screen-welcome {
+            justify-content: space-between;
+            text-align: center;
+        }
+
+        .welcome-illustration {
+            width: 180px;
+            height: 180px;
+            margin: 40px auto 60px;
+            background: linear-gradient(135deg, #FDB913 0%, #FDB913 50%, rgba(253, 185, 19, 0.1) 100%);
+            border-radius: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 80px;
+        }
+
+        .headline {
+            font-size: 32px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 12px;
+            line-height: 1.2;
+        }
+
+        .subheadline {
+            font-size: 16px;
+            font-weight: 400;
+            color: #64748b;
+            line-height: 1.5;
+            margin-bottom: 40px;
+        }
+
+        .cta-primary {
+            width: 100%;
+            padding: 16px;
+            background: #0f172a;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s ease, transform 0.2s ease;
+            margin-bottom: 12px;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .cta-primary:hover {
+            background: #1e293b;
+            transform: translateY(-2px);
+        }
+
+        .cta-primary:active {
+            transform: translateY(0);
+        }
+
+        .cta-secondary {
+            width: 100%;
+            padding: 16px;
+            background: transparent;
+            color: #0f172a;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: border-color 0.3s ease, background 0.3s ease;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .cta-secondary:hover {
+            border-color: #cbd5e1;
+            background: #f8fafc;
+        }
+
+        .cta-secondary:active {
+            background: #f1f5f9;
+        }
+
+        /* Screen 2 - Capabilities */
+        .screen-capabilities {
+            justify-content: space-between;
+        }
+
+        .capabilities-content {
+            flex: 1;
+        }
+
+        .capability-row {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 32px;
+            align-items: flex-start;
+        }
+
+        .capability-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            flex-shrink: 0;
+        }
+
+        .capability-icon.accounts {
+            background: rgba(253, 185, 19, 0.1);
+        }
+
+        .capability-icon.opportunities {
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        .capability-icon.insights {
+            background: rgba(34, 197, 94, 0.1);
+        }
+
+        .capability-text h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #0f172a;
+            margin-bottom: 6px;
+        }
+
+        .capability-text p {
+            font-size: 14px;
+            color: #64748b;
+            line-height: 1.5;
+        }
+
+        /* Screen 3 - Personalise */
+        .screen-personalise {
+            justify-content: space-between;
+        }
+
+        .personalise-content {
+            flex: 1;
+        }
+
+        .selection-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 32px;
+        }
+
+        .selection-card {
+            padding: 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 16px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .selection-card:hover {
+            border-color: #cbd5e1;
+            background: #f8fafc;
+        }
+
+        .selection-card.selected {
+            border-color: #FDB913;
+            background: rgba(253, 185, 19, 0.05);
+            box-shadow: 0 4px 12px rgba(253, 185, 19, 0.15);
+        }
+
+        .selection-card-icon {
+            font-size: 32px;
+        }
+
+        .selection-card-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #0f172a;
+        }
+
+        .selection-card.selected .selection-card-label {
+            color: #FDB913;
+        }
+
+        .selection-card-checkmark {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #FDB913;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: #0f172a;
+            font-weight: 700;
+            margin-top: 4px;
+        }
+
+        .selection-card.selected .selection-card-checkmark {
+            display: flex;
+        }
+
+        .cta-primary:disabled {
+            background: #cbd5e1;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .cta-primary:disabled:hover {
+            background: #cbd5e1;
+            transform: none;
+        }
+
+        /* Progress dots */
+        .progress-dots {
+            position: absolute;
+            bottom: 32px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            z-index: 10;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #e2e8f0;
+            transition: background 0.3s ease, width 0.3s ease;
+            cursor: pointer;
+        }
+
+        .dot.active {
+            background: #0f172a;
+            width: 24px;
+            border-radius: 4px;
+        }
+
+        /* Scrollable content fix */
+        .screen {
+            scroll-behavior: smooth;
+        }
+
+        .screen::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .screen::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .screen::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 2px;
+        }
+
+        .screen::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="screens-wrapper">
+            <!-- Screen 1: Welcome -->
+            <div class="screen active screen-welcome" data-screen="0">
+                <div>
+                    <div class="welcome-illustration">👋</div>
+                    <h1 class="headline">Welcome to EY Engage</h1>
+                    <p class="subheadline">Stay on top of accounts, opportunities, and client moments — wherever you are</p>
+                </div>
+                <div>
+                    <button class="cta-primary" onclick="nextScreen()">Get Started</button>
+                    <button class="cta-secondary" onclick="nextScreen()">Log in</button>
+                </div>
+            </div>
+
+            <!-- Screen 2: Capabilities -->
+            <div class="screen screen-capabilities" data-screen="1">
+                <div class="capabilities-content">
+                    <h1 class="headline">Everything you need for your next client conversation</h1>
+                    
+                    <div class="capability-row">
+                        <div class="capability-icon accounts">📇</div>
+                        <div class="capability-text">
+                            <h3>Accounts</h3>
+                            <p>Quickly find stakeholders, relationship history, and key notes</p>
+                        </div>
+                    </div>
+
+                    <div class="capability-row">
+                        <div class="capability-icon opportunities">📈</div>
+                        <div class="capability-text">
+                            <h3>Opportunities</h3>
+                            <p>Track deal stage, next steps, and blockers in one view</p>
+                        </div>
+                    </div>
+
+                    <div class="capability-row">
+                        <div class="capability-icon insights">✨</div>
+                        <div class="capability-text">
+                            <h3>Insights</h3>
+                            <p>Get a concise briefing and suggested talking points before meetings</p>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <button class="cta-primary" onclick="nextScreen()">Continue</button>
+                </div>
+            </div>
+
+            <!-- Screen 3: Personalise -->
+            <div class="screen screen-personalise" data-screen="2">
+                <div class="personalise-content">
+                    <h1 class="headline">What are you working on today?</h1>
+                    
+                    <div class="selection-grid">
+                        <div class="selection-card" onclick="selectOption(this, 'account')">
+                            <div class="selection-card-icon">🏢</div>
+                            <div class="selection-card-label">Key Account</div>
+                            <div class="selection-card-checkmark">✓</div>
+                        </div>
+                        <div class="selection-card" onclick="selectOption(this, 'opportunity')">
+                            <div class="selection-card-icon">🎯</div>
+                            <div class="selection-card-label">Active Opportunity</div>
+                            <div class="selection-card-checkmark">✓</div>
+                        </div>
+                        <div class="selection-card" onclick="selectOption(this, 'meeting')">
+                            <div class="selection-card-icon">📅</div>
+                            <div class="selection-card-label">Upcoming Meeting</div>
+                            <div class="selection-card-checkmark">✓</div>
+                        </div>
+                        <div class="selection-card" onclick="selectOption(this, 'research')">
+                            <div class="selection-card-icon">🔍</div>
+                            <div class="selection-card-label">General Research</div>
+                            <div class="selection-card-checkmark">✓</div>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <button class="cta-primary" id="getStartedBtn" onclick="getStarted()" disabled>Get started</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Progress dots -->
+        <div class="progress-dots">
+            <div class="dot active" onclick="goToScreen(0)"></div>
+            <div class="dot" onclick="goToScreen(1)"></div>
+            <div class="dot" onclick="goToScreen(2)"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentScreen = 0;
+        let selectedOption = null;
+
+        function nextScreen() {
+            if (currentScreen < 2) {
+                goToScreen(currentScreen + 1);
+            }
+        }
+
+        function goToScreen(screenIndex) {
+            const screens = document.querySelectorAll('.screen');
+            const dots = document.querySelectorAll('.dot');
+
+            screens[currentScreen].classList.remove('active');
+            screens[currentScreen].classList.add('prev');
+
+            screens[screenIndex].classList.remove('prev');
+            screens[screenIndex].classList.add('active');
+
+            dots[currentScreen].classList.remove('active');
+            dots[screenIndex].classList.add('active');
+
+            currentScreen = screenIndex;
+        }
+
+        function selectOption(element, option) {
+            const cards = document.querySelectorAll('.selection-card');
+            cards.forEach(card => card.classList.remove('selected'));
+            element.classList.add('selected');
+            selectedOption = option;
+            document.getElementById('getStartedBtn').disabled = false;
+        }
+
+        function getStarted() {
+            if (selectedOption) {
+                const contextMap = {
+                    'account': 'accounts',
+                    'opportunity': 'opportunities',
+                    'meeting': 'meetings',
+                    'research': 'research'
+                };
+                const context = contextMap[selectedOption];
+                alert(`Navigating to ${context} context...\n\nIn a real app, this would route to: /app/${context}`);
+            }
+        }
+    </script>
+</body>
+</html>
