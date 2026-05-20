@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notion - Your connected workspace</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #37352f;
+            background: #fff;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        header {
+            position: sticky;
+            top: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid #e9e9e7;
+            z-index: 100;
+        }
+        
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 0;
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: #000;
+            text-decoration: none;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 32px;
+            list-style: none;
+        }
+        
+        .nav-links a {
+            color: #37352f;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        
+        .nav-links a:hover {
+            color: #2383e2;
+        }
+        
+        .cta-button {
+            background: #2383e2;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+        
+        .cta-button:hover {
+            background: #1c6dcc;
+        }
+        
+        .hero {
+            padding: 80px 0;
+            text-align: center;
+            background: linear-gradient(135deg, #f7f6f3 0%, #fff 100%);
+        }
+        
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 24px;
+            color: #000;
+        }
+        
+        .hero p {
+            font-size: 1.5rem;
+            margin-bottom: 48px;
+            color: #6b6b6b;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .path-selector {
+            background: white;
+            border-radius: 16px;
+            padding: 48px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            margin: 48px auto;
+            max-width: 900px;
+        }
+        
+        .path-selector h2 {
+            font-size: 2rem;
+            margin-bottom: 32px;
+            text-align: center;
+            color: #000;
+        }
+        
+        .paths-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 24px;
+        }
+        
+        .path-card {
+            background: #f7f6f3;
+            border-radius: 12px;
+            padding: 32px 24px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        
+        .path-card:hover, .path-card.selected {
+            background: #2383e2;
+            color: white;
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(35, 131, 226, 0.3);
+        }
+        
+        .path-icon {
+            font-size: 2.5rem;
+            margin-bottom: 16px;
+        }
+        
+        .path-card h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .path-card p {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        .demo-section {
+            display: none;
+            margin-top: 48px;
+            padding: 48px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+        }
+        
+        .demo-section.active {
+            display: block;
+        }
+        
+        .demo-preview {
+            display: flex;
+            align-items: center;
+            gap: 48px;
+            margin-bottom: 32px;
+        }
+        
+        .demo-content {
+            flex: 1;
+        }
+        
+        .demo-visual {
+            flex: 1;
+            background: #f7f6f3;
+            height: 300px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            color: #6b6b6b;
+        }
+        
+        .role-links {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        
+        .role-link {
+            background: #e9f3ff;
+            color: #2383e2;
+            padding: 8px 16px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        
+        .role-link:hover {
+            background: #2383e2;
+            color: white;
+        }
+        
+        .features {
+            padding: 80px 0;
+            background: #f7f6f3;
+        }
+        
+        .features h2 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 48px;
+            color: #000;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 32px;
+        }
+        
+        .feature-card {
+            background: white;
+            padding: 32px;
+            border-radius: 12px;
+            text-align: center;
+        }
+        
+        .feature-icon {
+            font-size: 2rem;
+            margin-bottom: 16px;
+        }
+        
+        footer {
+            background: #000;
+            color: white;
+            padding: 48px 0;
+            text-align: center;
+        }
+        
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+            
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .hero p {
+                font-size: 1.2rem;
+            }
+            
+            .path-selector {
+                padding: 32px 24px;
+            }
+            
+            .paths-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .demo-preview {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .role-links {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="container">
+            <a href="#" class="logo">Notion</a>
+            <ul class="nav-links">
+                <li><a href="#product">Product</a></li>
+                <li><a href="#pricing">Pricing</a></li>
+                <li><a href="#security">Security</a></li>
+                <li><a href="#resources">Resources</a></li>
+            </ul>
+            <a href="#" class="cta-button">Get started free</a>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="container">
+                <h1>Your connected workspace</h1>
+                <p>One tool for your whole team. Write, plan, and organize everything in one place.</p>
+                
+                <div class="path-selector">
+                    <h2>What are you trying to do?</h2>
+                    <div class="paths-grid">
+                        <div class="path-card" data-path="docs">
+                            <div class="path-icon">📝</div>
+                            <h3>Write & Document</h3>
+                            <p>Notes, docs, and knowledge bases</p>
+                        </div>
+                        <div class="path-card" data-path="projects">
+                            <div class="path-icon">📊</div>
+                            <h3>Manage Projects</h3>
+                            <p>Tasks, timelines, and team workflows</p>
+                        </div>
+                        <div class="path-card" data-path="wiki">
+                            <div class="path-icon">🗂️</div>
+                            <h3>Build a Wiki</h3>
+                            <p>Centralized company knowledge</p>
+                        </div>
+                        <div class="path-card" data-path="ai">
+                            <div class="path-icon">🤖</div>
+                            <h3>AI Assistant</h3>
+                            <p>Smart writing and automation</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="demo-section" id="docs-demo">
+                    <div class="demo-preview">
+                        <div class="demo-content">
+                            <h3>Write beautiful documents</h3>
+                            <p>Create notes, docs, and wikis with rich formatting, embeds, and collaboration features. Perfect for meeting notes, project plans, and team documentation.</p>
+                            <div class="role-links">
+                                <a href="#" class="role-link">For Students</a>
+                                <a href="#" class="role-link">For Writers</a>
+                                <a href="#" class="role-link">For Teams</a>
+                            </div>
+                        </div>
+                        <div class="demo-visual">
+                            Interactive document editor preview
+                        </div>
+                    </div>
+                </div>
+
+                <div class="demo-section" id="projects-demo">
+                    <div class="demo-preview">
+                        <div class="demo-content">
+                            <h3>Organize your projects</h3>
+                            <p>Track tasks, set deadlines, and manage team workflows. Switch between kanban boards, calendars, and tables to see your work your way.</p>
+                            <div class="role-links">
+                                <a href="#" class="role-link">For Project Managers</a>
+                                <a href="#" class="role-link">For Startups</a>
+                                <a href="#" class="role-link">For Marketing Teams</a>
+                            </div>
+                        </div>
+                        <div class="demo-visual">
+                            Project kanban board preview
+                        </div>
+                    </div>
+                </div>
+
+                <div class="demo-section" id="wiki-demo">
+                    <div class="demo-preview">
+                        <div class="demo-content">
+                            <h3>Create a company wiki</h3>
+                            <p>Centralize all your team's knowledge in one searchable, organized space. Perfect for onboarding, processes, and institutional knowledge.</p>
+                            <div class="role-links">
+                                <a href="#" class="role-link">For HR Teams</a>
+                                <a href="#" class="role-link">For Engineering</a>
+                                <a href="#" class="role-link">For Operations</a>
+                            </div>
+                        </div>
+                        <div class="demo-visual">
+                            Wiki structure and search preview
+                        </div>
+                    </div>
+                </div>
+
+                <div class="demo-section" id="ai-demo">
+                    <div class="demo-preview">
+                        <div class="demo-content">
+                            <h3>AI-powered workspace</h3>
+                            <p>Let AI help you write better, think clearer, and work faster. Generate summaries, brainstorm ideas, and automate routine tasks.</p>
+                            <div class="role-links">
+                                <a href="#" class="role-link">For Content Creators</a>
+                                <a href="#" class="role-link">For Consultants</a>
+                                <a href="#" class="role-link">For Researchers</a>
+                            </div>
+                        </div>
+                        <div class="demo-visual">
+                            AI assistant interface preview
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="features">
+            <div class="container">
+                <h2>Trusted by teams worldwide</h2>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">🔒</div>
+                        <h3>Enterprise Security</h3>
+                        <p>SOC 2 Type II certified with advanced encryption and compliance features.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">📱</div>
+                        <h3>Works Everywhere</h3>
+                        <p>Native apps for web, desktop, and mobile. Your work syncs seamlessly across devices.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🔗</div>
+                        <h3>Easy Migration</h3>
+                        <p>Import from Google Docs, Confluence, Trello, and 50+ other tools in minutes.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 Notion Labs, Inc. Built with ❤️ in San Francisco.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const pathCards = document.querySelectorAll('.path-card');
+            const demoSections = document.querySelectorAll('.demo-section');
+            
+            pathCards.forEach(card => {
+                card.addEventListener('click', function() {
+                    // Remove active state from all cards and sections
+                    pathCards.forEach(c => c.classList.remove('selected'));
+                    demoSections.forEach(s => s.classList.remove('active'));
+                    
+                    // Add active state to clicked card
+                    this.classList.add('selected');
+                    
+                    // Show corresponding demo section
+                    const path = this.dataset.path;
+                    const demoSection = document.getElementById(`${path}-demo`);
+                    if (demoSection) {
+                        demoSection.classList.add('active');
+                        demoSection.scrollIntoView({ behavior: 'smooth' });
+                    }
+                });
+            });
+            
+            // Track role link clicks
+            const roleLinks = document.querySelectorAll('.role-link');
+            roleLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    // In a real implementation, this would navigate to role-specific landing pages
+                    alert(`This would take you to a ${this.textContent} landing page with specific templates and examples.`);
+                });
+            });
+        });
+    </script>
+</body>
+</html>
