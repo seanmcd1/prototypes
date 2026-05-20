@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notion Mobile Home</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #fafafa;
+            color: #37352f;
+            line-height: 1.5;
+            padding-bottom: 80px;
+        }
+
+        .container {
+            max-width: 375px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        .greeting-section {
+            padding: 20px 16px;
+            background: white;
+            border-bottom: 1px solid #e9e9e7;
+        }
+
+        .greeting-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .avatar {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        .greeting-text {
+            font-size: 20px;
+            font-weight: 600;
+            color: #37352f;
+        }
+
+        .activity-summary {
+            color: #787774;
+            font-size: 14px;
+        }
+
+        .section {
+            padding: 24px 16px;
+            border-bottom: 1px solid #f1f1ef;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: #37352f;
+        }
+
+        .recents-scroll {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .recents-scroll::-webkit-scrollbar {
+            display: none;
+        }
+
+        .recent-card {
+            min-width: 200px;
+            background: white;
+            border-radius: 6px;
+            border: 1px solid #e9e9e7;
+            padding: 12px;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .recent-card:hover {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .recent-card-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .page-icon {
+            width: 16px;
+            height: 16px;
+            font-size: 14px;
+        }
+
+        .page-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: #37352f;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .last-edited {
+            font-size: 12px;
+            color: #787774;
+        }
+
+        .my-work-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid #f1f1ef;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .my-work-item:last-child {
+            border-bottom: none;
+        }
+
+        .my-work-item:hover {
+            background: #f7f7f5;
+            margin: 0 -16px;
+            padding-left: 16px;
+            padding-right: 16px;
+        }
+
+        .work-item-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+
+        .work-item-details {
+            flex: 1;
+        }
+
+        .work-item-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: #37352f;
+            margin-bottom: 2px;
+        }
+
+        .work-item-meta {
+            font-size: 12px;
+            color: #787774;
+        }
+
+        .priority-high {
+            background: #fdeaea;
+            color: #d9534f;
+        }
+
+        .priority-medium {
+            background: #fff4e6;
+            color: #f39c12;
+        }
+
+        .priority-low {
+            background: #e8f5e8;
+            color: #5cb85c;
+        }
+
+        .favourites-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .favourite-card {
+            background: white;
+            border: 1px solid #e9e9e7;
+            border-radius: 6px;
+            padding: 16px;
+            text-align: center;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .favourite-card:hover {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .favourite-icon {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        .favourite-title {
+            font-size: 13px;
+            font-weight: 500;
+            color: #37352f;
+        }
+
+        .tab-bar {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 375px;
+            background: white;
+            border-top: 1px solid #e9e9e7;
+            display: flex;
+            justify-content: space-around;
+            padding: 12px 0;
+        }
+
+        .tab-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            transition: color 0.2s ease;
+            color: #787774;
+        }
+
+        .tab-item.active {
+            color: #2383e2;
+        }
+
+        .tab-icon {
+            font-size: 20px;
+        }
+
+        .tab-label {
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 32px 16px;
+            color: #787774;
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .loading-shimmer {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 4px;
+            height: 20px;
+            margin-bottom: 8px;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        .notification-badge {
+            background: #ff4757;
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            font-weight: 600;
+        }
+
+        .tab-item {
+            position: relative;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Greeting Section -->
+        <div class="greeting-section">
+            <div class="greeting-header">
+                <div class="avatar">JD</div>
+                <div class="greeting-text" id="greeting">Good morning, John</div>
+            </div>
+            <div class="activity-summary" id="activity-summary">3 pages updated today</div>
+        </div>
+
+        <!-- Recents Section -->
+        <div class="section">
+            <div class="section-title">Recents</div>
+            <div class="recents-scroll">
+                <div class="recent-card" onclick="navigateToPage('project-alpha')">
+                    <div class="recent-card-header">
+                        <div class="page-icon">📊</div>
+                        <div class="page-title">Project Alpha Dashboard</div>
+                    </div>
+                    <div class="last-edited">Edited 2 hours ago</div>
+                </div>
+                <div class="recent-card" onclick="navigateToPage('meeting-notes')">
+                    <div class="recent-card-header">
+                        <div class="page-icon">📝</div>
+                        <div class="page-title">Weekly Team Meeting</div>
+                    </div>
+                    <div class="last-edited">Edited yesterday</div>
+                </div>
+                <div class="recent-card" onclick="navigateToPage('design-system')">
+                    <div class="recent-card-header">
+                        <div class="page-icon">🎨</div>
+                        <div class="page-title">Design System Guidelines</div>
+                    </div>
+                    <div class="last-edited">Edited 3 days ago</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- My Work Section -->
+        <div class="section">
+            <div class="section-title">My Work</div>
+            <div id="my-work-list">
+                <div class="my-work-item" onclick="completeWorkItem(this, 'review-proposal')">
+                    <div class="work-item-icon priority-high">⚡</div>
+                    <div class="work-item-details">
+                        <div class="work-item-title">Review Q4 budget proposal</div>
+                        <div class="work-item-meta">Due today • Assigned by Sarah</div>
+                    </div>
+                </div>
+                <div class="my-work-item" onclick="completeWorkItem(this, 'update-docs')">
+                    <div class="work-item-icon priority-medium">📝</div>
+                    <div class="work-item-details">
+                        <div class="work-item-title">Update API documentation</div>
+                        <div class="work-item-meta">Due tomorrow • Self-assigned</div>
+                    </div>
+                </div>
+                <div class="my-work-item" onclick="completeWorkItem(this, 'team-feedback')">
+                    <div class="work-item-icon priority-low">💬</div>
+                    <div class="work-item-details">
+                        <div class="work-item-title">@john mentioned in Team Feedback</div>
+                        <div class="work-item-meta">2 hours ago • Product Team</div>
+                    </div>
+                </div>
+                <div class="my-work-item" onclick="completeWorkItem(this, 'design-review')">
+                    <div class="work-item-icon priority-medium">🎯</div>
+                    <div class="work-item-details">
+                        <div class="work-item-title">Complete design review checklist</div>
+                        <div class="work-item-meta">Due Friday • Design Team</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Favourites Section -->
+        <div class="section">
+            <div class="section-title">Favourites</div>
+            <div class="favourites-grid">
+                <div class="favourite-card" onclick="navigateToPage('task-manager')">
+                    <div class="favourite-icon">✅</div>
+                    <div class="favourite-title">Task Manager</div>
+                </div>
+                <div class="favourite-card" onclick="navigateToPage('team-wiki')">
+                    <div class="favourite-icon">📚</div>
+                    <div class="favourite-title">Team Wiki</div>
+                </div>
+                <div class="favourite-card" onclick="navigateToPage('project-roadmap')">
+                    <div class="favourite-icon">🗺️</div>
+                    <div class="favourite-title">Roadmap</div>
+                </div>
+                <div class="favourite-card" onclick="navigateToPage('resources')">
+                    <div class="favourite-icon">🔧</div>
+                    <div class="favourite-title">Resources</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab Bar -->
+        <div class="tab-bar">
+            <div class="tab-item active" onclick="switchTab('home')">
+                <div class="tab-icon">🏠</div>
+                <div class="tab-label">Home</div>
+            </div>
+            <div class="tab-item" onclick="switchTab('search')">
+                <div class="tab-icon">🔍</div>
+                <div class="tab-label">Search</div>
+            </div>
+            <div class="tab-item" onclick="switchTab('inbox')" style="position: relative;">
+                <div class="tab-icon">📥</div>
+                <div class="tab-label">Inbox</div>
+                <div class="notification-badge">3</div>
+            </div>
+            <div class="tab-item" onclick="switchTab('profile')">
+                <div class="tab-icon">👤</div>
+                <div class="tab-label">Profile</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Set greeting based on time of day
+        function setGreeting() {
+            const hour = new Date().getHours();
+            const greetingElement = document.getElementById('greeting');
+            
+            if (hour < 12) {
+                greetingElement.textContent = 'Good morning, John';
+            } else if (hour < 18) {
+                greetingElement.textContent = 'Good afternoon, John';
+            } else {
+                greetingElement.textContent = 'Good evening, John';
+            }
+        }
+
+        // Simulate work item completion
+        function completeWorkItem(element, itemId) {
+            element.style.opacity = '0.5';
+            element.style.textDecoration = 'line-through';
+            
+            setTimeout(() => {
+                element.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    element.remove();
+                    updateActivitySummary();
+                }, 300);
+            }, 500);
+        }
+
+        // Update activity summary
+        function updateActivitySummary() {
+            const workItems = document.querySelectorAll('.my-work-item').length;
+            const summaryElement = document.getElementById('activity-summary');
+            summaryElement.textContent = `${workItems} items remaining • 3 pages updated today`;
+        }
+
+        // Navigate to page (simulate)
+        function navigateToPage(pageId) {
+            // In a real app, this would navigate to the actual page
+            console.log(`Navigating to: ${pageId}`);
+            
+            // Simulate navigation with visual feedback
+            event.target.closest('.recent-card, .favourite-card').style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                event.target.closest('.recent-card, .favourite-card').style.transform = 'scale(1)';
+            }, 150);
+        }
+
+        // Switch tabs
+        function switchTab(tabName) {
+            // Remove active state from all tabs
+            document.querySelectorAll('.tab-item').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Add active state to clicked tab
+            event.currentTarget.classList.add('active');
+            
+            // In a real app, this would switch the main content
+            console.log(`Switched to: ${tabName}`);
+            
+            if (tabName === 'inbox') {
+                // Clear notification badge when inbox is opened
+                const badge = document.querySelector('.notification-badge');
+                if (badge) {
+                    badge.style.opacity = '0';
+                    setTimeout(() => badge.remove(), 200);
+                }
+            }
+        }
+
+        // Simulate loading state
+        function showLoadingState() {
+            const myWorkList = document.getElementById('my-work-list');
+            myWorkList.innerHTML = `
+                <div class="loading-shimmer"></div>
+                <div class="loading-shimmer" style="width: 80%;"></div>
+                <div class="loading-shimmer" style="width: 90%;"></div>
+            `;
+        }
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            setGreeting();
+            
+            // Simulate brief loading state
+            setTimeout(() => {
+                // Loading complete - content already rendered
+            }, 500);
+        });
+
+        // Add smooth scrolling for horizontal scroll
+        const recentsScroll = document.querySelector('.recents-scroll');
+        let isDown = false;
+        let startX;
+        let scrollLeft;
+
+        recentsScroll.addEventListener('mousedown', (e) => {
+            isDown = true;
+            startX = e.pageX - recentsScroll.offsetLeft;
+            scrollLeft = recentsScroll.scrollLeft;
+        });
+
+        recentsScroll.addEventListener('mouseleave', () => {
+            isDown = false;
+        });
+
+        recentsScroll.addEventListener('mouseup', () => {
+            isDown = false;
+        });
+
+        recentsScroll.addEventListener('mousemove', (e) => {
+            if (!isDown) return;
+            e.preventDefault();
+            const x = e.pageX - recentsScroll.offsetLeft;
+            const walk = (x - startX) * 2;
+            recentsScroll.scrollLeft = scrollLeft - walk;
+        });
+    </script>
+</body>
+</html>
