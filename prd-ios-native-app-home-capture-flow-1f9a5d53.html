@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notion iOS - Home</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #ffffff;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .phone-container {
+            width: 375px;
+            height: 812px;
+            margin: 20px auto;
+            background: #000;
+            border-radius: 40px;
+            padding: 8px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        .screen {
+            width: 100%;
+            height: 100%;
+            background: #ffffff;
+            border-radius: 32px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .status-bar {
+            height: 44px;
+            background: #ffffff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .header {
+            padding: 20px 20px 16px;
+            background: #ffffff;
+            border-bottom: 1px solid #f1f1f0;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #37352f;
+            margin-bottom: 8px;
+        }
+
+        .search-bar {
+            background: #f7f6f3;
+            border-radius: 8px;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .search-icon {
+            width: 16px;
+            height: 16px;
+            opacity: 0.5;
+        }
+
+        .search-input {
+            background: none;
+            border: none;
+            flex: 1;
+            font-size: 16px;
+            color: #37352f;
+        }
+
+        .search-input::placeholder {
+            color: #9b9a97;
+        }
+
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .section {
+            margin-bottom: 32px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #37352f;
+            margin-bottom: 12px;
+        }
+
+        .quick-actions {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .quick-action {
+            background: #f7f6f3;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: #37352f;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .quick-action:hover {
+            background: #efefef;
+        }
+
+        .page-item {
+            background: #ffffff;
+            border: 1px solid #f1f1f0;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .page-item:hover {
+            border-color: #e1e1df;
+            transform: translateY(-1px);
+        }
+
+        .page-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .page-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .page-title {
+            font-size: 16px;
+            font-weight: 500;
+            color: #37352f;
+            line-height: 1.3;
+        }
+
+        .page-preview {
+            font-size: 14px;
+            color: #787774;
+            line-height: 1.4;
+            margin-top: 4px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .page-meta {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-top: 12px;
+            font-size: 12px;
+            color: #9b9a97;
+        }
+
+        .tab-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 80px;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid #f1f1f0;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 0 20px;
+            padding-bottom: 20px;
+        }
+
+        .tab-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 8px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            min-width: 50px;
+        }
+
+        .tab-item.active .tab-icon {
+            color: #2383e2;
+        }
+
+        .tab-item.active .tab-label {
+            color: #2383e2;
+        }
+
+        .tab-icon {
+            width: 24px;
+            height: 24px;
+            color: #9b9a97;
+            transition: all 0.2s;
+        }
+
+        .tab-label {
+            font-size: 10px;
+            color: #9b9a97;
+            transition: all 0.2s;
+        }
+
+        .capture-btn {
+            background: #2383e2;
+            border: none;
+            width: 56px;
+            height: 56px;
+            border-radius: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 16px rgba(35, 131, 226, 0.3);
+            transition: all 0.2s;
+            margin-bottom: 8px;
+        }
+
+        .capture-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(35, 131, 226, 0.4);
+        }
+
+        .capture-btn .tab-icon {
+            color: white;
+            width: 28px;
+            height: 28px;
+        }
+
+        .capture-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: flex-end;
+            z-index: 1000;
+        }
+
+        .capture-modal.active {
+            display: flex;
+            animation: fadeIn 0.2s ease;
+        }
+
+        .capture-content {
+            background: white;
+            width: 100%;
+            border-radius: 16px 16px 0 0;
+            padding: 20px;
+            transform: translateY(100%);
+            animation: slideUp 0.3s ease forwards;
+        }
+
+        .capture-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .capture-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #37352f;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 16px;
+            color: #9b9a97;
+            cursor: pointer;
+            padding: 8px;
+        }
+
+        .capture-input {
+            width: 100%;
+            min-height: 120px;
+            border: 1px solid #e1e1df;
+            border-radius: 8px;
+            padding: 16px;
+            font-size: 16px;
+            font-family: inherit;
+            resize: none;
+            margin-bottom: 16px;
+        }
+
+        .capture-input:focus {
+            outline: none;
+            border-color: #2383e2;
+        }
+
+        .capture-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-primary {
+            background: #2383e2;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            flex: 1;
+        }
+
+        .btn-secondary {
+            background: #f7f6f3;
+            color: #37352f;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 24px;
+            font-size: 16px;
+            cursor: pointer;
+            flex: 1;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+
+        .success-toast {
+            position: fixed;
+            top: 60px;
+            left: 20px;
+            right: 20px;
+            background: #22c55e;
+            color: white;
+            padding: 16px;
+            border-radius: 12px;
+            display: none;
+            align-items: center;
+            gap: 12px;
+            z-index: 1001;
+            animation: slideDown 0.3s ease;
+        }
+
+        .success-toast.show {
+            display: flex;
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="phone-container">
+        <div class="screen">
+            <div class="status-bar">
+                <span>9:41</span>
+                <span>📶 📶 🔋</span>
+            </div>
+
+            <div class="header">
+                <h1>Good morning</h1>
+                <div class="search-bar">
+                    <svg class="search-icon" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"></path>
+                    </svg>
+                    <input class="search-input" placeholder="Search or create..." />
+                </div>
+            </div>
+
+            <div class="content">
+                <div class="quick-actions">
+                    <button class="quick-action">
+                        📝 Quick note
+                    </button>
+                    <button class="quick-action">
+                        📅 Meeting notes
+                    </button>
+                </div>
+
+                <div class="section">
+                    <h2 class="section-title">Pinned</h2>
+                    <div class="page-item">
+                        <div class="page-header">
+                            <div class="page-icon" style="background: #ff6b6b;">📋</div>
+                            <div>
+                                <div class="page-title">Project Roadmap Q1</div>
+                                <div class="page-preview">Sprint planning and feature development timeline for the first quarter...</div>
+                                <div class="page-meta">
+                                    <span>Updated 2 hours ago</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2 class="section-title">Recent</h2>
+                    <div class="page-item">
+                        <div class="page-header">
+                            <div class="page-icon" style="background: #4ecdc4;">💡</div>
+                            <div>
+                                <div class="page-title">Daily Standup Notes</div>
+                                <div class="page-preview">Team updates and blockers from today's meeting...</div>
+                                <div class="page-meta">
+                                    <span>Today at 10:30 AM</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="page-item">
+                        <div class="page-header">
+                            <div class="page-icon" style="background: #ffe66d;">📊</div>
+                            <div>
+                                <div class="page-title">Weekly Metrics Review</div>
+                                <div class="page-preview">Performance analysis and key insights from last week's data...</div>
+                                <div class="page-meta">
+                                    <span>Yesterday at 3:15 PM</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="page-item">
+                        <div class="page-header">
+                            <div class="page-icon" style="background: #a8e6cf;">🎯</div>
+                            <div>
+                                <div class="page-title">Product Strategy Ideas</div>
+                                <div class="page-preview">Brainstorming session notes about new feature possibilities...</div>
+                                <div class="page-meta">
+                                    <span>2 days ago</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-bar">
+                <button class="tab-item active">
+                    <svg class="tab-icon" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"></path>
+                    </svg>
+                    <span class="tab-label">Home</span>
+                </button>
+                
+                <button class="tab-item">
+                    <svg class="tab-icon" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"></path>
+                    </svg>
+                    <span class="tab-label">Search</span>
+                </button>
+
+                <button class="tab-item" id="captureTab">
+                    <button class="capture-btn">
+                        <svg class="tab-icon" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </button>
+
+                <button class="tab-item">
+                    <svg class="tab-icon" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
+                    </svg>
+                    <span class="tab-label">Recents</span>
+                </button>
+
+                <button class="tab-item">
+                    <svg class="tab-icon" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path>
+                    </svg>
+                    <span class="tab-label">Pages</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="capture-modal" id="captureModal">
+        <div class="capture-content">
+            <div class="capture-header">
+                <h3 class="capture-title">Quick Capture</h3>
+                <button class="close-btn" id="closeModal">✕</button>
+            </div>
+            <textarea class="capture-input" placeholder="What's on your mind?" id="captureInput"></textarea>
+            <div class="capture-actions">
+                <button class="btn-secondary" id="cancelBtn">Cancel</button>
+                <button class="btn-primary" id="saveBtn">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="success-toast" id="successToast">
+        <span>✅</span>
+        <span>Note saved successfully!</span>
+    </div>
+
+    <script>
+        const captureTab = document.getElementById('captureTab');
+        const captureModal = document.getElementById('captureModal');
+        const closeModal = document.getElementById('closeModal');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const saveBtn = document.getElementById('saveBtn');
+        const captureInput = document.getElementById('captureInput');
+        const successToast = document.getElementById('successToast');
+
+        function openCaptureModal() {
+            captureModal.classList.add('active');
+            setTimeout(() => {
+                captureInput.focus();
+            }, 300);
+        }
+
+        function closeCaptureModal() {
+            captureModal.classList.remove('active');
+            captureInput.value = '';
+        }
+
+        function saveNote() {
+            const noteText = captureInput.value.trim();
+            if (noteText) {
+                // Add new note to recent section
+                const recentSection = document.querySelector('.section:last-child');
+                const newNote = document.createElement('div');
+                newNote.className = 'page-item';
+                newNote.innerHTML = `
+                    <div class="page-header">
+                        <div class="page-icon" style="background: #ff9f43;">📝</div>
+                        <div>
+                            <div class="page-title">Quick Note</div>
+                            <div class="page-preview">${noteText.substring(0, 60)}${noteText.length > 60 ? '...' : ''}</div>
+                            <div class="page-meta">
+                                <span>Just now</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                recentSection.insertBefore(newNote, recentSection.children[1]);
+                
+                closeCaptureModal();
+                
+                // Show success toast
+                successToast.classList.add('show');
+                setTimeout(() => {
+                    successToast.classList.remove('show');
+                }, 3000);
+            }
+        }
+
+        captureTab.addEventListener('click', openCaptureModal);
+        closeModal.addEventListener('click', closeCaptureModal);
+        cancelBtn.addEventListener('click', closeCaptureModal);
+        saveBtn.addEventListener('click', saveNote);
+
+        // Close modal when clicking outside
+        captureModal.addEventListener('click', (e) => {
+            if (e.target === captureModal) {
+                closeCaptureModal();
+            }
+        });
+
+        // Save with Enter key (Cmd+Enter on mobile)
+        captureInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+                saveNote();
+            }
+        });
+
+        // Add touch feedback for page items
+        const pageItems = document.querySelectorAll('.page-item');
+        pageItems.forEach(item => {
+            item.addEventListener('touchstart', () => {
+                item.style.backgroundColor = '#f8f8f7';
+            });
+            item.addEventListener('touchend', () => {
+                item.style.backgroundColor = '#ffffff';
+            });
+        });
+
+        // Simulate iOS keyboard behavior
+        captureInput.addEventListener('focus', () => {
+            setTimeout(() => {
+                document.querySelector('.capture-content').style.transform = 'translateY(-150px)';
+            }, 100);
+        });
+
+        captureInput.addEventListener('blur', () => {
+            document.querySelector('.capture-content').style.transform = 'translateY(0)';
+        });
+    </script>
+</body>
+</html>
