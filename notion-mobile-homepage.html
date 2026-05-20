@@ -1,0 +1,2032 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Notion Mobile 2.0 — Interactive Prototype</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  :root {
+    --bg: #ffffff;
+    --bg2: #f7f7f5;
+    --bg3: #f0f0ee;
+    --text: #1a1a1a;
+    --text2: #6b6b6b;
+    --text3: #9b9b9b;
+    --accent: #2383e2;
+    --accent2: #e8f0fe;
+    --border: #e8e8e5;
+    --card: #ffffff;
+    --shadow: rgba(0,0,0,0.06);
+    --shadow2: rgba(0,0,0,0.12);
+    --red: #eb5757;
+    --green: #27ae60;
+    --yellow: #f2c94c;
+    --purple: #9b51e0;
+    --orange: #e67e22;
+    --pink: #e91e8c;
+    --nav-bg: rgba(255,255,255,0.92);
+    --overlay: rgba(0,0,0,0.4);
+  }
+
+  .dark {
+    --bg: #191919;
+    --bg2: #202020;
+    --bg3: #2a2a2a;
+    --text: #e8e8e8;
+    --text2: #9b9b9b;
+    --text3: #6b6b6b;
+    --accent: #529CCA;
+    --accent2: #1e3a5f;
+    --border: #333333;
+    --card: #242424;
+    --shadow: rgba(0,0,0,0.2);
+    --shadow2: rgba(0,0,0,0.4);
+    --nav-bg: rgba(25,25,25,0.92);
+    --overlay: rgba(0,0,0,0.6);
+  }
+
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: #1a1a2e;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    overflow: hidden;
+  }
+
+  /* Phone Frame */
+  .phone-frame {
+    width: 390px;
+    height: 844px;
+    background: var(--bg);
+    border-radius: 48px;
+    border: 8px solid #1a1a1a;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 50px 100px rgba(0,0,0,0.4), 0 0 0 2px #333, inset 0 0 0 2px #444;
+  }
+
+  .dark .phone-frame {
+    border-color: #333;
+    box-shadow: 0 50px 100px rgba(0,0,0,0.6), 0 0 0 2px #444, inset 0 0 0 2px #555;
+  }
+
+  /* Status Bar */
+  .status-bar {
+    height: 54px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding: 0 28px 8px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    background: var(--bg);
+  }
+
+  .status-bar .time { font-size: 15px; font-weight: 600; color: var(--text); }
+  .status-bar .icons { display: flex; gap: 6px; align-items: center; }
+  .status-bar .icons svg { width: 16px; height: 16px; fill: var(--text); }
+
+  /* Dynamic Island */
+  .dynamic-island {
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 120px;
+    height: 34px;
+    background: #000;
+    border-radius: 20px;
+    z-index: 200;
+  }
+
+  /* Home Indicator */
+  .home-indicator {
+    position: absolute;
+    bottom: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 134px;
+    height: 5px;
+    background: var(--text3);
+    border-radius: 3px;
+    z-index: 100;
+    opacity: 0.4;
+  }
+
+  /* Screen Container */
+  .screen-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    overflow: hidden;
+  }
+
+  .screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--bg);
+    transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.4s ease;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-top: 54px;
+    padding-bottom: 90px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .screen::-webkit-scrollbar { display: none; }
+
+  .screen.hidden {
+    transform: translateX(100%);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .screen.slide-left {
+    transform: translateX(-30%);
+    opacity: 0.5;
+  }
+
+  /* ====== SPLASH SCREEN ====== */
+  #splash {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding-top: 0;
+    padding-bottom: 0;
+    background: var(--bg);
+    z-index: 300;
+  }
+
+  .splash-logo {
+    width: 80px;
+    height: 80px;
+    background: var(--text);
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: splashPulse 1.5s ease-in-out infinite;
+    margin-bottom: 24px;
+  }
+
+  .splash-logo svg { width: 48px; height: 48px; }
+
+  @keyframes splashPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+
+  .splash-text {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.5px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease 0.3s forwards;
+  }
+
+  .splash-sub {
+    font-size: 14px;
+    color: var(--text3);
+    margin-top: 8px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease 0.5s forwards;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ====== HOME SCREEN ====== */
+  .home-header {
+    padding: 8px 20px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .home-header-left { display: flex; align-items: center; gap: 12px; }
+
+  .avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--purple));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+    cursor: pointer;
+  }
+
+  .home-greeting {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.3px;
+  }
+
+  .home-header-right { display: flex; gap: 8px; }
+
+  .icon-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    border: none;
+    background: var(--bg2);
+    color: var(--text2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .icon-btn:hover { background: var(--bg3); }
+  .icon-btn svg { width: 18px; height: 18px; }
+
+  /* Search Bar */
+  .search-bar {
+    margin: 0 20px 20px;
+    padding: 12px 16px;
+    background: var(--bg2);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1.5px solid transparent;
+  }
+
+  .search-bar:hover { border-color: var(--border); }
+  .search-bar svg { width: 18px; height: 18px; color: var(--text3); flex-shrink: 0; }
+  .search-bar span { color: var(--text3); font-size: 15px; }
+  .search-bar .shortcut {
+    margin-left: auto;
+    font-size: 11px;
+    padding: 3px 8px;
+    background: var(--bg3);
+    border-radius: 6px;
+    color: var(--text3);
+    font-weight: 500;
+  }
+
+  /* Quick Actions */
+  .quick-actions {
+    display: flex;
+    gap: 10px;
+    padding: 0 20px;
+    margin-bottom: 24px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .quick-actions::-webkit-scrollbar { display: none; }
+
+  .quick-action {
+    flex-shrink: 0;
+    padding: 10px 16px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+    color: #fff;
+  }
+
+  .quick-action svg { width: 16px; height: 16px; }
+  .qa-note { background: linear-gradient(135deg, var(--accent), #1a6bc4); }
+  .qa-task { background: linear-gradient(135deg, var(--green), #1e8449); }
+  .qa-ai { background: linear-gradient(135deg, var(--purple), #7b3ec4); }
+  .qa-photo { background: linear-gradient(135deg, var(--orange), #c0392b); }
+
+  .quick-action:active { transform: scale(0.95); }
+
+  /* Section */
+  .section { padding: 0 20px; margin-bottom: 24px; }
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+
+  .section-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+
+  .section-link {
+    font-size: 13px;
+    color: var(--accent);
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    background: none;
+  }
+
+  /* Page Cards */
+  .page-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .page-card:active { transform: scale(0.98); }
+
+  .page-card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+
+  .page-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  .page-card-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.3;
+  }
+
+  .page-card-meta {
+    font-size: 12px;
+    color: var(--text3);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .page-card-preview {
+    font-size: 13px;
+    color: var(--text2);
+    line-height: 1.4;
+    margin-top: 6px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* Favorites Grid */
+  .fav-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .fav-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .fav-card:active { transform: scale(0.97); }
+
+  .fav-icon {
+    font-size: 28px;
+    margin-bottom: 10px;
+    display: block;
+  }
+
+  .fav-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  .fav-sub {
+    font-size: 11px;
+    color: var(--text3);
+  }
+
+  /* Workspace Switcher */
+  .workspace-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: var(--bg2);
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text2);
+    margin: 0 20px 16px;
+    cursor: pointer;
+    border: none;
+  }
+
+  .workspace-pill .ws-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--green);
+  }
+
+  /* ====== PAGE EDITOR SCREEN ====== */
+  .page-editor-header {
+    padding: 8px 16px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .back-btn {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 15px;
+    color: var(--accent);
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    background: none;
+    padding: 8px 4px;
+  }
+
+  .back-btn svg { width: 20px; height: 20px; }
+
+  .page-actions { display: flex; gap: 4px; }
+
+  .page-cover {
+    height: 140px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    margin: 12px 16px;
+    border-radius: 14px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .page-cover::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(transparent 50%, rgba(0,0,0,0.15));
+  }
+
+  .page-cover-emoji {
+    position: absolute;
+    bottom: -20px;
+    left: 24px;
+    font-size: 48px;
+    z-index: 2;
+  }
+
+  .page-title-area { padding: 28px 20px 8px; }
+
+  .page-title-input {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text);
+    border: none;
+    outline: none;
+    width: 100%;
+    background: transparent;
+    letter-spacing: -0.5px;
+    line-height: 1.2;
+  }
+
+  .page-props {
+    display: flex;
+    gap: 12px;
+    padding: 8px 20px;
+    flex-wrap: wrap;
+  }
+
+  .page-prop {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--text2);
+  }
+
+  .prop-tag {
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 500;
+  }
+
+  .tag-blue { background: #dbeafe; color: #1e40af; }
+  .tag-green { background: #d1fae5; color: #065f46; }
+  .tag-purple { background: #ede9fe; color: #5b21b6; }
+  .dark .tag-blue { background: #1e3a5f; color: #93c5fd; }
+  .dark .tag-green { background: #064e3b; color: #6ee7b7; }
+  .dark .tag-purple { background: #3b0764; color: #c4b5fd; }
+
+  /* Blocks */
+  .blocks { padding: 8px 20px; }
+
+  .block {
+    padding: 6px 8px;
+    margin-bottom: 2px;
+    border-radius: 6px;
+    cursor: text;
+    transition: background 0.15s;
+    position: relative;
+    min-height: 28px;
+    display: flex;
+    align-items: flex-start;
+  }
+
+  .block:hover { background: var(--bg2); }
+
+  .block-handle {
+    opacity: 0;
+    position: absolute;
+    left: -20px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: grab;
+    color: var(--text3);
+    transition: opacity 0.2s;
+  }
+
+  .block:hover .block-handle { opacity: 1; }
+
+  .block-content {
+    flex: 1;
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--text);
+    outline: none;
+  }
+
+  .block-content:empty::before {
+    content: "Type '/' for commands...";
+    color: var(--text3);
+  }
+
+  .block-h1 .block-content { font-size: 24px; font-weight: 700; letter-spacing: -0.3px; }
+  .block-h2 .block-content { font-size: 20px; font-weight: 600; }
+  .block-h3 .block-content { font-size: 16px; font-weight: 600; }
+
+  .block-todo {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .todo-check {
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--border);
+    border-radius: 4px;
+    flex-shrink: 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 4px;
+    transition: all 0.2s;
+  }
+
+  .todo-check.checked {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .todo-check.checked svg { opacity: 1; }
+  .todo-check svg { width: 12px; height: 12px; opacity: 0; }
+
+  .todo-done .block-content {
+    text-decoration: line-through;
+    color: var(--text3);
+  }
+
+  .block-bullet { padding-left: 24px; }
+  .block-bullet::before {
+    content: '•';
+    position: absolute;
+    left: 16px;
+    color: var(--text2);
+    font-weight: 700;
+  }
+
+  .block-callout {
+    background: var(--bg2);
+    border-radius: 8px;
+    padding: 12px;
+    display: flex;
+    gap: 10px;
+    margin: 4px 0;
+  }
+
+  .callout-icon { font-size: 20px; flex-shrink: 0; }
+
+  .block-divider {
+    border-top: 1px solid var(--border);
+    margin: 12px 0;
+    min-height: 1px;
+    padding: 0;
+  }
+
+  .block-code {
+    background: var(--bg2);
+    border-radius: 8px;
+    padding: 14px;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 13px;
+    margin: 4px 0;
+    overflow-x: auto;
+  }
+
+  .block-quote {
+    border-left: 3px solid var(--text);
+    padding-left: 16px;
+    margin: 4px 0;
+  }
+
+  .block-quote .block-content {
+    font-style: italic;
+    color: var(--text2);
+  }
+
+  /* Editor Toolbar */
+  .editor-toolbar {
+    position: absolute;
+    bottom: 90px;
+    left: 0;
+    right: 0;
+    background: var(--nav-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid var(--border);
+    padding: 8px 12px;
+    display: flex;
+    gap: 4px;
+    z-index: 50;
+    overflow-x: auto;
+  }
+
+  .editor-toolbar::-webkit-scrollbar { display: none; }
+
+  .toolbar-btn {
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: none;
+    background: transparent;
+    color: var(--text2);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.15s;
+  }
+
+  .toolbar-btn:hover { background: var(--bg2); color: var(--text); }
+  .toolbar-btn svg { width: 16px; height: 16px; }
+
+  /* ====== SEARCH SCREEN ====== */
+  .search-screen-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 16px;
+    margin-bottom: 8px;
+  }
+
+  .search-input-wrap {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--bg2);
+    border-radius: 12px;
+    padding: 10px 14px;
+    border: 1.5px solid transparent;
+    transition: all 0.2s;
+  }
+
+  .search-input-wrap:focus-within { border-color: var(--accent); }
+
+  .search-input-wrap input {
+    flex: 1;
+    border: none;
+    outline: none;
+    font-size: 15px;
+    background: transparent;
+    color: var(--text);
+    font-family: inherit;
+  }
+
+  .search-input-wrap svg { width: 18px; height: 18px; color: var(--text3); flex-shrink: 0; }
+
+  .search-cancel {
+    font-size: 15px;
+    color: var(--accent);
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    background: none;
+  }
+
+  .search-filters {
+    display: flex;
+    gap: 8px;
+    padding: 0 16px;
+    margin-bottom: 16px;
+    overflow-x: auto;
+  }
+
+  .search-filters::-webkit-scrollbar { display: none; }
+
+  .filter-chip {
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text2);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s;
+  }
+
+  .filter-chip.active {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+  }
+
+  .search-result {
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  .search-result:hover { background: var(--bg2); }
+
+  .search-result-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: var(--bg2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  .search-result-info { flex: 1; min-width: 0; }
+
+  .search-result-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .search-result-path {
+    font-size: 12px;
+    color: var(--text3);
+    margin-top: 2px;
+  }
+
+  .search-result-time {
+    font-size: 11px;
+    color: var(--text3);
+    flex-shrink: 0;
+  }
+
+  /* ====== AI SCREEN ====== */
+  .ai-header {
+    padding: 8px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .ai-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .ai-badge {
+    background: linear-gradient(135deg, var(--purple), var(--pink));
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 10px;
+    letter-spacing: 0.5px;
+  }
+
+  .ai-messages {
+    flex: 1;
+    padding: 16px 20px;
+    overflow-y: auto;
+  }
+
+  .ai-message {
+    margin-bottom: 16px;
+    display: flex;
+    gap: 10px;
+    animation: fadeUp 0.3s ease;
+  }
+
+  .ai-message-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+  }
+
+  .ai-msg-ai .ai-message-avatar {
+    background: linear-gradient(135deg, var(--purple), var(--pink));
+  }
+
+  .ai-msg-user .ai-message-avatar {
+    background: var(--accent);
+    color: #fff;
+    font-weight: 600;
+    font-size: 11px;
+  }
+
+  .ai-message-content {
+    flex: 1;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--text);
+  }
+
+  .ai-message-content p { margin-bottom: 8px; }
+  .ai-message-content p:last-child { margin-bottom: 0; }
+
+  .ai-suggestions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+  }
+
+  .ai-suggestion {
+    padding: 8px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text2);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .ai-suggestion:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .ai-input-area {
+    position: absolute;
+    bottom: 90px;
+    left: 0;
+    right: 0;
+    padding: 12px 16px;
+    background: var(--nav-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid var(--border);
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+  }
+
+  .ai-text-input {
+    flex: 1;
+    padding: 10px 14px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: var(--bg2);
+    font-size: 14px;
+    font-family: inherit;
+    color: var(--text);
+    outline: none;
+    resize: none;
+    max-height: 100px;
+  }
+
+  .ai-text-input::placeholder { color: var(--text3); }
+
+  .ai-send-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--purple), var(--pink));
+    border: none;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.2s;
+    flex-shrink: 0;
+  }
+
+  .ai-send-btn:active { transform: scale(0.9); }
+  .ai-send-btn svg { width: 18px; height: 18px; }
+
+  /* ====== BOTTOM NAV ====== */
+  .bottom-nav {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 84px;
+    background: var(--nav-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-around;
+    align-items: flex-start;
+    padding-top: 8px;
+    z-index: 90;
+  }
+
+  .nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    border: none;
+    background: none;
+    padding: 4px 12px;
+    transition: all 0.2s;
+  }
+
+  .nav-item svg { width: 22px; height: 22px; color: var(--text3); transition: color 0.2s; }
+  .nav-item span { font-size: 10px; color: var(--text3); font-weight: 500; transition: color 0.2s; }
+
+  .nav-item.active svg { color: var(--accent); }
+  .nav-item.active span { color: var(--accent); }
+
+  /* ====== FAB ====== */
+  .fab {
+    position: absolute;
+    bottom: 96px;
+    right: 20px;
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, var(--accent), #1a6bc4);
+    color: #fff;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(35, 131, 226, 0.4);
+    z-index: 80;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .fab:active { transform: scale(0.9); }
+  .fab.expanded { border-radius: 50%; transform: rotate(45deg); }
+  .fab svg { width: 24px; height: 24px; }
+
+  /* Quick Capture Modal */
+  .quick-capture-overlay {
+    position: absolute;
+    inset: 0;
+    background: var(--overlay);
+    z-index: 150;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+  }
+
+  .quick-capture-overlay.show {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .quick-capture-sheet {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--bg);
+    border-radius: 20px 20px 0 0;
+    padding: 16px 20px 40px;
+    transform: translateY(100%);
+    transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+    z-index: 151;
+  }
+
+  .quick-capture-overlay.show .quick-capture-sheet {
+    transform: translateY(0);
+  }
+
+  .sheet-handle {
+    width: 40px;
+    height: 4px;
+    background: var(--text3);
+    opacity: 0.3;
+    border-radius: 2px;
+    margin: 0 auto 16px;
+  }
+
+  .capture-title {
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 16px;
+  }
+
+  .capture-input {
+    width: 100%;
+    padding: 12px;
+    border-radius: 12px;
+    border: 1.5px solid var(--border);
+    background: var(--bg2);
+    font-size: 15px;
+    font-family: inherit;
+    color: var(--text);
+    outline: none;
+    margin-bottom: 16px;
+    resize: none;
+    min-height: 80px;
+  }
+
+  .capture-input:focus { border-color: var(--accent); }
+
+  .capture-options {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .capture-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 12px 8px;
+    border-radius: 12px;
+    background: var(--bg2);
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: var(--text2);
+  }
+
+  .capture-option:active { transform: scale(0.95); }
+  .capture-option svg { width: 22px; height: 22px; }
+  .capture-option span { font-size: 11px; font-weight: 500; }
+
+  .capture-save-btn {
+    width: 100%;
+    padding: 14px;
+    border-radius: 12px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s;
+  }
+
+  .capture-save-btn:active { transform: scale(0.98); opacity: 0.9; }
+
+  /* ====== SETTINGS SCREEN ====== */
+  .settings-group {
+    margin: 16px 20px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+
+  .settings-item {
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    transition: background 0.15s;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .settings-item:last-child { border-bottom: none; }
+  .settings-item:hover { background: var(--bg2); }
+
+  .settings-item-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .settings-item-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+  }
+
+  .settings-item-label {
+    font-size: 15px;
+    color: var(--text);
+  }
+
+  .settings-item-value {
+    font-size: 13px;
+    color: var(--text3);
+  }
+
+  /* Toggle */
+  .toggle {
+    width: 48px;
+    height: 28px;
+    border-radius: 14px;
+    background: var(--bg3);
+    position: relative;
+    cursor: pointer;
+    transition: background 0.3s;
+    border: none;
+  }
+
+  .toggle.on { background: var(--accent); }
+
+  .toggle-knob {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #fff;
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  }
+
+  .toggle.on .toggle-knob { transform: translateX(20px); }
+
+  /* Toast */
+  .toast {
+    position: absolute;
+    top: 70px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-20px);
+    background: var(--text);
+    color: var(--bg);
+    padding: 10px 20px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 500;
+    z-index: 500;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    white-space: nowrap;
+  }
+
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* Typing indicator */
+  .typing-indicator {
+    display: flex;
+    gap: 4px;
+    padding: 8px 0;
+  }
+
+  .typing-indicator .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--text3);
+    animation: typingBounce 1.4s ease-in-out infinite;
+  }
+
+  .typing-indicator .dot:nth-child(2) { animation-delay: 0.2s; }
+  .typing-indicator .dot:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes typingBounce {
+    0%, 60%, 100% { transform: translateY(0); }
+    30% { transform: translateY(-6px); }
+  }
+
+  /* Responsive - make it work on mobile too */
+  @media (max-width: 420px) {
+    body { align-items: flex-start; }
+    .phone-frame {
+      width: 100vw;
+      height: 100vh;
+      border-radius: 0;
+      border: none;
+      box-shadow: none;
+    }
+    .dynamic-island { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="phone-frame" id="app">
+  <div class="dynamic-island"></div>
+  <div class="status-bar">
+    <span class="time">9:41</span>
+    <span class="icons">
+      <svg viewBox="0 0 24 24"><path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3c-1.65-1.66-4.34-1.66-6 0zm-4-4l2 2c2.76-2.76 7.24-2.76 10 0l2-2C15.14 9.14 8.87 9.14 5 13z"/></svg>
+      <svg viewBox="0 0 24 24"><path d="M15.67 4H14V2h-4v2H8.33C7.6 4 7 4.6 7 5.33v15.34C7 21.4 7.6 22 8.33 22h7.34c.73 0 1.33-.6 1.33-1.33V5.33C17 4.6 16.4 4 15.67 4z"/></svg>
+    </span>
+  </div>
+
+  <div class="screen-container">
+    <!-- SPLASH -->
+    <screen id="splash" class="screen">
+      <div class="splash-logo">
+        <svg viewBox="0 0 100 100" fill="none">
+          <path d="M25 20h50c2.8 0 5 2.2 5 5v50c0 2.8-2.2 5-5 5H25c-2.8 0-5-2.2-5-5V25c0-2.8 2.2-5 5-5z" fill="currentColor" style="color:var(--bg)"/>
+          <path d="M68.7 31.2c-.6.5-1 .4-1.5.2l-5.8-3.8c-1.6-1-3.7-.9-3.7-.9H32.3c-.7 0-1.5.7-1.5.7L28 30c-.2.2-.1.4.2.4h28.2c.7 0 1 .3 1 1v24.8c0 1-.4 1.7-1.1 2l-5 2.5c-.3.1-.5 0-.5-.3V36.9c0-.7-.3-1.1-1.1-1.1H31c-1.5 0-3 1.2-3 3.2v24.6c0 1.6.8 2.6 2.6 3.5l7 3.5c2.5 1.2 5.3 1.5 7.2-.5l22.5-22.5c.6-.6 1-1.6 1-2.7V33.5c0-1.3-.5-2.3-1.3-2.8l.3.2c.2.1.3.2.4.3z" fill="currentColor" style="color:var(--bg)"/>
+        </svg>
+      </div>
+      <div class="splash-text">Notion</div>
+      <div class="splash-sub">Your connected workspace</div>
+    </screen>
+
+    <!-- HOME -->
+    <screen id="home" class="screen hidden">
+      <div class="home-header">
+        <div class="home-header-left">
+          <div class="avatar">SM</div>
+          <span class="home-greeting">Good evening</span>
+        </div>
+        <div class="home-header-right">
+          <button class="icon-btn" onclick="showToast('🔔 No new notifications')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          </button>
+          <button class="icon-btn" onclick="toggleDarkMode()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <button class="workspace-pill" onclick="showToast('Workspace: Lumi Labs')">
+        <span class="ws-dot"></span>
+        Lumi Labs
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+
+      <div class="search-bar" onclick="showScreen('search')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <span>Search pages, databases...</span>
+        <span class="shortcut">⌘K</span>
+      </div>
+
+      <div class="quick-actions">
+        <button class="quick-action qa-note" onclick="showScreen('editor')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          New Page
+        </button>
+        <button class="quick-action qa-task" onclick="showToast('✅ New task created!')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          Task
+        </button>
+        <button class="quick-action qa-ai" onclick="showScreen('ai')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a7 7 0 0 1 7 7c0 3-1.5 5-3 6.5V18H8v-2.5C6.5 14 5 12 5 9a7 7 0 0 1 7-7z"/><path d="M9 22h6M10 18v4M14 18v4"/></svg>
+          Ask AI
+        </button>
+        <button class="quick-action qa-photo" onclick="showToast('📸 Camera opened')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          Scan
+        </button>
+      </div>
+
+      <div class="section">
+        <div class="section-header">
+          <span class="section-title">Favorites</span>
+          <button class="section-link">Edit</button>
+        </div>
+        <div class="fav-grid">
+          <div class="fav-card" onclick="showScreen('editor')">
+            <span class="fav-icon">📋</span>
+            <div class="fav-title">Project Roadmap</div>
+            <div class="fav-sub">Updated 2h ago</div>
+          </div>
+          <div class="fav-card" onclick="showScreen('editor')">
+            <span class="fav-icon">🎯</span>
+            <div class="fav-title">Q3 Goals</div>
+            <div class="fav-sub">Updated 5h ago</div>
+          </div>
+          <div class="fav-card" onclick="showScreen('editor')">
+            <span class="fav-icon">📝</span>
+            <div class="fav-title">Meeting Notes</div>
+            <div class="fav-sub">Updated 1d ago</div>
+          </div>
+          <div class="fav-card" onclick="showScreen('editor')">
+            <span class="fav-icon">🚀</span>
+            <div class="fav-title">Launch Plan</div>
+            <div class="fav-sub">Updated 3d ago</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-header">
+          <span class="section-title">Recently Visited</span>
+          <button class="section-link">See all</button>
+        </div>
+        <div class="page-card" onclick="showScreen('editor')">
+          <div class="page-card-header">
+            <div class="page-icon" style="background:#dbeafe">📋</div>
+            <div>
+              <div class="page-card-title">Project Roadmap — Q3 2026</div>
+              <div class="page-card-meta">
+                <span>Engineering</span>
+                <span>•</span>
+                <span>Edited 2h ago</span>
+              </div>
+            </div>
+          </div>
+          <div class="page-card-preview">Sprint planning for the mobile redesign. Focus on performance improvements and the new block editor experience.</div>
+        </div>
+        <div class="page-card" onclick="showScreen('editor')">
+          <div class="page-card-header">
+            <div class="page-icon" style="background:#fef3c7">📊</div>
+            <div>
+              <div class="page-card-title">Design System Components</div>
+              <div class="page-card-meta">
+                <span>Design</span>
+                <span>•</span>
+                <span>Edited 5h ago</span>
+              </div>
+            </div>
+          </div>
+          <div class="page-card-preview">Token updates for the new color palette. Dark mode contrast ratios need review before shipping.</div>
+        </div>
+        <div class="page-card" onclick="showScreen('editor')">
+          <div class="page-card-header">
+            <div class="page-icon" style="background:#d1fae5">✅</div>
+            <div>
+              <div class="page-card-title">Team Standup Notes</div>
+              <div class="page-card-meta">
+                <span>Team</span>
+                <span>•</span>
+                <span>Edited 1d ago</span>
+              </div>
+            </div>
+          </div>
+          <div class="page-card-preview">Daily standup — blocked on API integration, need backend team review. Ship date remains on track.</div>
+        </div>
+      </div>
+    </screen>
+
+    <!-- EDITOR -->
+    <screen id="editor" class="screen hidden">
+      <div class="page-editor-header">
+        <button class="back-btn" onclick="showScreen('home')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+          Back
+        </button>
+        <div class="page-actions">
+          <button class="icon-btn" onclick="showToast('⭐ Added to favorites')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          </button>
+          <button class="icon-btn" onclick="showToast('🔗 Link copied!')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98"/></svg>
+          </button>
+          <button class="icon-btn" onclick="showToast('⋯ More options')">
+            <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="page-cover">
+        <div class="page-cover-emoji">📋</div>
+      </div>
+
+      <div class="page-title-area">
+        <input class="page-title-input" value="Project Roadmap — Q3 2026" />
+      </div>
+
+      <div class="page-props">
+        <div class="page-prop">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          Sean M.
+        </div>
+        <span class="prop-tag tag-blue">In Progress</span>
+        <span class="prop-tag tag-green">Engineering</span>
+        <span class="prop-tag tag-purple">P0</span>
+      </div>
+
+      <div class="blocks" id="blocks">
+        <div class="block block-h2">
+          <div class="block-handle">⋮⋮</div>
+          <div class="block-content" contenteditable="true">Overview</div>
+        </div>
+        <div class="block">
+          <div class="block-handle">⋮⋮</div>
+          <div class="block-content" contenteditable="true">This document outlines the key milestones and deliverables for Q3 2026, focused on the mobile app redesign.</div>
+        </div>
+        <div class="block block-callout">
+          <span class="callout-icon">💡</span>
+          <div class="block-content" contenteditable="true">Key insight: 68% of our users access Notion primarily on mobile. We need to make the mobile experience as powerful as desktop.</div>
+        </div>
+        <div class="block block-divider"></div>
+        <div class="block block-h2">
+          <div class="block-handle">⋮⋮</div>
+          <div class="block-content" contenteditable="true">Sprint Goals</div>
+        </div>
+        <div class="block block-todo" onclick="toggleTodo(this)">
+          <div class="todo-check checked">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>
+          </div>
+          <div class="block-content" contenteditable="true">Redesign home screen with new navigation</div>
+        </div>
+        <div class="block block-todo" onclick="toggleTodo(this)">
+          <div class="todo-check checked">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>
+          </div>
+          <div class="block-content" contenteditable="true">Implement gesture-based block editor</div>
+        </div>
+        <div class="block block-todo" onclick="toggleTodo(this)">
+          <div class="todo-check">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>
+          </div>
+          <div class="block-content" contenteditable="true">Add AI assistant integration</div>
+        </div>
+        <div class="block block-todo" onclick="toggleTodo(this)">
+          <div class="todo-check">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>
+          </div>
+          <div class="block-content" contenteditable="true">Performance optimization pass</div>
+        </div>
+        <div class="block block-todo" onclick="toggleTodo(this)">
+          <div class="todo-check">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>
+          </div>
+          <div class="block-content" contenteditable="true">Dark mode polish</div>
+        </div>
+        <div class="block block-divider"></div>
+        <div class="block block-h2">
+          <div class="block-handle">⋮⋮</div>
+          <div class="block-content" contenteditable="true">Technical Notes</div>
+        </div>
+        <div class="block block-quote">
+          <div class="block-content" contenteditable="true">"Move fast and build things that matter. Every pixel counts on mobile." — Design Team</div>
+        </div>
+        <div class="block block-bullet">
+          <div class="block-content" contenteditable="true">React Native → New architecture with Fabric renderer</div>
+        </div>
+        <div class="block block-bullet">
+          <div class="block-content" contenteditable="true">Offline-first sync engine using CRDTs</div>
+        </div>
+        <div class="block block-bullet">
+          <div class="block-content" contenteditable="true">Target: 60fps scrolling, <100ms interaction latency</div>
+        </div>
+        <div class="block block-code">
+          <div class="block-content" contenteditable="true">// New block editor architecture
+const editor = new BlockEditor({
+  renderer: 'fabric',
+  sync: 'crdt',
+  offline: true,
+  gestures: ['swipe', 'drag', 'pinch']
+});</div>
+        </div>
+        <div class="block">
+          <div class="block-handle">⋮⋮</div>
+          <div class="block-content" contenteditable="true"></div>
+        </div>
+      </div>
+
+      <div class="editor-toolbar">
+        <button class="toolbar-btn" onclick="showToast('Block: Text')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7V4h16v3M9 20h6M12 4v16"/></svg>
+          Text
+        </button>
+        <button class="toolbar-btn" onclick="showToast('Block: Heading')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12h8M4 18V6M12 18V6M21 18h-2l-3-8-3 8h-2"/></svg>
+          H
+        </button>
+        <button class="toolbar-btn" onclick="showToast('Block: To-do')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          To-do
+        </button>
+        <button class="toolbar-btn" onclick="showToast('Block: List')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+          List
+        </button>
+        <button class="toolbar-btn" onclick="showToast('Block: Image')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+          Image
+        </button>
+        <button class="toolbar-btn" onclick="showScreen('ai')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a7 7 0 0 1 7 7c0 3-1.5 5-3 6.5V18H8v-2.5C6.5 14 5 12 5 9a7 7 0 0 1 7-7z"/></svg>
+          AI
+        </button>
+      </div>
+    </screen>
+
+    <!-- SEARCH -->
+    <screen id="search" class="screen hidden">
+      <div class="search-screen-bar">
+        <div class="search-input-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          <input type="text" placeholder="Search everything..." id="searchInput" oninput="filterSearch(this.value)" autofocus />
+        </div>
+        <button class="search-cancel" onclick="showScreen('home')">Cancel</button>
+      </div>
+
+      <div class="search-filters">
+        <button class="filter-chip active" onclick="setFilter(this)">All</button>
+        <button class="filter-chip" onclick="setFilter(this)">Pages</button>
+        <button class="filter-chip" onclick="setFilter(this)">Databases</button>
+        <button class="filter-chip" onclick="setFilter(this)">People</button>
+        <button class="filter-chip" onclick="setFilter(this)">Dates</button>
+      </div>
+
+      <div class="section" style="padding-top:0">
+        <div class="section-header">
+          <span class="section-title" id="searchSectionTitle">Recent</span>
+        </div>
+      </div>
+
+      <div id="searchResults">
+        <div class="search-result" onclick="showScreen('editor')">
+          <div class="search-result-icon">📋</div>
+          <div class="search-result-info">
+            <div class="search-result-title">Project Roadmap — Q3 2026</div>
+            <div class="search-result-path">Engineering / Projects</div>
+          </div>
+          <span class="search-result-time">2h</span>
+        </div>
+        <div class="search-result" onclick="showScreen('editor')">
+          <div class="search-result-icon">📊</div>
+          <div class="search-result-info">
+            <div class="search-result-title">Design System Components</div>
+            <div class="search-result-path">Design / Systems</div>
+          </div>
+          <span class="search-result-time">5h</span>
+        </div>
+        <div class="search-result" onclick="showScreen('editor')">
+          <div class="search-result-icon">✅</div>
+          <div class="search-result-info">
+            <div class="search-result-title">Team Standup Notes</div>
+            <div class="search-result-path">Team / Daily</div>
+          </div>
+          <span class="search-result-time">1d</span>
+        </div>
+        <div class="search-result" onclick="showScreen('editor')">
+          <div class="search-result-icon">🚀</div>
+          <div class="search-result-info">
+            <div class="search-result-title">Launch Plan — Mobile v2</div>
+            <div class="search-result-path">Product / Launches</div>
+          </div>
+          <span class="search-result-time">3d</span>
+        </div>
+        <div class="search-result" onclick="showScreen('editor')">
+          <div class="search-result-icon">🎯</div>
+          <div class="search-result-info">
+            <div class="search-result-title">Q3 OKRs</div>
+            <div class="search-result-path">Company / Goals</div>
+          </div>
+          <span class="search-result-time">1w</span>
+        </div>
+        <div class="search-result" onclick="showScreen('editor')">
+          <div class="search-result-icon">📚</div>
+          <div class="search-result-info">
+            <div class="search-result-title">API Documentation</div>
+            <div class="search-result-path">Engineering / Docs</div>
+          </div>
+          <span class="search-result-time">1w</span>
+        </div>
+        <div class="search-result" onclick="showScreen('editor')">
+          <div class="search-result-icon">🎨</div>
+          <div class="search-result-info">
+            <div class="search-result-title">Brand Guidelines</div>
+            <div class="search-result-path">Design / Brand</div>
+          </div>
+          <span class="search-result-time">2w</span>
+        </div>
+        <div class="search-result" onclick="showScreen('editor')">
+          <div class="search-result-icon">💼</div>
+          <div class="search-result-info">
+            <div class="search-result-title">Hiring Pipeline</div>
+            <div class="search-result-path">People / Recruiting</div>
+          </div>
+          <span class="search-result-time">2w</span>
+        </div>
+      </div>
+    </screen>
+
+    <!-- AI -->
+    <screen id="ai" class="screen hidden" style="display:flex;flex-direction:column;">
+      <div class="ai-header">
+        <div class="ai-title">
+          <span>✨</span>
+          Notion AI
+          <span class="ai-badge">BETA</span>
+        </div>
+        <button class="back-btn" onclick="showScreen('home')" style="padding-right:0">
+          Done
+        </button>
+      </div>
+
+      <div class="ai-messages" id="aiMessages">
+        <div class="ai-message ai-msg-ai">
+          <div class="ai-message-avatar">✨</div>
+          <div class="ai-message-content">
+            <p>Hey Sean! 👋 I'm your AI assistant. I can help you with writing, brainstorming, summarizing, and more.</p>
+            <p>What would you like to work on?</p>
+            <div class="ai-suggestions">
+              <button class="ai-suggestion" onclick="sendAiMessage('Summarize my recent meeting notes')">📝 Summarize meetings</button>
+              <button class="ai-suggestion" onclick="sendAiMessage('Help me brainstorm ideas for the Q3 roadmap')">🧠 Brainstorm ideas</button>
+              <button class="ai-suggestion" onclick="sendAiMessage('Draft a project status update')">📊 Status update</button>
+              <button class="ai-suggestion" onclick="sendAiMessage('Create an action items list from my notes')">✅ Action items</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ai-input-area">
+        <input class="ai-text-input" placeholder="Ask AI anything..." id="aiInput" onkeypress="if(event.key==='Enter')sendAiMessage()" />
+        <button class="ai-send-btn" onclick="sendAiMessage()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+        </button>
+      </div>
+    </screen>
+
+    <!-- SETTINGS -->
+    <screen id="settings" class="screen hidden">
+      <div class="page-editor-header" style="margin-bottom:8px">
+        <button class="back-btn" onclick="showScreen('home')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+          Back
+        </button>
+        <span style="font-size:17px;font-weight:600;color:var(--text)">Settings</span>
+        <span style="width:60px"></span>
+      </div>
+
+      <div style="text-align:center;padding:20px">
+        <div class="avatar" style="width:64px;height:64px;font-size:24px;margin:0 auto 12px">SM</div>
+        <div style="font-size:18px;font-weight:600;color:var(--text)">Sean McDonnell</div>
+        <div style="font-size:13px;color:var(--text3);margin-top:4px">smcdonnell@makenotion.com</div>
+      </div>
+
+      <div class="settings-group">
+        <div class="settings-item" onclick="toggleDarkMode()">
+          <div class="settings-item-left">
+            <div class="settings-item-icon" style="background:#1a1a2e;color:#fff;border-radius:8px;">🌙</div>
+            <span class="settings-item-label">Dark Mode</span>
+          </div>
+          <button class="toggle" id="darkToggle" onclick="event.stopPropagation();toggleDarkMode()">
+            <div class="toggle-knob"></div>
+          </button>
+        </div>
+        <div class="settings-item" onclick="showToast('🔔 Notification settings')">
+          <div class="settings-item-left">
+            <div class="settings-item-icon" style="background:#fee2e2;border-radius:8px;">🔔</div>
+            <span class="settings-item-label">Notifications</span>
+          </div>
+          <span class="settings-item-value">On</span>
+        </div>
+        <div class="settings-item" onclick="showToast('🔐 Security settings')">
+          <div class="settings-item-left">
+            <div class="settings-item-icon" style="background:#dbeafe;border-radius:8px;">🔐</div>
+            <span class="settings-item-label">Security</span>
+          </div>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text3)" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+        </div>
+      </div>
+
+      <div class="settings-group">
+        <div class="settings-item" onclick="showToast('📱 App settings')">
+          <div class="settings-item-left">
+            <div class="settings-item-icon" style="background:#ede9fe;border-radius:8px;">📱</div>
+            <span class="settings-item-label">App Preferences</span>
+          </div>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text3)" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+        </div>
+        <div class="settings-item" onclick="showToast('☁️ Sync settings')">
+          <div class="settings-item-left">
+            <div class="settings-item-icon" style="background:#d1fae5;border-radius:8px;">☁️</div>
+            <span class="settings-item-label">Sync & Storage</span>
+          </div>
+          <span class="settings-item-value">2.4 GB</span>
+        </div>
+        <div class="settings-item" onclick="showToast('🌐 Language settings')">
+          <div class="settings-item-left">
+            <div class="settings-item-icon" style="background:#fef3c7;border-radius:8px;">🌐</div>
+            <span class="settings-item-label">Language</span>
+          </div>
+          <span class="settings-item-value">English</span>
+        </div>
+      </div>
+
+      <div class="settings-group">
+        <div class="settings-item" onclick="showToast('📤 Export data')">
+          <div class="settings-item-left">
+            <div class="settings-item-icon" style="background:#fce7f3;border-radius:8px;">📤</div>
+            <span class="settings-item-label">Export Data</span>
+          </div>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text3)" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+        </div>
+        <div class="settings-item">
+          <div class="settings-item-left">
+            <div class="settings-item-icon" style="background:var(--bg2);border-radius:8px;">ℹ️</div>
+            <span class="settings-item-label">Version</span>
+          </div>
+          <span class="settings-item-value">2.0.0 (beta)</span>
+        </div>
+      </div>
+    </screen>
+  </div>
+
+  <!-- Bottom Nav -->
+  <div class="bottom-nav" id="bottomNav">
+    <button class="nav-item active" onclick="showScreen('home')" data-screen="home">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>
+      <span>Home</span>
+    </button>
+    <button class="nav-item" onclick="showScreen('search')" data-screen="search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+      <span>Search</span>
+    </button>
+    <button class="nav-item" onclick="showScreen('ai')" data-screen="ai">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a7 7 0 0 1 7 7c0 3-1.5 5-3 6.5V18H8v-2.5C6.5 14 5 12 5 9a7 7 0 0 1 7-7z"/><path d="M9 22h6"/></svg>
+      <span>AI</span>
+    </button>
+    <button class="nav-item" onclick="showScreen('settings')" data-screen="settings">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      <span>Settings</span>
+    </button>
+  </div>
+
+  <!-- FAB -->
+  <button class="fab" id="fab" onclick="toggleCapture()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+  </button>
+
+  <!-- Quick Capture Overlay -->
+  <div class="quick-capture-overlay" id="captureOverlay" onclick="toggleCapture()">
+    <div class="quick-capture-sheet" onclick="event.stopPropagation()">
+      <div class="sheet-handle"></div>
+      <div class="capture-title">Quick Capture</div>
+      <textarea class="capture-input" placeholder="What's on your mind?"></textarea>
+      <div class="capture-options">
+        <button class="capture-option" onclick="showToast('📝 Note type selected')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
+          <span>Note</span>
+        </button>
+        <button class="capture-option" onclick="showToast('✅ Task type selected')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          <span>Task</span>
+        </button>
+        <button class="capture-option" onclick="showToast('🔗 Bookmark saved')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+          <span>Bookmark</span>
+        </button>
+        <button class="capture-option" onclick="showToast('🎤 Recording started')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/></svg>
+          <span>Voice</span>
+        </button>
+      </div>
+      <button class="capture-save-btn" onclick="saveCapture()">Save to Notion</button>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <div class="home-indicator"></div>
+</div>
+
+<script>
+  let currentScreen = 'splash';
+  let isDark = false;
+
+  // Splash → Home after 2s
+  setTimeout(() => showScreen('home'), 2000);
+
+  function showScreen(id) {
+    if (id === currentScreen) return;
+
+    const screens = document.querySelectorAll('.screen');
+    screens.forEach(s => {
+      s.classList.add('hidden');
+      s.classList.remove('slide-left');
+    });
+
+    const target = document.getElementById(id);
+    target.classList.remove('hidden');
+    target.scrollTop = 0;
+    currentScreen = id;
+
+    // Update nav
+    document.querySelectorAll('.nav-item').forEach(n => {
+      n.classList.toggle('active', n.dataset.screen === id);
+    });
+
+    // Show/hide FAB
+    const fab = document.getElementById('fab');
+    fab.style.display = (id === 'home' || id === 'editor') ? 'flex' : 'none';
+
+    // Focus search input
+    if (id === 'search') {
+      setTimeout(() => document.getElementById('searchInput')?.focus(), 400);
+    }
+  }
+
+  function toggleDarkMode() {
+    isDark = !isDark;
+    document.documentElement.classList.toggle('dark', isDark);
+    document.getElementById('darkToggle')?.classList.toggle('on', isDark);
+    showToast(isDark ? '🌙 Dark mode on' : '☀️ Light mode on');
+  }
+
+  function toggleTodo(el) {
+    const check = el.querySelector('.todo-check');
+    const isChecked = check.classList.toggle('checked');
+    el.classList.toggle('todo-done', isChecked);
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2000);
+  }
+
+  function toggleCapture() {
+    const overlay = document.getElementById('captureOverlay');
+    const fab = document.getElementById('fab');
+    const isOpen = overlay.classList.toggle('show');
+    fab.classList.toggle('expanded', isOpen);
+  }
+
+  function saveCapture() {
+    const input = document.querySelector('.capture-input');
+    if (input.value.trim()) {
+      showToast('✅ Saved to Notion!');
+      input.value = '';
+    } else {
+      showToast('📝 Type something first');
+    }
+    toggleCapture();
+  }
+
+  function setFilter(el) {
+    document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+  }
+
+  function filterSearch(query) {
+    const results = document.querySelectorAll('.search-result');
+    const title = document.getElementById('searchSectionTitle');
+    title.textContent = query ? 'Results' : 'Recent';
+    results.forEach(r => {
+      const text = r.textContent.toLowerCase();
+      r.style.display = !query || text.includes(query.toLowerCase()) ? 'flex' : 'none';
+    });
+  }
+
+  // AI Chat
+  const aiResponses = {
+    'Summarize my recent meeting notes': `Here's a summary of your recent meetings:\n\n**Team Standup (Today)**\n• API integration blocked — needs backend review\n• Ship date remains on track for Q3\n• Design system tokens updated\n\n**Product Review (Yesterday)**\n• Mobile v2 prototype approved\n• Need to finalize gesture interactions\n• AI assistant integration prioritized`,
+    'Help me brainstorm ideas for the Q3 roadmap': `Here are some ideas for Q3:\n\n🎯 **User Experience**\n• Offline-first editing with instant sync\n• Gesture-based block manipulation\n• Smart templates that adapt to context\n\n⚡ **Performance**\n• Sub-100ms interaction latency\n• Predictive content preloading\n• Reduced app startup time by 40%\n\n🤖 **AI Features**\n• Auto-organize notes into projects\n• Smart meeting summaries\n• Content suggestions based on context`,
+    'Draft a project status update': `**📊 Project Status: Mobile v2 Redesign**\n\n**Status:** 🟢 On Track\n**Sprint:** 4 of 8\n**Completion:** 45%\n\n**Completed this week:**\n✅ Home screen redesign shipped\n✅ New navigation implemented\n✅ Block editor gesture support\n\n**In progress:**\n🔄 AI assistant integration\n🔄 Performance optimization\n\n**Blockers:**\n⚠️ Backend API review needed for sync`,
+    'Create an action items list from my notes': `**✅ Action Items**\n\n**High Priority:**\n• [ ] Review backend API changes — @Engineering\n• [ ] Finalize gesture interaction spec — @Design\n• [ ] Set up performance benchmarks — @Mobile\n\n**Medium Priority:**\n• [ ] Update design system tokens — @Design\n• [ ] Write migration guide for v2 — @Docs\n• [ ] Schedule user testing sessions — @Research\n\n**Low Priority:**\n• [ ] Clean up feature flags — @Engineering\n• [ ] Update onboarding flow — @Product`,
+  };
+
+  function sendAiMessage(text) {
+    const input = document.getElementById('aiInput');
+    const msg = text || input.value.trim();
+    if (!msg) return;
+    input.value = '';
+
+    const messages = document.getElementById('aiMessages');
+
+    // User message
+    messages.innerHTML += `
+      <div class="ai-message ai-msg-user">
+        <div class="ai-message-avatar">SM</div>
+        <div class="ai-message-content"><p>${msg}</p></div>
+      </div>
+    `;
+
+    // Typing indicator
+    messages.innerHTML += `
+      <div class="ai-message ai-msg-ai" id="typing">
+        <div class="ai-message-avatar">✨</div>
+        <div class="ai-message-content">
+          <div class="typing-indicator">
+            <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    messages.scrollTop = messages.scrollHeight;
+
+    // Simulate response
+    setTimeout(() => {
+      const typing = document.getElementById('typing');
+      if (typing) typing.remove();
+
+      const response = aiResponses[msg] || `I'd be happy to help with that! Here's what I can do:\n\n• **Analyze** your existing notes and pages\n• **Generate** drafts, summaries, and outlines\n• **Organize** your workspace intelligently\n• **Suggest** next steps based on your content\n\nCould you tell me more about what you need?`;
+
+      const formatted = response.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+      messages.innerHTML += `
+        <div class="ai-message ai-msg-ai">
+          <div class="ai-message-avatar">✨</div>
+          <div class="ai-message-content"><p>${formatted}</p></div>
+        </div>
+      `;
+
+      messages.scrollTop = messages.scrollHeight;
+    }, 1500);
+  }
+
+  // Update time
+  function updateTime() {
+    const now = new Date();
+    const h = now.getHours();
+    const m = now.getMinutes().toString().padStart(2, '0');
+    document.querySelector('.status-bar .time').textContent = `${h}:${m}`;
+
+    // Update greeting
+    const greeting = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
+    const el = document.querySelector('.home-greeting');
+    if (el) el.textContent = greeting;
+  }
+  updateTime();
+  setInterval(updateTime, 60000);
+</script>
+</body>
+</html>
