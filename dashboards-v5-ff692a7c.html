@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Innovation Hub Analytics Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f8f9fa;
+            color: #1a1a1a;
+            line-height: 1.5;
+        }
+
+        .header {
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 24px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #000;
+            margin-bottom: 8px;
+        }
+
+        .header-meta {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .update-badge {
+            background: #f0fdf4;
+            color: #22863a;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 32px 24px;
+        }
+
+        .section {
+            margin-bottom: 48px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #000;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-title::before {
+            content: '';
+            display: inline-block;
+            width: 4px;
+            height: 20px;
+            background: #0066cc;
+            border-radius: 2px;
+        }
+
+        /* KPI Grid */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 32px;
+        }
+
+        .kpi-card {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 24px;
+            transition: all 0.3s ease;
+        }
+
+        .kpi-card:hover {
+            border-color: #0066cc;
+            box-shadow: 0 4px 12px rgba(0, 102, 204, 0.1);
+        }
+
+        .kpi-label {
+            font-size: 13px;
+            font-weight: 500;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+        }
+
+        .kpi-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #000;
+            line-height: 1;
+            margin-bottom: 8px;
+        }
+
+        .kpi-change {
+            font-size: 13px;
+            font-weight: 500;
+            color: #22863a;
+        }
+
+        .kpi-change.negative {
+            color: #cb2431;
+        }
+
+        /* Charts */
+        .chart-card {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 24px;
+            transition: all 0.3s ease;
+        }
+
+        .chart-card:hover {
+            border-color: #0066cc;
+            box-shadow: 0 4px 12px rgba(0, 102, 204, 0.08);
+        }
+
+        .chart-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #000;
+            margin-bottom: 20px;
+        }
+
+        .chart-container {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        svg {
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* Two Column Layout */
+        .chart-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(480px, 1fr));
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        /* Data Table */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 16px;
+        }
+
+        .data-table thead {
+            background: #f8f9fa;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .data-table th {
+            padding: 12px 16px;
+            text-align: left;
+            font-size: 12px;
+            font-weight: 600;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .data-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 14px;
+            color: #1a1a1a;
+        }
+
+        .data-table tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        .flag {
+            font-size: 20px;
+            margin-right: 8px;
+        }
+
+        .country-cell {
+            display: flex;
+            align-items: center;
+        }
+
+        .metric-badge {
+            background: #f0f4ff;
+            color: #0066cc;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        /* Legend */
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 24px;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid #e5e7eb;
+            font-size: 13px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+        }
+
+        /* Engagement Distribution */
+        .bars-container {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-around;
+            height: 300px;
+            padding: 20px 0;
+            gap: 12px;
+        }
+
+        .bar-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+        }
+
+        .bar {
+            width: 100%;
+            background: #0066cc;
+            border-radius: 4px 4px 0 0;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .bar:hover {
+            background: #0052a3;
+        }
+
+        .bar-label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 12px;
+            text-align: center;
+            width: 100%;
+        }
+
+        .bar-value {
+            position: absolute;
+            top: -24px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 12px;
+            font-weight: 600;
+            color: #0066cc;
+            white-space: nowrap;
+        }
+
+        /* Footer */
+        .footer {
+            background: white;
+            border-top: 1px solid #e5e7eb;
+            padding: 24px;
+            margin-top: 48px;
+            text-align: center;
+            color: #999;
+            font-size: 12px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 22px;
+            }
+
+            .kpi-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .chart-row {
+                grid-template-columns: 1fr;
+            }
+
+            .kpi-value {
+                font-size: 32px;
+            }
+
+            .header-meta {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+        }
+
+        /* Tooltip */
+        .tooltip {
+            position: relative;
+            cursor: help;
+        }
+
+        .tooltip::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1a1a1a;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            z-index: 10;
+        }
+
+        .tooltip:hover::after {
+            opacity: 1;
+        }
+
+        .info-icon {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            background: #0066cc;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 16px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: help;
+        }
+
+        /* Map-like visualization */
+        .geo-bars {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .geo-bar-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .geo-label {
+            font-size: 13px;
+            font-weight: 500;
+            color: #1a1a1a;
+            min-width: 120px;
+        }
+
+        .geo-bar-bg {
+            flex: 1;
+            height: 28px;
+            background: #f0f4ff;
+            border-radius: 4px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .geo-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #0066cc, #0052a3);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .geo-bar-fill:hover {
+            filter: brightness(1.1);
+        }
+
+        .geo-value {
+            font-size: 12px;
+            font-weight: 600;
+            color: white;
+        }
+
+        /* Progress bar */
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #0066cc;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <h1>📊 Innovation Hub Analytics Dashboard</h1>
+            <div class="header-meta">
+                <span><strong>Period:</strong> January 2024</span>
+                <div class="update-badge">✓ Last updated 2 hours ago</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- KPI Section -->
+        <div class="section">
+            <div class="section-title">Key Metrics</div>
+            <div class="kpi-grid">
+                <div class="kpi-card">
+                    <div class="kpi-label">Monthly Active Users</div>
+                    <div class="kpi-value">24,580</div>
+                    <div class="kpi-change">↑ 12.4% vs last month</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">Total Sessions</div>
+                    <div class="kpi-value">58,942</div>
+                    <div class="kpi-change">↑ 8.7% vs last month</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">Avg Session Duration</div>
+                    <div class="kpi-value">4m 32s</div>
+                    <div class="kpi-change">↓ 2.1% vs last month</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">Returning Visitors</div>
+                    <div class="kpi-value">68%</div>
+                    <div class="kpi-change">↑ 5.3% vs last month</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Traffic Trends Section -->
+        <div class="section">
+            <div class="section-title">Traffic Trends</div>
+            <div class="chart-row">
+                <div class="chart-card full-width">
+                    <div class="chart-title">Monthly Active Users & Sessions Over Time</div>
+                    <div class="chart-container">
+                        <svg viewBox="0 0 1000 300" width="100%" height="300" xmlns="http://www.w3.org/2000/svg">
+                            <!-- Grid -->
+                            <line x1="60" y1="250" x2="950" y2="250" stroke="#e5e7eb" stroke-width="1"/>
+                            <line x1="60" y1="200" x2="950" y2="200" stroke="#f0f4ff" stroke-width="1"/>
+                            <line x1="60" y1="150" x2="950" y2="150" stroke="#f0f4ff" stroke-width="1"/>
+                            <line x1="60" y1="100" x2="950" y2="100" stroke="#f0f4ff" stroke-width="1"/>
+                            <line x1="60" y1="50" x2="950" y2="50" stroke="#f0f4ff" stroke-width="1"/>
+
+                            <!-- Y-axis labels -->
+                            <text x="40" y="255" font-size="12" fill="#999" text-anchor="end">0</text>
+                            <text x="40" y="205" font-size="12" fill="#999" text-anchor="end">10k</text>
+                            <text x="40" y="155" font-size="12" fill="#999" text-anchor="end">20k</text>
+                            <text x="40" y="105" font-size="12" fill="#999" text-anchor="end">30k</text>
+                            <text x="40" y="55" font-size="12" fill="#999" text-anchor="end">40k</text>
+
+                            <!-- Axes -->
+                            <line x1="60" y1="40" x2="60" y2="260" stroke="#1a1a1a" stroke-width="2"/>
+                            <line x1="60" y1="260" x2="950" y2="260" stroke="#1a1a1a" stroke-width="2"/>
+
+                            <!-- Line 1: MAU (Blue) -->
+                            <polyline points="100,200 180,170 260,180 340,150 420,140 500,120 580,110 660,100 740,95 820,85 900,80" 
+                                      fill="none" stroke="#0066cc" stroke-width="3" stroke-linejoin="round"/>
+
+                            <!-- Line 2: Sessions (Orange) -->
+                            <polyline points="100,220 180,200 260,210 340,180 420,170 500,150 580,140 660,125 740,120 820,105 900,100" 
+                                      fill="none" stroke="#ff8c00" stroke-width="3" stroke-linejoin="round"/>
+
+                            <!-- X-axis labels -->
+                            <text x="100" y="280" font-size="12" fill="#666" text-anchor="middle">Jan</text>
+                            <text x="260" y="280" font-size="12" fill="#666" text-anchor="middle">Feb</text>
+                            <text x="420" y="280" font-size="12" fill="#666" text-anchor="middle">Mar</text>
+                            <text x="580" y="280" font-size="12" fill="#666" text-anchor="middle">Apr</text>
+                            <text x="740" y="280" font-size="12" fill="#666" text-anchor="middle">May</text>
+                            <text x="900" y="280" font-size="12" fill="#666" text-anchor="middle">Jun</text>
+
+                            <!-- Data points -->
+                            <circle cx="100" cy="200" r="4" fill="#0066cc"/>
+                            <circle cx="420" cy="140" r="4" fill="#0066cc"/>
+                            <circle cx="900" cy="80" r="4" fill="#0066cc"/>
+                            <circle cx="100" cy="220" r="4" fill="#ff8c00"/>
+                            <circle cx="420" cy="170" r="4" fill="#ff8c00"/>
+                            <circle cx="900" cy="100" r="4" fill="#ff8c00"/>
+                        </svg>
+                    </div>
+                    <div class="legend">
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #0066cc;"></div>
+                            <span>Monthly Active Users</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #ff8c00;"></div>
+                            <span>Total Sessions</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Geographic Distribution Section -->
+        <div class="section">
+            <div class="section-title">
+                Geographic Distribution
+                <span class="info-icon" data-tooltip="Visitors by country">?</span>
+            </div>
+            <div class="chart-row">
+                <div class="chart-card">
+                    <div class="chart-title">Visitors by Country</div>
