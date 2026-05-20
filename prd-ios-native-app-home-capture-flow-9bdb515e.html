@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Quick Capture App</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f2f2f7;
+            overflow: hidden;
+            height: 100vh;
+            width: 375px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .app-container {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .status-bar {
+            height: 44px;
+            background: #f2f2f7;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .content-area {
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .tab-content {
+            height: 100%;
+            display: none;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .tab-bar {
+            height: 83px;
+            background: rgba(248, 248, 248, 0.95);
+            backdrop-filter: blur(20px);
+            border-top: 0.5px solid #c6c6c8;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding-bottom: 20px;
+            position: relative;
+        }
+
+        .tab-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 8px 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: #8e8e93;
+            font-size: 10px;
+            font-weight: 500;
+        }
+
+        .tab-item.active {
+            color: #007aff;
+        }
+
+        .tab-item.capture {
+            background: #007aff;
+            color: white;
+            border-radius: 12px;
+            padding: 12px 16px;
+            transform: translateY(-8px);
+            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
+        }
+
+        .tab-icon {
+            width: 24px;
+            height: 24px;
+            margin-bottom: 2px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .home-content h1 {
+            font-size: 32px;
+            font-weight: 700;
+            color: #1c1c1e;
+            margin-bottom: 8px;
+        }
+
+        .home-subtitle {
+            font-size: 16px;
+            color: #8e8e93;
+            margin-bottom: 32px;
+        }
+
+        .quick-actions {
+            background: white;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            overflow: hidden;
+        }
+
+        .quick-action {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            border-bottom: 0.5px solid #f2f2f7;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .quick-action:last-child {
+            border-bottom: none;
+        }
+
+        .quick-action:active {
+            background: #f2f2f7;
+        }
+
+        .quick-action-icon {
+            width: 32px;
+            height: 32px;
+            background: #007aff;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            margin-right: 12px;
+            font-size: 16px;
+        }
+
+        .quick-action-text h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1c1c1e;
+        }
+
+        .quick-action-text p {
+            font-size: 14px;
+            color: #8e8e93;
+            margin-top: 2px;
+        }
+
+        .recent-notes {
+            margin-top: 24px;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1c1c1e;
+            margin-bottom: 12px;
+        }
+
+        .note-card {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .note-card:active {
+            transform: scale(0.98);
+            background: #f8f9fa;
+        }
+
+        .note-card.offline {
+            border-left: 4px solid #ff9500;
+        }
+
+        .note-card h4 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1c1c1e;
+            margin-bottom: 4px;
+        }
+
+        .note-card p {
+            font-size: 14px;
+            color: #8e8e93;
+            line-height: 1.4;
+        }
+
+        .note-meta {
+            font-size: 12px;
+            color: #8e8e93;
+            margin-top: 8px;
+        }
+
+        .offline-indicator {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: #ff9500;
+            color: white;
+            font-size: 10px;
+            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .capture-screen {
+            background: white;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            padding: 0;
+        }
+
+        .capture-header {
+            padding: 16px 20px;
+            border-bottom: 0.5px solid #f2f2f7;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .capture-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1c1c1e;
+        }
+
+        .cancel-btn, .save-btn {
+            font-size: 16px;
+            font-weight: 500;
+            padding: 8px 12px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .cancel-btn {
+            color: #8e8e93;
+        }
+
+        .save-btn {
+            color: #007aff;
+            font-weight: 600;
+        }
+
+        .save-btn:disabled {
+            color: #c7c7cc;
+        }
+
+        .capture-form {
+            flex: 1;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .capture-input {
+            width: 100%;
+            border: none;
+            outline: none;
+            font-size: 16px;
+            color: #1c1c1e;
+            line-height: 1.5;
+            resize: none;
+            flex: 1;
+            background: transparent;
+            font-family: inherit;
+        }
+
+        .capture-input::placeholder {
+            color: #c7c7cc;
+        }
+
+        .ai-suggestions {
+            padding: 16px 20px;
+            border-top: 0.5px solid #f2f2f7;
+            background: #f8f9fa;
+        }
+
+        .ai-suggestion {
+            background: white;
+            border: 1px solid #e5e5ea;
+            border-radius: 20px;
+            padding: 8px 16px;
+            margin: 4px 8px 4px 0;
+            display: inline-block;
+            font-size: 14px;
+            color: #007aff;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .ai-suggestion:active {
+            background: #f0f0f0;
+        }
+
+        .success-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.4);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .success-message {
+            background: white;
+            border-radius: 16px;
+            padding: 32px 24px;
+            text-align: center;
+            margin: 0 40px;
+            transform: scale(0.8);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .success-message.show {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        .success-icon {
+            width: 60px;
+            height: 60px;
+            background: #34c759;
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+            color: white;
+            font-size: 24px;
+        }
+
+        .workspace-panel {
+            position: absolute;
+            right: -280px;
+            top: 0;
+            width: 280px;
+            height: 100%;
+            background: white;
+            box-shadow: -2px 0 20px rgba(0, 0, 0, 0.1);
+            transition: right 0.3s ease;
+            z-index: 900;
+            padding: 60px 20px 20px;
+        }
+
+        .workspace-panel.open {
+            right: 0;
+        }
+
+        .panel-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.3);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 850;
+        }
+
+        .panel-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #8e8e93;
+        }
+
+        .empty-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .loading-state {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+        }
+
+        .spinner {
+            width: 32px;
+            height: 32px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #007aff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-state {
+            background: #fff2f2;
+            border: 1px solid #fecaca;
+            border-radius: 12px;
+            padding: 16px;
+            margin: 20px 0;
+            color: #dc2626;
+            text-align: center;
+        }
+
+        .pinned-note {
+            border: 2px solid #007aff;
+            position: relative;
+        }
+
+        .pin-icon {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            color: #007aff;
+            font-size: 14px;
+        }
+
+        .swipe-hint {
+            position: fixed;
+            top: 50%;
+            right: 10px;
+            transform: translateY(-50%);
+            color: #8e8e93;
+            font-size: 12px;
+            writing-mode: vertical-rl;
+            opacity: 0.7;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="status-bar">
+            <span>9:41</span>
+            <span>📶 📶 📶 🔋</span>
+        </div>
+
+        <div class="content-area">
+            <!-- Home Tab -->
+            <div class="tab-content active" id="home">
+                <div class="home-content">
+                    <h1>Good morning</h1>
+                    <p class="home-subtitle">Ready to capture your ideas?</p>
+                    
+                    <div class="quick-actions">
+                        <div class="quick-action" onclick="showCapture()">
+                            <div class="quick-action-icon">✏️</div>
+                            <div class="quick-action-text">
+                                <h3>Quick Note</h3>
+                                <p>Capture thoughts instantly</p>
+                            </div>
+                        </div>
+                        <div class="quick-action">
+                            <div class="quick-action-icon">📷</div>
+                            <div class="quick-action-text">
+                                <h3>Scan Document</h3>
+                                <p>Camera to text</p>
+                            </div>
+                        </div>
+                        <div class="quick-action">
+                            <div class="quick-action-icon">🎤</div>
+                            <div class="quick-action-text">
+                                <h3>Voice Note</h3>
+                                <p>Speak your thoughts</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="recent-notes">
+                        <h2 class="section-title">Pinned</h2>
+                        <div class="note-card pinned-note" id="pinned-note" style="display: none;">
+                            <div class="pin-icon">📌</div>
+                            <h4 id="pinned-title">New captured note</h4>
+                            <p id="pinned-preview">Just captured this important thought...</p>
+                            <div class="note-meta">Just now • Pinned</div>
+                        </div>
+                        
+                        <h2 class="section-title">Recent</h2>
+                        <div class="note-card offline">
+                            <div class="offline-indicator">OFFLINE</div>
+                            <h4>Meeting Notes - Q4 Planning</h4>
+                            <p>Key discussion points about product roadmap and resource allocation for next quarter...</p>
+                            <div class="note-meta">2 hours ago • Available offline</div>
+                        </div>
+                        
+                        <div class="note-card">
+                            <h4>Weekend Project Ideas</h4>
+                            <p>Build a small mobile app, learn SwiftUI, organize home office, read two books...</p>
+                            <div class="note-meta">Yesterday • Synced</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Search Tab -->
+            <div class="tab-content" id="search">
+                <div class="loading-state">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+
+            <!-- Capture Tab -->
+            <div class="tab-content" id="capture">
+                <div class="capture-screen">
+                    <div class="capture-header">
+                        <button class="cancel-btn" onclick="cancelCapture()">Cancel</button>
+                        <h2 class="capture-title">New Note</h2>
+                        <button class="save-btn" id="save-btn" onclick="saveNote()" disabled>Save</button>
+                    </div>
+                    
+                    <div class="capture-form">
+                        <textarea class="capture-input" id="note-input" placeholder="What's on your mind?" oninput="updateSaveButton()"></textarea>
+                    </div>
+                    
+                    <div class="ai-suggestions">
+                        <div class="ai-suggestion" onclick="applySuggestion('clean')">✨ Clean up</div>
+                        <div class="ai-suggestion" onclick="applySuggestion('continue')">➕ Continue writing</div>
+                        <div class="ai-suggestion" onclick="applySuggestion('summarize')">📝 Summarize</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recents Tab -->
+            <div class="tab-content" id="recents">
+                <div style="padding-top: 20px;">
+                    <h2 class="section-title">Recent Notes</h2>
+                    <div id="recent-notes-list">
+                        <div class="note-card">
+                            <h4>Daily Standup Notes</h4>
+                            <p>Team updates, blockers, and action items from today's meeting...</p>
+                            <div class="note-meta">3 hours ago</div>
+                        </div>
+                        
+                        <div class="note-card offline">
+                            <div class="offline-indicator">OFFLINE</div>
+                            <h4>Travel Itinerary</h4>
+                            <p>Flight details, hotel confirmations, and planned activities for upcoming trip...</p>
+                            <div class="note-meta">1 day ago • Available offline</div>
+                        </div>
+                    </div>
+                    
+                    <div class="error-state" style="margin-top: 20px;">
+                        ⚠️ Some notes couldn't sync. Check your connection and try again.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Workspace Tab -->
+            <div class="tab-content" id="workspace">
+                <div class="empty-state">
+                    <div class="empty-icon">📁</div>
+                    <h3>No Workspaces</h3>
+                    <p>Create your first workspace to organize your notes</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-bar">
+            <div class="tab-item active" onclick="switchTab('home', this)">
+                <div class="tab-icon">🏠</div>
+                <span>Home</span>
+            </div>
+            <div class="tab-item" onclick="switchTab('search', this)">
+                <div class="tab-icon">🔍</div>
+                <span>Search</span>
+            </div>
+            <div class="tab-item capture" onclick="showCapture()">
+                <div class="tab-icon">+</div>
+                <span>Capture</span>
+            </div>
+            <div class="tab-item" onclick="switchTab('recents', this)">
+                <div class="tab-icon">📋</div>
+                <span>Recents</span>
+            </div>
+            <div class="tab-item" onclick="toggleWorkspacePanel()">
+                <div class="tab-icon">⚡</div>
+                <span>Hub</span>
+            </div>
+        </div>
+
+        <div class="success-overlay" id="success-overlay">
+            <div class="success-message" id="success-message">
+                <div class="success-icon">✓</div>
+                <h3>Note Saved!</h3>
+                <p>Your note has been saved and synced</p>
+            </div>
+        </div>
+
+        <div class="panel-overlay" id="panel-overlay" onclick="closeWorkspacePanel()"></div>
+        <div class="workspace-panel" id="workspace-panel">
+            <h2 class="section-title">Workspace Hub</h2>
+            <div class="empty-state">
+                <div class="empty-icon">⚡</div>
+                <h3>Quick Actions</h3>
+                <p>Swipe right to access workspace tools and settings</p>
+            </div>
+        </div>
+
+        <div class="swipe-hint">← Swipe for Hub</div>
+    </div>
+
+    <script>
+        let currentTab = 'home';
+        let startX = 0;
+        let currentX = 0;
+        let isDragging = false;
+
+        function switchTab(tabId, element) {
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            document.getElementById(tabId).classList.add('active');
+            if (element && !element.classList.contains('capture')) {
+                element.classList.add('active');
+            }
+            
+            currentTab = tabId;
+        }
+
+        function showCapture() {
+            switchTab('capture');
+            setTimeout(() => {
+                document.getElementById('note-input').focus();
+            }, 100);
+        }
+
+        function cancelCapture() {
+            document.getElementById('note-input').value = '';
+            updateSaveButton();
+            switchTab('home');
+            document.querySelector('.tab-item').classList.add('active');
+        }
+
+        function updateSaveButton() {
+            const input = document.getElementById('note-input');
+            const saveBtn = document.getElementById('save-btn');
+            saveBtn.disabled = input.value.trim().length === 0;
+        }
+
+        function saveNote() {
+            const input = document.getElementById('note-input');
+            const noteText = input.value.trim();
+            
+            if (!noteText) return;
+            
+            // Show success overlay
+            const overlay = document.getElementById('success-overlay');
+            const message = document.getElementById('success-message');
+            
+            overlay.style.display = 'flex';
+            setTimeout(() => {
+                message.classList.add('show');
+            }, 100);
+            
+            // Add to recents and pinned
+            addToRecents(noteText);
+            addToPinned(noteText);
+            
+            // Hide after 2 seconds and return to home
+            setTimeout(() => {
+                message.classList.remove('show');
+                setTimeout(() => {
+                    overlay.style.display = 'none';
+                    input.value = '';
+                    updateSaveButton();
+                    switchTab('home');
+                    document.querySelector('.tab-item').classList.add('active');
+                }, 300);
+            }, 2000);
+        }
+
+        function addToRecents(noteText) {
+            const recentsList = document.getElementById('recent-notes-list');
+            const noteCard = document.createElement('div');
+            noteCard.className = 'note-card';
+            noteCard.innerHTML = `
+                <h4>New Note</h4>
+                <p>${noteText.substring(0,
