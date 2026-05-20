@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notes App</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #000;
+            color: #fff;
+            height: 100vh;
+            overflow: hidden;
+            max-width: 375px;
+            margin: 0 auto;
+        }
+
+        .app-container {
+            height: 100vh;
+            background: #000;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .status-bar {
+            height: 44px;
+            background: #000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .screen {
+            flex: 1;
+            background: #000;
+            display: none;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        .header {
+            padding: 16px 20px;
+            border-bottom: 0.5px solid #333;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        .search-bar {
+            background: #1c1c1e;
+            border-radius: 12px;
+            padding: 12px 16px;
+            font-size: 16px;
+            border: none;
+            color: #fff;
+            width: 100%;
+        }
+
+        .search-bar::placeholder {
+            color: #8e8e93;
+        }
+
+        .content {
+            flex: 1;
+            padding: 20px;
+        }
+
+        .section {
+            margin-bottom: 32px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #fff;
+        }
+
+        .note-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .note-item {
+            background: #1c1c1e;
+            border-radius: 12px;
+            padding: 16px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .note-item:active {
+            background: #2c2c2e;
+        }
+
+        .note-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: #fff;
+        }
+
+        .note-preview {
+            font-size: 14px;
+            color: #8e8e93;
+            line-height: 1.4;
+        }
+
+        .note-meta {
+            font-size: 12px;
+            color: #636366;
+            margin-top: 8px;
+        }
+
+        .ai-suggestions {
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
+        }
+
+        .suggestion-chip {
+            background: #007aff;
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 16px;
+            font-size: 14px;
+            border: none;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .suggestion-chip:active {
+            background: #0056cc;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .empty-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .empty-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .empty-subtitle {
+            font-size: 14px;
+            color: #8e8e93;
+        }
+
+        .capture-form {
+            padding: 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .input-field {
+            background: #1c1c1e;
+            border: none;
+            border-radius: 12px;
+            padding: 16px;
+            font-size: 16px;
+            color: #fff;
+            font-family: inherit;
+        }
+
+        .input-field::placeholder {
+            color: #8e8e93;
+        }
+
+        .input-field.title {
+            font-weight: 600;
+        }
+
+        .input-field.body {
+            flex: 1;
+            min-height: 200px;
+            resize: none;
+        }
+
+        .save-button {
+            background: #007aff;
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            padding: 16px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .save-button:active {
+            background: #0056cc;
+        }
+
+        .save-button:disabled {
+            background: #333;
+            color: #666;
+        }
+
+        .ai-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
+        }
+
+        .ai-action {
+            background: #2c2c2e;
+            color: #007aff;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .ai-action:active {
+            background: #3a3a3c;
+        }
+
+        .tab-bar {
+            height: 83px;
+            background: #1c1c1e;
+            display: flex;
+            border-top: 0.5px solid #333;
+            padding-bottom: 20px;
+        }
+
+        .tab {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: color 0.2s;
+            color: #8e8e93;
+        }
+
+        .tab.active {
+            color: #007aff;
+        }
+
+        .tab-icon {
+            font-size: 24px;
+            margin-bottom: 4px;
+        }
+
+        .tab-label {
+            font-size: 10px;
+        }
+
+        .toast {
+            position: fixed;
+            top: 80px;
+            left: 20px;
+            right: 20px;
+            background: #34c759;
+            color: #fff;
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+            transform: translateY(-100px);
+            opacity: 0;
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .toast.error {
+            background: #ff3b30;
+        }
+
+        .hub-drawer {
+            position: fixed;
+            top: 0;
+            right: -300px;
+            width: 300px;
+            height: 100%;
+            background: #1c1c1e;
+            transition: right 0.3s;
+            z-index: 2000;
+            padding: 44px 20px 20px;
+        }
+
+        .hub-drawer.open {
+            right: 0;
+        }
+
+        .hub-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+            z-index: 1500;
+        }
+
+        .hub-overlay.open {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .offline-indicator {
+            background: #ff9500;
+            color: #000;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+        .read-view {
+            padding: 20px;
+            display: none;
+        }
+
+        .read-view.active {
+            display: block;
+        }
+
+        .read-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        .read-content {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #e5e5e7;
+        }
+
+        .back-button {
+            background: none;
+            border: none;
+            color: #007aff;
+            font-size: 16px;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="status-bar">
+            <span>9:41</span>
+            <span id="connection-status">📶 📶 📶  🔋</span>
+        </div>
+
+        <!-- Home Screen -->
+        <div class="screen active" id="home-screen">
+            <div class="header">
+                <h1>Notes</h1>
+                <input type="text" class="search-bar" placeholder="Search notes...">
+            </div>
+            <div class="content">
+                <div class="section">
+                    <div class="section-title">📌 Pinned</div>
+                    <div class="empty-state">
+                        <div class="empty-icon">📌</div>
+                        <div class="empty-title">No Pinned Notes</div>
+                        <div class="empty-subtitle">Pin important notes for quick access</div>
+                    </div>
+                </div>
+                <div class="section">
+                    <div class="section-title">🕐 Recent</div>
+                    <div id="home-recents" class="note-list">
+                        <div class="empty-state">
+                            <div class="empty-icon">📝</div>
+                            <div class="empty-title">No Recent Notes</div>
+                            <div class="empty-subtitle">Your recent notes will appear here</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="ai-suggestions">
+                    <button class="suggestion-chip">Daily Journal</button>
+                    <button class="suggestion-chip">Meeting Notes</button>
+                    <button class="suggestion-chip">Ideas</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search Screen -->
+        <div class="screen" id="search-screen">
+            <div class="header">
+                <h1>Search</h1>
+                <input type="text" class="search-bar" placeholder="Search all notes...">
+            </div>
+            <div class="content">
+                <div class="empty-state">
+                    <div class="empty-icon">🔍</div>
+                    <div class="empty-title">Search Notes</div>
+                    <div class="empty-subtitle">Enter keywords to find your notes</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Capture Screen -->
+        <div class="screen" id="capture-screen">
+            <div class="header">
+                <h1>New Note</h1>
+            </div>
+            <div class="capture-form">
+                <input type="text" class="input-field title" id="note-title" placeholder="Title">
+                <textarea class="input-field body" id="note-body" placeholder="Start writing..."></textarea>
+                <button class="save-button" id="save-button" disabled>Save Note</button>
+                <div class="ai-actions">
+                    <button class="ai-action">✨ Clean up</button>
+                    <button class="ai-action">📝 Summarize</button>
+                    <button class="ai-action">➡️ Continue</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recents Screen -->
+        <div class="screen" id="recents-screen">
+            <div class="header">
+                <h1>Recent Notes</h1>
+            </div>
+            <div class="content">
+                <div id="recents-list" class="note-list">
+                    <div class="empty-state">
+                        <div class="empty-icon">📝</div>
+                        <div class="empty-title">No Notes Yet</div>
+                        <div class="empty-subtitle">Create your first note to get started</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Read View -->
+        <div class="read-view" id="read-view">
+            <button class="back-button" onclick="closeReadView()">← Back</button>
+            <div class="read-title" id="read-note-title"></div>
+            <div class="read-content" id="read-note-content"></div>
+        </div>
+
+        <!-- Hub Screen -->
+        <div class="screen" id="hub-screen">
+            <div class="header">
+                <h1>Hub</h1>
+            </div>
+            <div class="content">
+                <div class="section">
+                    <div class="section-title">Settings</div>
+                    <div class="note-item">
+                        <div class="note-title">Sync Settings</div>
+                        <div class="note-preview">Manage cloud sync preferences</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab Bar -->
+        <div class="tab-bar">
+            <div class="tab active" data-screen="home">
+                <div class="tab-icon">🏠</div>
+                <div class="tab-label">Home</div>
+            </div>
+            <div class="tab" data-screen="search">
+                <div class="tab-icon">🔍</div>
+                <div class="tab-label">Search</div>
+            </div>
+            <div class="tab" data-screen="capture">
+                <div class="tab-icon">➕</div>
+                <div class="tab-label">Capture</div>
+            </div>
+            <div class="tab" data-screen="recents">
+                <div class="tab-icon">🕐</div>
+                <div class="tab-label">Recents</div>
+            </div>
+            <div class="tab" data-screen="hub">
+                <div class="tab-icon">⚙️</div>
+                <div class="tab-label">Hub</div>
+            </div>
+        </div>
+
+        <!-- Toast -->
+        <div class="toast" id="toast"></div>
+
+        <!-- Hub Drawer -->
+        <div class="hub-overlay" id="hub-overlay"></div>
+        <div class="hub-drawer" id="hub-drawer">
+            <h2>Hub</h2>
+            <div style="margin-top: 20px;">
+                <div class="note-item">
+                    <div class="note-title">Settings</div>
+                </div>
+                <div class="note-item">
+                    <div class="note-title">Export Notes</div>
+                </div>
+                <div class="note-item">
+                    <div class="note-title">Help & Support</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let notes = [];
+        let currentScreen = 'home';
+        let isOffline = false;
+
+        // Tab navigation
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                const screenName = tab.dataset.screen;
+                
+                if (screenName === 'hub') {
+                    openHubDrawer();
+                    return;
+                }
+                
+                switchScreen(screenName);
+                
+                // Update active tab
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+            });
+        });
+
+        function switchScreen(screenName) {
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            document.getElementById(screenName + '-screen').classList.add('active');
+            document.getElementById('read-view').classList.remove('active');
+            currentScreen = screenName;
+        }
+
+        // Hub drawer
+        function openHubDrawer() {
+            document.getElementById('hub-drawer').classList.add('open');
+            document.getElementById('hub-overlay').classList.add('open');
+        }
+
+        function closeHubDrawer() {
+            document.getElementById('hub-drawer').classList.remove('open');
+            document.getElementById('hub-overlay').classList.remove('open');
+        }
+
+        document.getElementById('hub-overlay').addEventListener('click', closeHubDrawer);
+
+        // Capture functionality
+        const titleInput = document.getElementById('note-title');
+        const bodyInput = document.getElementById('note-body');
+        const saveButton = document.getElementById('save-button');
+
+        function updateSaveButton() {
+            const hasContent = titleInput.value.trim() || bodyInput.value.trim();
+            saveButton.disabled = !hasContent;
+        }
+
+        titleInput.addEventListener('input', updateSaveButton);
+        bodyInput.addEventListener('input', updateSaveButton);
+
+        saveButton.addEventListener('click', saveNote);
+
+        function saveNote() {
+            const title = titleInput.value.trim() || 'Untitled';
+            const body = bodyInput.value.trim();
+            
+            if (!title && !body) return;
+
+            // Simulate save delay
+            saveButton.disabled = true;
+            saveButton.textContent = 'Saving...';
+
+            setTimeout(() => {
+                const note = {
+                    id: Date.now(),
+                    title,
+                    body,
+                    date: new Date().toLocaleDateString(),
+                    time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+                };
+
+                notes.unshift(note);
+                
+                // Clear form
+                titleInput.value = '';
+                bodyInput.value = '';
+                updateSaveButton();
+                saveButton.textContent = 'Save Note';
+
+                // Show success toast
+                showToast('Note saved successfully!', 'success');
+
+                // Update recents list
+                updateRecentsList();
+                updateHomeRecents();
+
+                // Switch to recents after short delay
+                setTimeout(() => {
+                    switchScreen('recents');
+                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    document.querySelector('.tab[data-screen="recents"]').classList.add('active');
+                }, 1000);
+
+            }, 800);
+        }
+
+        function updateRecentsList() {
+            const recentsList = document.getElementById('recents-list');
+            
+            if (notes.length === 0) {
+                recentsList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">📝</div>
+                        <div class="empty-title">No Notes Yet</div>
+                        <div class="empty-subtitle">Create your first note to get started</div>
+                    </div>
+                `;
+                return;
+            }
+
+            recentsList.innerHTML = notes.map(note => `
+                <div class="note-item" onclick="openNote(${note.id})">
+                    <div class="note-title">${note.title}${isOffline ? '<span class="offline-indicator">OFFLINE</span>' : ''}</div>
+                    <div class="note-preview">${note.body.substring(0, 100)}${note.body.length > 100 ? '...' : ''}</div>
+                    <div class="note-meta">${note.date} • ${note.time}</div>
+                </div>
+            `).join('');
+        }
+
+        function updateHomeRecents() {
+            const homeRecents = document.getElementById('home-recents');
+            
+            if (notes.length === 0) {
+                homeRecents.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">📝</div>
+                        <div class="empty-title">No Recent Notes</div>
+                        <div class="empty-subtitle">Your recent notes will appear here</div>
+                    </div>
+                `;
+                return;
+            }
+
+            const recentNotes = notes.slice(0, 3);
+            homeRecents.innerHTML = recentNotes.map(note => `
+                <div class="note-item" onclick="openNote(${note.id})">
+                    <div class="note-title">${note.title}</div>
+                    <div class="note-preview">${note.body.substring(0, 80)}${note.body.length > 80 ? '...' : ''}</div>
+                    <div class="note-meta">${note.date}</div>
+                </div>
+            `).join('');
+        }
+
+        function openNote(noteId) {
+            const note = notes.find(n => n.id === noteId);
+            if (!note) return;
+
+            document.getElementById('read-note-title').textContent = note.title + (isOffline ? ' 📴' : '');
+            document.getElementById('read-note-content').textContent = note.body;
+            
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            document.getElementById('read-view').classList.add('active');
+        }
+
+        function closeReadView() {
+            document.getElementById('read-view').classList.remove('active');
+            document.getElementById(currentScreen + '-screen').classList.add('active');
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type}`;
+            toast.classList.add('show');
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Simulate offline mode
+        setTimeout(() => {
+            isOffline = true;
+            document.getElementById('connection-status').innerHTML = '📶 📶 ⚪  🔋';
+            updateRecentsList();
+        }, 10000);
+
+        // Initialize
+        updateRecentsList();
+        updateHomeRecents();
+    </script>
+</body>
+</html>
