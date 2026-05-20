@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Innovation Hub — Ideas Repository</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f7fa;
+            color: #1a1a1a;
+        }
+
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            box-shadow: 0 0 20px rgba(0,0,0,0.08);
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #0052cc 0%, #003d99 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid #002966;
+        }
+
+        .header h1 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .header p {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        /* Tab Navigation */
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #e0e0e0;
+            background: #fafbfc;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 14px;
+            text-align: center;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            color: #666;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .tab.active {
+            color: #0052cc;
+            border-bottom-color: #0052cc;
+        }
+
+        .tab:hover {
+            background: #f0f2f5;
+        }
+
+        /* Tab Content */
+        .tab-content {
+            display: none;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .tab-content.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Submit Form */
+        .form-section {
+            padding: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #d0d0d0;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #0052cc;
+            box-shadow: 0 0 0 3px rgba(0, 82, 204, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .tag-input-container {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-bottom: 8px;
+        }
+
+        .tag {
+            background: #e8f0ff;
+            color: #0052cc;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .tag button {
+            background: none;
+            border: none;
+            color: #0052cc;
+            cursor: pointer;
+            font-size: 14px;
+            padding: 0;
+        }
+
+        .tag-suggestions {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+        }
+
+        .tag-suggestion {
+            background: #f0f2f5;
+            color: #333;
+            padding: 6px 12px;
+            border: 1px solid #d0d0d0;
+            border-radius: 12px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tag-suggestion:hover {
+            background: #e0e0e0;
+            border-color: #999;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #0052cc 0%, #003d99 100%);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            width: 100%;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 82, 204, 0.3);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        /* Ideas List */
+        .ideas-list {
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .idea-card {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 16px;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .idea-card:hover {
+            border-color: #0052cc;
+            box-shadow: 0 2px 8px rgba(0, 82, 204, 0.12);
+        }
+
+        .idea-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+
+        .idea-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1a1a1a;
+            flex: 1;
+        }
+
+        .idea-status {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        .status-draft {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-submitted {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .status-approved {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .idea-description {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+
+        .idea-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 11px;
+            color: #999;
+            margin-bottom: 10px;
+        }
+
+        .idea-tags {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .idea-tag {
+            background: #f0f2f5;
+            color: #333;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+        }
+
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            text-align: center;
+            color: #999;
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .empty-state p {
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .filter-bar {
+            padding: 12px;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            background: #fafbfc;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .filter-btn {
+            padding: 6px 12px;
+            border: 1px solid #d0d0d0;
+            background: white;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .filter-btn.active {
+            background: #0052cc;
+            color: white;
+            border-color: #0052cc;
+        }
+
+        .filter-btn:hover {
+            border-color: #0052cc;
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 12px 16px;
+            margin: 12px;
+            border-radius: 6px;
+            border: 1px solid #c3e6cb;
+            font-size: 13px;
+            display: none;
+        }
+
+        .success-message.show {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💡 Innovation Hub</h1>
+            <p>Share ideas, drive innovation</p>
+        </div>
+
+        <div class="tabs">
+            <div class="tab active" data-tab="submit">Submit Idea</div>
+            <div class="tab" data-tab="browse">Browse Ideas</div>
+            <div class="tab" data-tab="my-ideas">My Ideas</div>
+        </div>
+
+        <!-- Submit Tab -->
+        <div class="tab-content active" id="submit" style="padding: 0;">
+            <div class="success-message" id="successMsg">✓ Your idea has been submitted successfully!</div>
+            <div class="form-section">
+                <form id="ideaForm">
+                    <div class="form-group">
+                        <label for="idea-title">Idea Title *</label>
+                        <input type="text" id="idea-title" placeholder="e.g., AI-powered customer support" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="idea-description">Description *</label>
+                        <textarea id="idea-description" placeholder="Describe your innovation idea in detail..." required></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Tags *</label>
+                        <div class="tag-input-container" id="selectedTags"></div>
+                        <div class="tag-suggestions" id="tagSuggestions">
+                            <span class="tag-suggestion" data-tag="AI/ML">AI/ML</span>
+                            <span class="tag-suggestion" data-tag="UX">UX</span>
+                            <span class="tag-suggestion" data-tag="Process">Process</span>
+                            <span class="tag-suggestion" data-tag="Security">Security</span>
+                            <span class="tag-suggestion" data-tag="Data">Data</span>
+                            <span class="tag-suggestion" data-tag="Mobile">Mobile</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="idea-team">Team *</label>
+                        <select id="idea-team" required>
+                            <option value="">Select your team</option>
+                            <option value="engineering">Engineering</option>
+                            <option value="product">Product</option>
+                            <option value="design">Design</option>
+                            <option value="operations">Operations</option>
+                            <option value="marketing">Marketing</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="idea-impact">Estimated Impact</label>
+                        <select id="idea-impact">
+                            <option value="">Select impact level</option>
+                            <option value="high">High</option>
+                            <option value="medium">Medium</option>
+                            <option value="low">Low</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn-primary">Submit Idea</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Browse Tab -->
+        <div class="tab-content" id="browse">
+            <div class="filter-bar">
+                <button class="filter-btn active" data-filter="all">All</button>
+                <button class="filter-btn" data-filter="submitted">Submitted</button>
+                <button class="filter-btn" data-filter="approved">Approved</button>
+                <button class="filter-btn" data-filter="ai-ml" data-tag="AI/ML">AI/ML</button>
+            </div>
+            <div class="ideas-list" id="ideasList">
+                <div class="empty-state">
+                    <div class="empty-state-icon">📭</div>
+                    <p>No ideas yet</p>
+                    <small>Be the first to share an innovation idea!</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- My Ideas Tab -->
+        <div class="tab-content" id="my-ideas">
+            <div class="filter-bar">
+                <button class="filter-btn active" data-filter="all">All</button>
+                <button class="filter-btn" data-filter="draft">Draft</button>
+                <button class="filter-btn" data-filter="submitted">Submitted</button>
+            </div>
+            <div class="ideas-list" id="myIdeasList">
+                <div class="empty-state">
+                    <div class="empty-state-icon">📋</div>
+                    <p>No ideas yet</p>
+                    <small>Start by submitting your first innovation idea!</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // State management
+        let ideas = JSON.parse(localStorage.getItem('ideas')) || [];
+        let selectedTags = [];
+        let currentUser = 'user_' + Math.random().toString(36).substr(2, 9);
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            setupTabNavigation();
+            setupTagSuggestions();
+            setupFormSubmission();
+            setupFilterButtons();
+            renderBrowseIdeas('all');
+            renderMyIdeas('all');
+        });
+
+        //
