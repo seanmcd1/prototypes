@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conference Buddy</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .app-container {
+            max-width: 430px;
+            margin: 0 auto;
+            background: #ffffff;
+            min-height: 100vh;
+            box-shadow: 0 0 50px rgba(0,0,0,0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #37352f 0%, #2f1b69 100%);
+            padding: 20px;
+            color: white;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            opacity: 0.8;
+            font-size: 14px;
+        }
+
+        .navigation {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e1e5e9;
+            position: sticky;
+            top: 78px;
+            z-index: 99;
+        }
+
+        .nav-item {
+            flex: 1;
+            padding: 16px;
+            text-align: center;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 14px;
+            color: #64748b;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+        }
+
+        .nav-item.active {
+            color: #37352f;
+            border-bottom-color: #37352f;
+            background: white;
+        }
+
+        .screen {
+            display: none;
+            padding: 20px;
+            min-height: calc(100vh - 140px);
+            animation: slideIn 0.3s ease;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .scan-area {
+            background: #f8f9fa;
+            border: 2px dashed #cbd5e1;
+            border-radius: 16px;
+            padding: 60px 20px;
+            text-align: center;
+            margin-bottom: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .scan-area:hover {
+            border-color: #37352f;
+            background: #f1f5f9;
+        }
+
+        .scan-area.scanning {
+            border-color: #10b981;
+            background: linear-gradient(45deg, #ecfdf5, #f0fdf4);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+
+        .qr-icon {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 20px;
+            background: linear-gradient(135deg, #37352f 0%, #2f1b69 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 28px;
+        }
+
+        .attendee-card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            border: 1px solid #e1e5e9;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .attendee-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            margin-right: 12px;
+        }
+
+        .card-info h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .card-info p {
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .interests-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .tag {
+            background: #f1f5f9;
+            color: #475569;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .tag.primary {
+            background: #ddd6fe;
+            color: #5b21b6;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #37352f 0%, #2f1b69 100%);
+            color: white;
+            border: none;
+            padding: 14px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(55, 53, 47, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn.secondary {
+            background: #f8f9fa;
+            color: #37352f;
+            border: 1px solid #e1e5e9;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: #374151;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 16px;
+            font-family: inherit;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #37352f;
+            box-shadow: 0 0 0 3px rgba(55, 53, 47, 0.1);
+        }
+
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border: 1px solid #e1e5e9;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .checkbox-item:hover {
+            border-color: #37352f;
+            background: #f8f9fa;
+        }
+
+        .checkbox-item.selected {
+            border-color: #37352f;
+            background: #f1f5f9;
+        }
+
+        .checkbox-item input {
+            margin-right: 8px;
+            width: auto;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 32px;
+            font-weight: 700;
+            color: #37352f;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            color: #64748b;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .chart-container {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+        }
+
+        .recent-captures {
+            margin-top: 30px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: #374151;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #64748b;
+        }
+
+        .empty-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 430px;
+            height: 100%;
+            background: white;
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .modal.active {
+            display: block;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateX(-50%) translateY(100%); }
+            to { transform: translateX(-50%) translateY(0); }
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px;
+            border-bottom: 1px solid #e1e5e9;
+            background: #f8f9fa;
+        }
+
+        .modal-content {
+            padding: 20px;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #64748b;
+        }
+
+        .sync-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 16px;
+            background: #ecfdf5;
+            border: 1px solid #d1fae5;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #065f46;
+        }
+
+        .floating-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #37352f 0%, #2f1b69 100%);
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(55, 53, 47, 0.3);
+            transition: all 0.3s ease;
+            z-index: 50;
+        }
+
+        .floating-btn:hover {
+            transform: scale(1.1);
+        }
+
+        @media (max-width: 480px) {
+            .app-container {
+                margin: 0;
+                max-width: none;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .checkbox-group {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="header">
+            <h1>Conference Buddy</h1>
+            <p>Capture meaningful connections</p>
+        </div>
+
+        <div class="navigation">
+            <div class="nav-item active" data-screen="scan">📱 Scan</div>
+            <div class="nav-item" data-screen="contacts">👥 Contacts</div>
+            <div class="nav-item" data-screen="analytics">📊 Analytics</div>
+            <div class="nav-item" data-screen="sync">☁️ Sync</div>
+        </div>
+
+        <!-- Scan Screen -->
+        <div class="screen active" id="scan">
+            <div class="scan-area" id="scanArea">
+                <div class="qr-icon">📱</div>
+                <h3>Tap to Scan QR Code</h3>
+                <p>Point your camera at an attendee's badge</p>
+            </div>
+
+            <div class="sync-status">
+                ✅ Online - Ready to capture
+            </div>
+
+            <div class="recent-captures">
+                <h2 class="section-title">Recent Captures (3)</h2>
+                
+                <div class="attendee-card" onclick="openAttendeeModal('sarah-chen')">
+                    <div class="card-header">
+                        <div class="avatar">SC</div>
+                        <div class="card-info">
+                            <h3>Sarah Chen</h3>
+                            <p>Senior Product Manager • Figma</p>
+                        </div>
+                    </div>
+                    <div class="interests-tags">
+                        <span class="tag primary">Notion AI</span>
+                        <span class="tag">Project Management</span>
+                        <span class="tag">API</span>
+                    </div>
+                </div>
+
+                <div class="attendee-card" onclick="openAttendeeModal('mike-johnson')">
+                    <div class="card-header">
+                        <div class="avatar">MJ</div>
+                        <div class="card-info">
+                            <h3>Mike Johnson</h3>
+                            <p>CTO • TechStart Inc</p>
+                        </div>
+                    </div>
+                    <div class="interests-tags">
+                        <span class="tag primary">Engineering</span>
+                        <span class="tag">Security</span>
+                        <span class="tag">Enterprise</span>
+                    </div>
+                </div>
+
+                <div class="attendee-card" onclick="openAttendeeModal('lisa-wang')">
+                    <div class="card-header">
+                        <div class="avatar">LW</div>
+                        <div class="card-info">
+                            <h3>Lisa Wang</h3>
+                            <p>Head of Sales • DataCorp</p>
+                        </div>
+                    </div>
+                    <div class="interests-tags">
+                        <span class="tag primary">Sales CRM</span>
+                        <span class="tag">Enterprise</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contacts Screen -->
+        <div class="screen" id="contacts">
+            <div class="search-bar" style="margin-bottom: 20px;">
+                <input type="text" placeholder="Search contacts..." style="width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 8px;">
+            </div>
+
+            <div class="filter-tags" style="display: flex; gap: 8px; margin-bottom: 20px; overflow-x: auto;">
+                <span class="tag" style="cursor: pointer; white-space: nowrap;">All (8)</span>
+                <span class="tag primary" style="cursor: pointer; white-space: nowrap;">High Priority (3)</span>
+                <span class="tag" style="cursor: pointer; white-space: nowrap;">Enterprise (5)</span>
+                <span class="tag" style="cursor: pointer; white-space: nowrap;">Today (3)</span>
+            </div>
+
+            <div class="contacts-list">
+                <div class="attendee-card">
+                    <div class="card-header">
+                        <div class="avatar">SC</div>
+                        <div class="card-info">
+                            <h3>Sarah Chen</h3>
+                            <p>Senior PM • Figma • sarah.chen@figma.com</p>
+                        </div>
+                    </div>
+                    <div class="interests-tags">
+                        <span class="tag primary">High Priority</span>
+                        <span class="tag">Notion AI</span>
+                        <span class="tag">PM Tools</span>
+                    </div>
+                </div>
+
+                <div class="attendee-card">
+                    <div class="card-header">
+                        <div class="avatar">MJ</div>
+                        <div class="card-info">
+                            <h3>Mike Johnson</h3>
+                            <p>CTO • TechStart • mike@techstart.io</p>
+                        </div>
+                    </div>
+                    <div class="interests-tags">
+                        <span class="tag primary">High Priority</span>
+                        <span class="tag">Engineering</span>
+                        <span class="tag">Security</span>
+                    </div>
+                </div>
+
+                <div class="attendee-card">
+                    <div class="card-header">
+                        <div class="avatar">LW</div>
+                        <div class="card-info">
+                            <h3>Lisa Wang</h3>
+                            <p>Head of Sales • DataCorp • lisa.wang@datacorp.com</p>
+                        </div>
+                    </div>
+                    <div class="interests-tags">
+                        <span class="tag">Sales CRM</span>
+                        <span class="tag">Enterprise</span>
+                    </div>
+                </div>
+
+                <div class="attendee-card">
+                    <div class="card-header">
+                        <div class="avatar">DM</div>
+                        <div class="card-info">
+                            <h3>David Martinez</h3>
+                            <p>DevOps Engineer • CloudTech • d.martinez@cloudtech.io</p>
+                        </div>
+                    </div>
+                    <div class="interests-tags">
+                        <span class="tag">API</span>
+                        <span class="tag">Integration</span>
+                    </div>
+                </div>
+
+                <div class="attendee-card">
+                    <div class="card-header">
+                        <div class="avatar">JL</div>
+                        <div class="card-info">
+                            <h3>Jennifer Lee</h3>
+                            <p>Education Director • State University • j.lee@university.edu</p>
+                        </div>
+                    </div>
+                    <div class="interests-tags">
+                        <span class="tag">Education</span>
+                        <span class="tag">Knowledge Base</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Analytics Screen -->
+        <div class="screen" id="analytics">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number">23</div>
+                    <div class="stat-label">Total Contacts</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">8</div>
+                    <div class="stat-label">Today</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">12</div>
+                    <div class="stat-label">High Priority</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">85%</div>
+                    <div class="stat-label">Follow-up Rate</div>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <h3 style="margin-bottom: 20px;">Capture Timeline</h3>
+                <canvas id="timelineChart" width="400" height="200"></canvas>
+            </div>
+
+            <div class="chart-container">
+                <h3 style="margin-bottom: 20px;">Interest Distribution</h3>
+                <canvas id="interestsChart" width="400" height="200"></canvas>
+            </div>
+
+            <div class="chart-container">
+                <h3 style="margin-bottom: 20px;">Company Segments</h3>
+                <canvas id="segmentChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+
+        <!-- Sync Screen -->
+        <div class="screen" id="sync">
+            <div class="sync-status">
+                ✅ Connected to Notion workspace
+            </div>
+
+            <div class="form-group">
+                <label>Target Database</label>
+                <select>
+                    <option>Conference Leads - Config 2024</option>
+                    <option>General Contacts</option>
+                    <option>Partner Prospects</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Event</label>
+                <select>
+                    <option>Config 2024</option>
+                    <option>Web Summit 2024</option>
+                    <option>TechCrunch Disrupt</option>
+                </select>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number">23</div>
+                    <div class="stat-label">Ready to Sync</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">156</div>
+                    <div class="stat-label">Total Synced</div>
+                </div>
+            </div>
+
+            <button class="btn" onclick="syncToNotion()">Sync All to Notion</button>
+            <button class="btn secondary" onclick="exportData()">Export CSV</button>
+
+            <div style="margin-top: 30px;">
+                <h3 class="section-title">Recent Sync Activity</h3>
+                <div style="background: #f8f9fa; padding: 16px; border-radius: 8px; margin-bottom: 12px;">
+                    <div style="font-weight: 500; margin-bottom: 4px;">✅ Synced 3 contacts</div>
+                    <div style="color: #64748b; font-size: 14px;">2 minutes ago • Config 2024</div>
+                </div>
+                <div style="background: #f8f9fa; padding: 16px; border-radius: 8px; margin-bottom: 12px;">
+                    <div style="font-weight: 500; margin-bottom: 4px;">✅ Synced 5 contacts</div>
+                    <div style="color: #64748b; font-size: 14px;">1 hour ago • Config 2024</div>
+                </div>
+                <div style="background: #f8f9fa; padding: 16px; border-radius: 8px;">
+                    <div style="font-weight: 500; margin-bottom: 4px;">✅ Synced 8 contacts</div>
+                    <div style="color: #64748b; font-size: 14px;">3 hours ago • Config 2024</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Floating Add Button -->
+        <button class="floating-btn" onclick="simulateQRScan()">+</button>
+    </div>
+
+    <!-- Attendee Modal -->
+    <div class="modal" id="attendeeModal">
+        <div class="modal-header">
+            <h3>Contact Details</h3>
+            <button class="close-btn" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="modal-content" id="modalContent">
+            <!-- Content will be populated by JavaScript -->
+        </div>
+    </div>
+
+    <!-- New Contact Modal -->
+    <div class="modal" id="newContactModal">
+        <div class="modal-header">
+            <h3>New Contact</h3>
+            <button class="close-btn" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="modal-content">
+            <div class="form-group">
+                <label>Full Name *</label>
+                <input type="text" id="newName" placeholder="Enter full name">
+            </div>
+            <div class="form-group">
+                <label>Company *</label>
+                <input type="text" id="newCompany" placeholder="Enter company">
+            </div>
+            <div class="form-group">
+                <label>Role/Title *</label>
+                <input type="text" id="newRole" placeholder="Enter job title">
+            </div>
+            <div class="form-group">
+                <label>Email *</label>
+                <input type="email" id="newEmail" placeholder="Enter email address">
+            </div>
+            <div class="form-group">
+                <label>Phone</label>
+                <input type="tel" id="newPhone" placeholder="Enter phone number">
+            </div>
+            <div class="form-group">
+                <label>LinkedIn</label>
+                <input type="url" id="newLinkedin" placeholder="LinkedIn profile URL">
+            </div>
+            <div class="form-group">
+                <label>Interests</label>
+                <div class="checkbox-group" id="interestCheckboxes">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Notes</label>
+                <textarea id="newNotes" rows="3" placeholder="Add notes about this contact..."></textarea>
+            </div>
+            <div class="form-group">
+                <label style="display: flex; align-items: center;">
+                    <input type="checkbox" id="consentFollow" checked style="width: auto; margin-right: 8px;">
+                    Consent to follow up
+                </label>
+            </div>
+            <button class="btn" onclick="saveNewContact()">Save Contact</button>
+        </div>
+    </div>
+
+    <script>
+        // Navigation
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', () => {
+                document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+                document.querySelectorAll('.screen').forEach(screen => screen.classList.remove('active'));
+                
+                item.classList.add('active');
+                const screenId = item.getAttribute('data-screen');
+                document.getElementById(screenId).classList.add('active');
+                
+                if (screenId === 'analytics') {
+                    setTimeout(initCharts, 100);
+                }
+            });
+        });
+
+        // Sample data
+        const attendees = {
+            'sarah-chen': {
+                name: 'Sarah Chen',
+                company: 'Figma',
+                role: 'Senior Product Manager',
+                email: 'sarah.chen@figma.com',
+                phone: '+1 (555) 123-4567',
+                linkedin: 'https://linkedin.com/in/sarahchen',
+                interests: ['Notion AI', 'Project Management', 'API'],
+                notes: 'Very interested in AI features for product teams. Mentioned they\'re evaluating new PM tools.',
+                priority: 'High',
+                segment: 'Enterprise',
+                capturedAt: '2024-01-15 10:30 AM'
+            },
+            'mike-johnson': {
+                name: 'Mike Johnson',
+                company: 'TechStart Inc',
+                role: 'CTO',
+                email: 'mike@techstart.io',
+                phone: '+1 (555) 987-6543',
+                linkedin: 'https://linkedin.com/in/mikejohnson',
+                interests: ['Engineering', 'Security', 'Enterprise'],
+                notes: 'Looking for secure collaboration tools. Team of 50+ engineers.',
+                priority: 'High',
+                segment: 'Mid-market',
+                capturedAt: '2024-01-15 09:45 AM'
+            },
+            'lisa-wang': {
+                name: 'Lisa Wang',
+                company: 'DataCorp',
+                role: 'Head of Sales',
+                email: 'lisa.wang@datacorp.com',
+                phone: '+1 (555) 456-7890',
+                linkedin: 'https://linkedin.com/in/lisawang',
+                interests: ['Sales CRM', 'Enterprise'],
+                notes: 'Sales team needs better deal tracking and client communication.',
+                priority: 'Medium',
+                segment: 'Enterprise',
+                capturedAt: '2024-01-15 08:15 AM'
+            }
+        };
+
+        const interests = [
+            'Notion AI',
+            'Notion Mail', 
+            'Notion Calendar',
+            'Knowledge Base',
+            'Project Management',
+            'Sales CRM',
+            'Engineering',
+            'Security',
+            'Enterprise',
+            'Education',
+            'Partner',
+            'Other'
+        ];
+
+        // Initialize interest checkboxes
+        function initInterestCheckboxes() {
+            const container = document.getElementById('interestCheckboxes');
+            container.innerHTML = interests.map(interest => `
+                <div class="checkbox-item" onclick="toggleInterest(this)">
+                    <input type="checkbox" value="${interest}">
+                    <label>${interest}</label>
+                </div>
+            `).join('');
+        }
+
+        function toggleInterest(
