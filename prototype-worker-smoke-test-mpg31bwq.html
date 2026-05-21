@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smoke Test Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary-50: #f0f9ff;
+            --primary-100: #e0f2fe;
+            --primary-500: #0ea5e9;
+            --primary-600: #0284c7;
+            --primary-700: #0369a1;
+            --gray-50: #f8fafc;
+            --gray-100: #f1f5f9;
+            --gray-200: #e2e8f0;
+            --gray-300: #cbd5e1;
+            --gray-400: #94a3b8;
+            --gray-500: #64748b;
+            --gray-600: #475569;
+            --gray-700: #334155;
+            --gray-800: #1e293b;
+            --gray-900: #0f172a;
+            --green-100: #dcfce7;
+            --green-500: #22c55e;
+            --green-600: #16a34a;
+            --red-100: #fee2e2;
+            --red-500: #ef4444;
+            --red-600: #dc2626;
+            --amber-100: #fef3c7;
+            --amber-500: #f59e0b;
+            --amber-600: #d97706;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--gray-50);
+            color: var(--gray-800);
+            line-height: 1.5;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* Header */
+        .header {
+            background: white;
+            border-bottom: 1px solid var(--gray-200);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(8px);
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 0;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary-600);
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .logo:hover {
+            transform: scale(1.02);
+        }
+
+        .nav {
+            display: flex;
+            gap: 32px;
+        }
+
+        .nav-item {
+            color: var(--gray-600);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 14px;
+            padding: 8px 16px;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .nav-item:hover {
+            color: var(--primary-600);
+            background: var(--primary-50);
+            transform: translateY(-1px);
+        }
+
+        .nav-item.active {
+            color: var(--primary-600);
+            background: var(--primary-100);
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 12px;
+            background: var(--gray-100);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .user-menu:hover {
+            background: var(--gray-200);
+            transform: translateY(-1px);
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-500), var(--primary-700));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        /* Main Content */
+        .main {
+            padding: 32px 0;
+        }
+
+        .page-header {
+            margin-bottom: 32px;
+        }
+
+        .page-title {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: 8px;
+        }
+
+        .page-subtitle {
+            font-size: 16px;
+            color: var(--gray-600);
+            margin-bottom: 24px;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            background: white;
+            border-radius: 12px;
+            padding: 4px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            margin-bottom: 32px;
+            position: relative;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 12px 24px;
+            text-align: center;
+            background: transparent;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            color: var(--gray-600);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 2;
+        }
+
+        .tab.active {
+            color: var(--primary-600);
+            background: var(--primary-50);
+            box-shadow: 0 2px 4px rgba(14, 165, 233, 0.15);
+        }
+
+        .tab:hover:not(.active) {
+            color: var(--gray-800);
+            background: var(--gray-50);
+        }
+
+        /* Tab Content */
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Cards */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--gray-200);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            border-color: var(--gray-300);
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary-500), var(--primary-700));
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--gray-900);
+        }
+
+        .card-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: 8px;
+        }
+
+        .card-change {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .card-change.positive {
+            color: var(--green-600);
+        }
+
+        .card-change.negative {
+            color: var(--red-600);
+        }
+
+        .card-change.neutral {
+            color: var(--amber-600);
+        }
+
+        /* Status Badge */
+        .status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status.success {
+            background: var(--green-100);
+            color: var(--green-600);
+        }
+
+        .status.error {
+            background: var(--red-100);
+            color: var(--red-600);
+        }
+
+        .status.warning {
+            background: var(--amber-100);
+            color: var(--amber-600);
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+
+        /* Chart Container */
+        .chart-container {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--gray-200);
+            margin-bottom: 24px;
+        }
+
+        .chart-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+        }
+
+        .chart-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--gray-900);
+        }
+
+        .chart-filters {
+            display: flex;
+            gap: 8px;
+        }
+
+        .filter-btn {
+            padding: 6px 12px;
+            background: var(--gray-100);
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--gray-600);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .filter-btn:hover {
+            background: var(--gray-200);
+            transform: translateY(-1px);
+        }
+
+        .filter-btn.active {
+            background: var(--primary-500);
+            color: white;
+        }
+
+        /* Toggle Switch */
+        .toggle {
+            position: relative;
+            display: inline-block;
+            width: 48px;
+            height: 24px;
+        }
+
+        .toggle input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--gray-300);
+            transition: all 0.3s ease;
+            border-radius: 24px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 2px;
+            bottom: 2px;
+            background: white;
+            transition: all 0.3s ease;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        input:checked + .toggle-slider {
+            background: var(--primary-500);
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(24px);
+        }
+
+        /* List Items */
+        .list-container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--gray-200);
+            overflow: hidden;
+        }
+
+        .list-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--gray-100);
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .list-item:hover {
+            background: var(--gray-50);
+        }
+
+        .list-item:last-child {
+            border-bottom: none;
+        }
+
+        .list-item-content {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .list-item-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: white;
+        }
+
+        .list-item-details h4 {
+            font-weight: 600;
+            color: var(--gray-900);
+            margin-bottom: 4px;
+        }
+
+        .list-item-details p {
+            font-size: 14px;
+            color: var(--gray-600);
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 16px;
+            }
+
+            .header-content {
+                padding: 12px 0;
+            }
+
+            .nav {
+                display: none;
+            }
+
+            .page-title {
+                font-size: 24px;
+            }
+
+            .cards-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            .tabs {
+                flex-direction: column;
+                gap: 4px;
+            }
+
+            .tab {
+                text-align: left;
+                padding: 16px;
+            }
+
+            .chart-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+            }
+
+            .chart-filters {
+                width: 100%;
+                overflow-x: auto;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .main {
+                padding: 24px 0;
+            }
+
+            .card {
+                padding: 20px;
+            }
+
+            .chart-container {
+                padding: 20px;
+            }
+
+            .list-item {
+                padding: 16px;
+            }
+
+            .list-item-content {
+                gap: 8px;
+            }
+
+            .list-item-icon {
+                width: 32px;
+                height: 32px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <a href="#" class="logo">SmokeTest</a>
+                <nav class="nav">
+                    <a href="#" class="nav-item active">Dashboard</a>
+                    <a href="#" class="nav-item">Analytics</a>
+                    <a href="#" class="nav-item">Reports</a>
+                    <a href="#" class="nav-item">Settings</a>
+                </nav>
+                <div class="user-menu">
+                    <div class="user-avatar">JD</div>
+                    <span>John Doe</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="main">
+        <div class="container">
+            <div class="page-header">
+                <h1 class="page-title">Dashboard</h1>
+                <p class="page-subtitle">Monitor your smoke test metrics and performance indicators</p>
+            </div>
+
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab(event, 'overview')">Overview</button>
+                <button class="tab" onclick="switchTab(event, 'performance')">Performance</button>
+                <button class="tab" onclick="switchTab(event, 'insights')">Insights</button>
+            </div>
+
+            <div id="overview" class="tab-content active">
+                <div class="cards-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Total Tests</h3>
+                            <span class="status success">
+                                <div class="status-dot"></div>
+                                Active
+                            </span>
+                        </div>
+                        <div class="card-value">24,567</div>
+                        <div class="card-change positive">
+                            ↗ +12.5% from last month
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Success Rate</h3>
+                            <span class="status success">
+                                <div class="status-dot"></div>
+                                Healthy
+                            </span>
+                        </div>
+                        <div class="card-value">98.7%</div>
+                        <div class="card-change positive">
+                            ↗ +0.3% from last week
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Avg Response Time</h3>
+                            <span class="status warning">
+                                <div class="status-dot"></div>
+                                Warning
+                            </span>
+                        </div>
+                        <div class="card-value">247ms</div>
+                        <div class="card-change negative">
+                            ↘ +15ms from yesterday
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Failed Tests</h3>
+                            <span class="status error">
+                                <div class="status-dot"></div>
+                                Critical
+                            </span>
+                        </div>
+                        <div class="card-value">127</div>
+                        <div class="card-change negative">
+                            ↗ +23 from last hour
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <h3 class="chart-title">Test Performance Over Time</h3>
+                        <div class="chart-filters">
+                            <button class="filter-btn active" onclick="updateChart('24h')">24H</button>
+                            <button class="filter-btn" onclick="updateChart('7d')">7D</button>
+                            <button class="filter-btn" onclick="updateChart('30d')">30D</button>
+                            <button class="filter-btn" onclick="updateChart('90d')">90D</button>
+                        </div>
+                    </div>
+                    <canvas id="performanceChart" width="400" height="200"></canvas>
+                </div>
+
+                <div class="list-container">
+                    <div class="list-item">
+                        <div class="list-item-content">
+                            <div class="list-item-icon" style="background: var(--green-500);">✓</div>
+                            <div class="list-item-details">
+                                <h4>User Authentication Flow</h4>
+                                <p>Last run: 2 minutes ago • Duration: 1.2s</p>
+                            </div>
+                        </div>
+                        <div class="status success">
+                            <div class="status-dot"></div>
+                            Passed
+                        </div>
+                    </div>
+
+                    <div class="list-item">
+                        <div class="list-item-content">
+                            <div class="list-item-icon" style="background: var(--primary-500);">🔄</div>
+                            <div class="list-item-details">
+                                <h4>Payment Processing</h4>
+                                <p>Last run: 5 minutes ago • Duration: 3.4s</p>
+                            </div>
+                        </div>
+                        <div class="status success">
+                            <div class="status-dot"></div>
+                            Passed
+                        </div>
+                    </div>
+
+                    <div class="list-item">
+                        <div class="list-item-content">
+                            <div class="list-item-icon" style="background: var(--amber-500);">⚠</div>
+                            <div class="list-item-details">
+                                <h4>API Health Check</h4>
+                                <p>Last run: 8 minutes ago • Duration: 0.8s</p>
+                            </div>
+                        </div>
+                        <div class="status warning">
+                            <div class="status-dot"></div>
+                            Slow
+                        </div>
+                    </div>
+
+                    <div class="list-item">
+                        <div class="list-item-content">
+                            <div class="list-item-icon" style="background: var(--red-500);">✗</div>
+                            <div class="list-item-details">
+                                <h4>Database Connection</h4>
+                                <p>Last run: 12 minutes ago • Duration: Timeout</p>
+                            </div>
+                        </div>
+                        <div class="status error">
+                            <div class="status-dot"></div>
+                            Failed
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="performance" class="tab-content">
+                <div class="cards-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">CPU Usage</h3>
+                            <label class="toggle">
+                                <input type="checkbox" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <div class="card-value">67%</div>
+                        <div class="card-change neutral">
+                            → Stable for 2 hours
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Memory Usage</h3>
+                            <label class="toggle">
+                                <input type="checkbox">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <div class="card-value">4.2GB</div>
+                        <div class="card-change positive">
+                            ↘ -200MB from peak
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <h3 class="chart-title">Resource Usage</h3>
+                        <div class="chart-filters">
+                            <button class="filter-btn active" onclick="updateResourceChart('cpu')">CPU</button>
+                            <button class="filter-btn" onclick="updateResourceChart('memory')">Memory</button>
+                            <button class="filter-btn" onclick="updateResourceChart('disk')">Disk</button>
+                        </div>
+                    </div>
+                    <canvas id="resourceChart" width="400" height="200"></canvas>
+                </div>
+            </div>
+
+            <div id="insights" class="tab-content">
+                <div class="cards-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Test Coverage</h3>
+                            <span class="status success">
+                                <div class="status-dot"></div>
+                                Good
+                            </span>
+                        </div>
+                        <div class="card-value">87.3%</div>
+                        <div class="card-change positive">
+                            ↗ +2.1% this week
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Code Quality</h3>
+                            <span class="status success">
+                                <div class="status-dot"></div>
+                                Excellent
+                            </span>
+                        </div>
+                        <div class="card-value">A+</div>
+                        <div class="card-change neutral">
+                            → Maintained for 30 days
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <h3 class="chart-title">Quality Trends</h3>
+                    </div>
+                    <canvas id="qualityChart" width="400" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let performanceChart, resourceChart, qualityChart;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize Performance Chart
+            const performanceCtx = document.getElementById('performanceChart').getContext('2d');
+            performanceChart = new Chart(performanceCtx, {
+                type: 'line',
+                data: {
+                    labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '24:00'],
+                    datasets: [{
+                        label: 'Success Rate',
+                        data: [98.2, 98.7, 97.9, 98.4, 98.1, 98.9, 98.7],
+                        borderColor: 'rgb(14, 165, 233)',
+                        backgroundColor: 'rgba(14, 165, 233, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 6,
+                        pointHoverRadius: 8,
+                        pointBackgroundColor: 'rgb(14, 165, 233)',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            min: 95,
+                            max: 100,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    },
+                    elements: {
+                        point: {
+                            hoverBackgroundColor: 'rgb(14, 165, 233)'
+                        }
+                    }
+                }
+            });
+
+            // Initialize Resource Chart
+            const resourceCtx = document.getElementById('resourceChart').getContext('2d');
+            resourceChart = new Chart(resourceCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Used', 'Available'],
+                    datasets: [{
+                        data: [67, 33],
+                        backgroundColor: ['rgb(14, 165, 233)', 'rgba(14, 165, 233, 0.1)'],
+                        borderWidth: 0,
+                        cutout: '70%'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                font: {
+                                    size: 14,
+                                    weight: 500
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Initialize Quality Chart
+            const qualityCtx = document.getElementById('qualityChart').getContext('2d');
+            qualityChart = new Chart(qualityCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    datasets: [{
+                        label: 'Test Coverage',
+                        data: [85.2, 86.1, 87.3, 86.8, 88.1, 87.9, 87.3],
+                        backgroundColor: 'rgba(14, 165, 233, 0.8)',
+                        borderColor: 'rgb(14, 165, 233)',
+                        borderWidth: 2,
+                        borderRadius: 8,
+                        borderSkipped: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            min: 80,
+                            max: 90,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+        });
+
+        function switchTab(evt, tabName) {
+            // Hide all tab contents
+            const tabContents = document.getElementsByClassName('tab-content');
+            for (let i = 0; i < tabContents.length; i++) {
+                tabContents[i].classList.remove('active');
+            }
+
+            // Remove active class from all tabs
+            const tabs = document.getElementsByClassName('tab');
+            for (let i = 0; i < tabs.length; i++) {
+                tabs[i].classList.remove('active');
+            }
+
+            // Show the selected tab content and mark tab as active
+            document.getElementById(tabName).classList.add('active');
+            evt.currentTarget.classList.add('active');
+        }
+
+        function updateChart(period) {
+            // Update active filter button
+            const buttons = document.querySelectorAll('.filter-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add
