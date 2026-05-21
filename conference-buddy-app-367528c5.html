@@ -1,0 +1,1549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>Conference Buddy</title>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<style>
+  :root {
+    --bg: #ffffff;
+    --bg-secondary: #f7f6f3;
+    --bg-tertiary: #f0efeb;
+    --text: #37352f;
+    --text-secondary: #787774;
+    --text-tertiary: #b4b4b0;
+    --border: #e3e2de;
+    --accent: #2eaadc;
+    --accent-light: #e8f4f8;
+    --red: #eb5757;
+    --red-light: #fbe4e4;
+    --green: #4dab9a;
+    --green-light: #d8f5e8;
+    --yellow: #dfab01;
+    --yellow-light: #fdecc8;
+    --purple: #9065b0;
+    --purple-light: #e8deee;
+    --blue: #529cca;
+    --blue-light: #d3e5ef;
+    --pink: #c14c8a;
+    --pink-light: #f4dfeb;
+    --orange: #d9730d;
+    --orange-light: #fadec9;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-md: 0 2px 8px rgba(0,0,0,0.08);
+    --shadow-lg: 0 4px 16px rgba(0,0,0,0.12);
+    --radius: 8px;
+    --radius-lg: 12px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    backdrop-filter: blur(10px);
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .logo {
+    width: 28px;
+    height: 28px;
+    background: var(--text);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 700;
+    font-size: 14px;
+  }
+
+  .header h1 {
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .event-badge {
+    font-size: 12px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    padding: 4px 10px;
+    border-radius: 20px;
+    color: var(--text-secondary);
+    font-weight: 500;
+    cursor: pointer;
+  }
+
+  .main {
+    flex: 1;
+    padding-bottom: 80px;
+    overflow-y: auto;
+  }
+
+  .tab-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--bg);
+    border-top: 1px solid var(--border);
+    display: flex;
+    z-index: 100;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .tab {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px 0 6px;
+    gap: 3px;
+    color: var(--text-tertiary);
+    cursor: pointer;
+    transition: color 0.15s;
+    -webkit-tap-highlight-color: transparent;
+    border: none;
+    background: none;
+    font-family: inherit;
+  }
+
+  .tab.active { color: var(--text); }
+  .tab svg { width: 22px; height: 22px; }
+  .tab span { font-size: 10px; font-weight: 500; }
+
+  .view { display: none; }
+  .view.active { display: block; }
+
+  .scanner-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 16px;
+  }
+
+  .scanner-hint {
+    text-align: center;
+    margin-bottom: 16px;
+    color: var(--text-secondary);
+    font-size: 14px;
+  }
+
+  .scanner-box {
+    width: 100%;
+    max-width: 340px;
+    aspect-ratio: 1;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    position: relative;
+    border: 2px solid var(--border);
+  }
+
+  .scanner-box #reader {
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  .scanner-box #reader video {
+    object-fit: cover !important;
+    border-radius: var(--radius-lg) !important;
+  }
+
+  #reader img[alt="Info icon"] { display: none !important; }
+  #reader > div:last-child { display: none !important; }
+  #html5-qrcode-button-camera-permission,
+  #html5-qrcode-button-camera-start,
+  #html5-qrcode-button-camera-stop { display: none !important; }
+
+  .scanner-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 16px;
+    width: 100%;
+    max-width: 340px;
+  }
+
+  .btn {
+    border: none;
+    border-radius: var(--radius);
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 10px 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all 0.15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .btn-primary {
+    background: var(--text);
+    color: white;
+  }
+  .btn-primary:active { opacity: 0.85; }
+
+  .btn-secondary {
+    background: var(--bg-secondary);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .btn-secondary:active { background: var(--bg-tertiary); }
+
+  .btn-full { width: 100%; }
+
+  .btn-icon {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border-radius: var(--radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .btn svg { width: 16px; height: 16px; }
+
+  .scan-result-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 200;
+    align-items: flex-end;
+    justify-content: center;
+    backdrop-filter: blur(2px);
+  }
+
+  .scan-result-overlay.active { display: flex; }
+
+  .scan-result-sheet {
+    width: 100%;
+    max-width: 480px;
+    background: var(--bg);
+    border-radius: 16px 16px 0 0;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 24px 20px;
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    animation: slideUp 0.3s ease;
+  }
+
+  @keyframes slideUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+
+  .sheet-handle {
+    width: 36px;
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    margin: 0 auto 20px;
+  }
+
+  .sheet-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 20px;
+  }
+
+  .form-group {
+    margin-bottom: 14px;
+  }
+
+  .form-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    margin-bottom: 5px;
+    display: block;
+  }
+
+  .form-input {
+    width: 100%;
+    padding: 9px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-family: inherit;
+    font-size: 14px;
+    color: var(--text);
+    background: var(--bg);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  .form-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--accent-light);
+  }
+
+  .form-input::placeholder { color: var(--text-tertiary); }
+
+  textarea.form-input {
+    resize: vertical;
+    min-height: 60px;
+  }
+
+  .form-row {
+    display: flex;
+    gap: 10px;
+  }
+
+  .form-row .form-group { flex: 1; }
+
+  .interest-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .interest-chip {
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    border: 1.5px solid var(--border);
+    background: var(--bg);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.15s;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+  }
+
+  .interest-chip.selected {
+    border-color: transparent;
+    color: var(--text);
+  }
+
+  .interest-chip[data-color="blue"].selected { background: var(--blue-light); border-color: var(--blue); }
+  .interest-chip[data-color="purple"].selected { background: var(--purple-light); border-color: var(--purple); }
+  .interest-chip[data-color="green"].selected { background: var(--green-light); border-color: var(--green); }
+  .interest-chip[data-color="yellow"].selected { background: var(--yellow-light); border-color: var(--yellow); }
+  .interest-chip[data-color="red"].selected { background: var(--red-light); border-color: var(--red); }
+  .interest-chip[data-color="pink"].selected { background: var(--pink-light); border-color: var(--pink); }
+  .interest-chip[data-color="orange"].selected { background: var(--orange-light); border-color: var(--orange); }
+
+  .consent-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 0;
+    border-top: 1px solid var(--border);
+    margin-top: 6px;
+  }
+
+  .consent-row input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--text);
+  }
+
+  .consent-row label {
+    font-size: 13px;
+    color: var(--text-secondary);
+    cursor: pointer;
+  }
+
+  .sheet-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+  }
+
+  .sheet-actions .btn { flex: 1; padding: 12px; }
+
+  .captures-header {
+    padding: 16px 16px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .captures-header h2 {
+    font-size: 18px;
+    font-weight: 600;
+  }
+
+  .capture-count {
+    font-size: 13px;
+    color: var(--text-secondary);
+    background: var(--bg-secondary);
+    padding: 3px 10px;
+    border-radius: 12px;
+  }
+
+  .search-bar {
+    margin: 0 16px 12px;
+    position: relative;
+  }
+
+  .search-bar svg {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    color: var(--text-tertiary);
+  }
+
+  .search-bar input {
+    width: 100%;
+    padding: 9px 12px 9px 36px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-family: inherit;
+    font-size: 14px;
+    color: var(--text);
+    background: var(--bg-secondary);
+    outline: none;
+  }
+
+  .search-bar input:focus {
+    background: var(--bg);
+    border-color: var(--accent);
+  }
+
+  .filter-bar {
+    display: flex;
+    gap: 6px;
+    padding: 0 16px 12px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .filter-bar::-webkit-scrollbar { display: none; }
+
+  .filter-pill {
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text-secondary);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.15s;
+  }
+
+  .filter-pill.active {
+    background: var(--text);
+    color: white;
+    border-color: var(--text);
+  }
+
+  .attendee-list { padding: 0 16px; }
+
+  .attendee-card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 14px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .attendee-card:active { background: var(--bg-secondary); }
+
+  .attendee-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 6px;
+  }
+
+  .attendee-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .attendee-time {
+    font-size: 11px;
+    color: var(--text-tertiary);
+    white-space: nowrap;
+  }
+
+  .attendee-meta {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+  }
+
+  .attendee-interests {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .attendee-interest-tag {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 500;
+  }
+
+  .tag-blue { background: var(--blue-light); color: #2b6cb0; }
+  .tag-purple { background: var(--purple-light); color: #6b46c1; }
+  .tag-green { background: var(--green-light); color: #276749; }
+  .tag-yellow { background: var(--yellow-light); color: #975a16; }
+  .tag-red { background: var(--red-light); color: #c53030; }
+  .tag-pink { background: var(--pink-light); color: #97266d; }
+  .tag-orange { background: var(--orange-light); color: #c05621; }
+
+  .empty-state {
+    text-align: center;
+    padding: 60px 24px;
+    color: var(--text-tertiary);
+  }
+
+  .empty-state svg {
+    width: 48px;
+    height: 48px;
+    margin-bottom: 12px;
+    opacity: 0.4;
+  }
+
+  .empty-state p {
+    font-size: 14px;
+    margin-bottom: 16px;
+  }
+
+  .profile-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    z-index: 200;
+    overflow-y: auto;
+  }
+
+  .profile-overlay.active { display: block; }
+
+  .profile-header {
+    position: sticky;
+    top: 0;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 10;
+  }
+
+  .profile-body {
+    padding: 20px 16px;
+  }
+
+  .profile-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: var(--bg-tertiary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 12px;
+  }
+
+  .profile-name {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 2px;
+  }
+
+  .profile-role {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-bottom: 16px;
+  }
+
+  .profile-section {
+    margin-bottom: 20px;
+  }
+
+  .profile-section-title {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-tertiary);
+    margin-bottom: 8px;
+  }
+
+  .profile-field {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--bg-secondary);
+  }
+
+  .profile-field svg {
+    width: 16px;
+    height: 16px;
+    color: var(--text-tertiary);
+    flex-shrink: 0;
+  }
+
+  .profile-field-value {
+    font-size: 14px;
+    color: var(--text);
+  }
+
+  .profile-field-value a {
+    color: var(--accent);
+    text-decoration: none;
+  }
+
+  .profile-notes {
+    background: var(--bg-secondary);
+    padding: 12px;
+    border-radius: var(--radius);
+    font-size: 14px;
+    color: var(--text);
+    line-height: 1.5;
+    white-space: pre-wrap;
+  }
+
+  .export-section {
+    padding: 20px 16px;
+  }
+
+  .export-card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    margin-bottom: 12px;
+  }
+
+  .export-card h3 {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .export-card p {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 14px;
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 20px;
+    padding: 0 16px;
+  }
+
+  .stat-card {
+    background: var(--bg-secondary);
+    border-radius: var(--radius);
+    padding: 14px 12px;
+    text-align: center;
+  }
+
+  .stat-number {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .stat-label {
+    font-size: 11px;
+    color: var(--text-tertiary);
+    margin-top: 2px;
+  }
+
+  .toast {
+    position: fixed;
+    bottom: 90px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: var(--text);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 500;
+    z-index: 300;
+    transition: transform 0.3s ease;
+    white-space: nowrap;
+    box-shadow: var(--shadow-lg);
+  }
+
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  .scanner-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    background: var(--bg-tertiary);
+    color: var(--text-secondary);
+  }
+
+  .scanner-placeholder svg { width: 48px; height: 48px; opacity: 0.5; }
+  .scanner-placeholder p { font-size: 14px; }
+
+  .demo-banner {
+    background: var(--yellow-light);
+    border-bottom: 1px solid #e8d5a3;
+    padding: 8px 16px;
+    text-align: center;
+    font-size: 12px;
+    color: #975a16;
+  }
+
+  .demo-banner button {
+    background: none;
+    border: none;
+    color: #975a16;
+    font-weight: 600;
+    text-decoration: underline;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 12px;
+  }
+
+  .event-selector {
+    position: relative;
+  }
+
+  .event-dropdown {
+    display: none;
+    position: absolute;
+    top: calc(100% + 4px);
+    right: 0;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    min-width: 180px;
+    z-index: 50;
+    overflow: hidden;
+  }
+
+  .event-dropdown.show { display: block; }
+
+  .event-option {
+    padding: 8px 12px;
+    font-size: 13px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background 0.1s;
+  }
+
+  .event-option:hover { background: var(--bg-secondary); }
+  .event-option.active { font-weight: 600; }
+  .event-option.active::before { content: "\2713 "; }
+
+  .success-flash {
+    position: fixed;
+    inset: 0;
+    background: var(--green-light);
+    z-index: 250;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s;
+  }
+
+  .success-flash.show {
+    opacity: 1;
+    pointer-events: all;
+    animation: flashFade 0.6s ease forwards;
+  }
+
+  @keyframes flashFade {
+    0% { opacity: 1; }
+    60% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+
+  .success-flash svg {
+    width: 64px;
+    height: 64px;
+    color: var(--green);
+  }
+
+  .settings-section {
+    padding: 20px 16px;
+  }
+
+  .settings-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--bg-secondary);
+  }
+
+  .settings-item-left h3 { font-size: 14px; font-weight: 500; }
+  .settings-item-left p { font-size: 12px; color: var(--text-tertiary); margin-top: 2px; }
+
+  .toggle {
+    width: 44px;
+    height: 26px;
+    background: var(--border);
+    border-radius: 13px;
+    position: relative;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .toggle.on { background: var(--green); }
+
+  .toggle::after {
+    content: '';
+    width: 22px;
+    height: 22px;
+    background: white;
+    border-radius: 50%;
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    transition: transform 0.2s;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .toggle.on::after { transform: translateX(18px); }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #191919;
+      --bg-secondary: #252525;
+      --bg-tertiary: #2f2f2f;
+      --text: #e8e8e3;
+      --text-secondary: #9b9a97;
+      --text-tertiary: #5a5a58;
+      --border: #373737;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div id="toast" class="toast"></div>
+
+<div id="successFlash" class="success-flash">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+</div>
+
+<header class="header">
+  <div class="header-left">
+    <div class="logo">CB</div>
+    <h1>Conference Buddy</h1>
+  </div>
+  <div class="header-right">
+    <div class="event-selector">
+      <button class="event-badge" id="eventBadge" onclick="toggleEventDropdown()">Config 2026 &#9662;</button>
+      <div class="event-dropdown" id="eventDropdown">
+        <div class="event-option active" onclick="selectEvent('Config 2026')">Config 2026</div>
+        <div class="event-option" onclick="selectEvent('Web Summit')">Web Summit</div>
+        <div class="event-option" onclick="selectEvent('SaaStr')">SaaStr</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="demo-banner">
+  &#128241; Prototype mode &mdash; <button onclick="simulateScan()">Tap to simulate a QR scan</button>
+</div>
+
+<main class="main">
+  <div id="scanView" class="view active">
+    <div class="scanner-container">
+      <p class="scanner-hint">Point at a badge QR code to capture</p>
+      <div class="scanner-box" id="scannerBox">
+        <div class="scanner-placeholder" id="scannerPlaceholder">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 7V5a2 2 0 012-2h2"/><path d="M17 3h2a2 2 0 012 2v2"/><path d="M21 17v2a2 2 0 01-2 2h-2"/><path d="M7 21H5a2 2 0 01-2-2v-2"/><rect x="7" y="7" width="10" height="10" rx="1"/></svg>
+          <p>Camera loading&hellip;</p>
+          <button class="btn btn-secondary" onclick="startScanner()" style="margin-top:4px">Enable Camera</button>
+        </div>
+        <div id="reader" style="display:none"></div>
+      </div>
+      <div class="scanner-actions">
+        <button class="btn btn-primary btn-full" onclick="simulateScan()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 7V5a2 2 0 012-2h2M17 3h2a2 2 0 012 2v2M21 17v2a2 2 0 01-2 2h-2M7 21H5a2 2 0 01-2-2v-2"/></svg>
+          Scan QR
+        </button>
+        <button class="btn btn-secondary" onclick="showManualEntry()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          Manual
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="capturesView" class="view">
+    <div class="captures-header">
+      <h2>Recent Captures</h2>
+      <span class="capture-count" id="captureCount">0</span>
+    </div>
+    <div class="search-bar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+      <input type="text" placeholder="Search by name, company\u2026" id="searchInput" oninput="filterCaptures()">
+    </div>
+    <div class="filter-bar" id="filterBar">
+      <button class="filter-pill active" data-filter="all" onclick="setFilter('all')">All</button>
+    </div>
+    <div class="attendee-list" id="attendeeList">
+      <div class="empty-state" id="emptyState">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4-4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+        <p>No captures yet. Scan your first badge!</p>
+        <button class="btn btn-primary" onclick="switchTab('scan')">Start Scanning</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="exportView" class="view">
+    <div class="captures-header">
+      <h2>Export &amp; Sync</h2>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-number" id="statTotal">0</div>
+        <div class="stat-label">Total</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="statToday">0</div>
+        <div class="stat-label">Today</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="statInterests">0</div>
+        <div class="stat-label">Interests</div>
+      </div>
+    </div>
+    <div class="export-section">
+      <div class="export-card">
+        <h3>&#128279; Sync to Notion</h3>
+        <p>Push all captured attendees to your Notion \u201cConference Leads\u201d database. Existing entries will be updated.</p>
+        <button class="btn btn-primary btn-full" onclick="syncToNotion()">Sync Now</button>
+      </div>
+      <div class="export-card">
+        <h3>&#128196; Export CSV</h3>
+        <p>Download all captures as a CSV file for importing into any tool.</p>
+        <button class="btn btn-secondary btn-full" onclick="exportCSV()">Download CSV</button>
+      </div>
+      <div class="export-card">
+        <h3>&#128465;&#65039; Clear Data</h3>
+        <p>Remove all captured attendees from this device. This cannot be undone.</p>
+        <button class="btn btn-secondary btn-full" style="color:var(--red)" onclick="clearAllData()">Clear All Captures</button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<nav class="tab-bar">
+  <button class="tab active" data-tab="scan" onclick="switchTab('scan')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 7V5a2 2 0 012-2h2"/><path d="M17 3h2a2 2 0 012 2v2"/><path d="M21 17v2a2 2 0 01-2 2h-2"/><path d="M7 21H5a2 2 0 01-2-2v-2"/><line x1="7" y1="12" x2="17" y2="12"/></svg>
+    <span>Scan</span>
+  </button>
+  <button class="tab" data-tab="captures" onclick="switchTab('captures')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4-4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+    <span>Captures</span>
+  </button>
+  <button class="tab" data-tab="export" onclick="switchTab('export')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+    <span>Export</span>
+  </button>
+</nav>
+
+<div class="scan-result-overlay" id="entryOverlay" onclick="closeOverlayOnBackdrop(event)">
+  <div class="scan-result-sheet" onclick="event.stopPropagation()">
+    <div class="sheet-handle"></div>
+    <h2 class="sheet-title" id="sheetTitle">New Attendee</h2>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Full Name *</label>
+        <input class="form-input" id="fName" placeholder="Jane Smith" autocomplete="off">
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Company</label>
+        <input class="form-input" id="fCompany" placeholder="Acme Inc.">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Title</label>
+        <input class="form-input" id="fTitle" placeholder="Product Manager">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Email *</label>
+      <input class="form-input" id="fEmail" type="email" placeholder="jane@acme.com">
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Phone</label>
+        <input class="form-input" id="fPhone" type="tel" placeholder="+1 555-0123">
+      </div>
+      <div class="form-group">
+        <label class="form-label">LinkedIn</label>
+        <input class="form-input" id="fLinkedin" type="url" placeholder="linkedin.com/in/\u2026">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Interests</label>
+      <div class="interest-chips" id="interestChips">
+        <div class="interest-chip" data-color="blue" data-interest="Notion AI" onclick="toggleInterest(this)">Notion AI</div>
+        <div class="interest-chip" data-color="purple" data-interest="Notion Mail" onclick="toggleInterest(this)">Notion Mail</div>
+        <div class="interest-chip" data-color="green" data-interest="Notion Calendar" onclick="toggleInterest(this)">Notion Calendar</div>
+        <div class="interest-chip" data-color="yellow" data-interest="Knowledge base / wiki" onclick="toggleInterest(this)">Wiki / KB</div>
+        <div class="interest-chip" data-color="orange" data-interest="Project management" onclick="toggleInterest(this)">Project mgmt</div>
+        <div class="interest-chip" data-color="red" data-interest="Sales / CRM" onclick="toggleInterest(this)">Sales / CRM</div>
+        <div class="interest-chip" data-color="blue" data-interest="Engineering / API" onclick="toggleInterest(this)">Eng / API</div>
+        <div class="interest-chip" data-color="pink" data-interest="Security / compliance" onclick="toggleInterest(this)">Security</div>
+        <div class="interest-chip" data-color="purple" data-interest="Enterprise pricing" onclick="toggleInterest(this)">Enterprise</div>
+        <div class="interest-chip" data-color="green" data-interest="Education / non-profit" onclick="toggleInterest(this)">Education</div>
+        <div class="interest-chip" data-color="orange" data-interest="Partner / integrator" onclick="toggleInterest(this)">Partner</div>
+        <div class="interest-chip" data-color="yellow" data-interest="Other" onclick="toggleInterest(this)">Other</div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Notes</label>
+      <textarea class="form-input" id="fNotes" placeholder="Quick context: what did you talk about?"></textarea>
+    </div>
+
+    <div class="consent-row">
+      <input type="checkbox" id="fConsent" checked>
+      <label for="fConsent">Consent to follow up</label>
+    </div>
+
+    <div class="sheet-actions">
+      <button class="btn btn-secondary" onclick="closeOverlay()">Cancel</button>
+      <button class="btn btn-primary" id="saveBtn" onclick="saveAttendee()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:16px;height:16px"><path d="M20 6L9 17l-5-5"/></svg>
+        Save
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="profile-overlay" id="profileOverlay">
+  <div class="profile-header">
+    <button class="btn btn-icon btn-secondary" onclick="closeProfile()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+    </button>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-icon btn-secondary" onclick="editAttendee()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      </button>
+      <button class="btn btn-icon btn-secondary" onclick="deleteCurrentAttendee()" style="color:var(--red)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+      </button>
+    </div>
+  </div>
+  <div class="profile-body" id="profileBody"></div>
+</div>
+
+<script>
+let attendees = JSON.parse(localStorage.getItem('cb_attendees') || '[]');
+let currentEvent = localStorage.getItem('cb_event') || 'Config 2026';
+let editingId = null;
+let viewingId = null;
+let activeFilter = 'all';
+let html5QrCode = null;
+
+const INTEREST_COLORS = {
+  'Notion AI': 'blue',
+  'Notion Mail': 'purple',
+  'Notion Calendar': 'green',
+  'Knowledge base / wiki': 'yellow',
+  'Project management': 'orange',
+  'Sales / CRM': 'red',
+  'Engineering / API': 'blue',
+  'Security / compliance': 'pink',
+  'Enterprise pricing': 'purple',
+  'Education / non-profit': 'green',
+  'Partner / integrator': 'orange',
+  'Other': 'yellow'
+};
+
+const DEMO_SCANS = [
+  { name: 'Sarah Chen', company: 'Stripe', title: 'Head of Product', email: 'sarah.chen@stripe.com', phone: '+1 415-555-0142', linkedin: 'linkedin.com/in/sarahchen' },
+  { name: 'Marcus Johnson', company: 'Figma', title: 'Engineering Manager', email: 'marcus.j@figma.com', phone: '+1 628-555-0198', linkedin: 'linkedin.com/in/marcusj' },
+  { name: 'Aisha Patel', company: 'Shopify', title: 'VP Engineering', email: 'aisha.patel@shopify.com', phone: '+1 416-555-0177', linkedin: 'linkedin.com/in/aishap' },
+  { name: 'Tom Eriksen', company: 'Linear', title: 'Co-founder', email: 'tom@linear.app', phone: '', linkedin: 'linkedin.com/in/tomeriksen' },
+  { name: 'Priya Sharma', company: 'Vercel', title: 'Developer Advocate', email: 'priya@vercel.com', phone: '+1 555-0165', linkedin: '' },
+  { name: 'David Kim', company: 'Datadog', title: 'Solutions Architect', email: 'd.kim@datadoghq.com', phone: '+1 212-555-0134', linkedin: 'linkedin.com/in/davidkim' },
+];
+let demoIndex = 0;
+
+function switchTab(tab) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(tab + 'View').classList.add('active');
+  document.querySelector('[data-tab="' + tab + '"]').classList.add('active');
+  if (tab === 'captures') renderCaptures();
+  if (tab === 'export') updateStats();
+}
+
+function toggleEventDropdown() {
+  document.getElementById('eventDropdown').classList.toggle('show');
+}
+
+function selectEvent(event) {
+  currentEvent = event;
+  localStorage.setItem('cb_event', event);
+  document.getElementById('eventBadge').textContent = event + ' \u25BE';
+  document.querySelectorAll('.event-option').forEach(function(o) {
+    o.classList.toggle('active', o.textContent.includes(event));
+  });
+  document.getElementById('eventDropdown').classList.remove('show');
+}
+
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.event-selector')) {
+    document.getElementById('eventDropdown').classList.remove('show');
+  }
+});
+
+function startScanner() {
+  try {
+    document.getElementById('scannerPlaceholder').style.display = 'none';
+    var readerEl = document.getElementById('reader');
+    readerEl.style.display = 'block';
+    html5QrCode = new Html5Qrcode('reader');
+    html5QrCode.start(
+      { facingMode: 'environment' },
+      { fps: 10, qrbox: { width: 250, height: 250 } },
+      onScanSuccess,
+      function() {}
+    ).catch(function() {
+      document.getElementById('scannerPlaceholder').style.display = 'flex';
+      readerEl.style.display = 'none';
+      showToast('Camera access denied');
+    });
+  } catch (e) {
+    showToast('Camera not available');
+  }
+}
+
+function onScanSuccess(decodedText) {
+  if (html5QrCode) html5QrCode.pause();
+  if (navigator.vibrate) navigator.vibrate(50);
+  var parsed = parseQR(decodedText);
+  openEntrySheet(parsed, decodedText);
+}
+
+function parseQR(raw) {
+  var data = { name: '', company: '', title: '', email: '', phone: '', linkedin: '', qrRaw: raw };
+
+  if (raw.includes('BEGIN:VCARD')) {
+    var get = function(key) { var m = raw.match(new RegExp(key + ':(.+)', 'i')); return m ? m[1].trim() : ''; };
+    var fn = get('FN');
+    var n = get('N');
+    data.name = fn || (n ? n.split(';').filter(Boolean).reverse().join(' ') : '');
+    data.company = get('ORG');
+    data.title = get('TITLE');
+    data.email = get('EMAIL');
+    data.phone = get('TEL');
+    var url = get('URL');
+    if (url && url.includes('linkedin')) data.linkedin = url;
+    return data;
+  }
+
+  if (raw.startsWith('MECARD:')) {
+    var get2 = function(key) { var m = raw.match(new RegExp(key + ':([^;]+')); return m ? m[1].trim() : ''; };
+    data.name = get2('N').split(',').reverse().join(' ').trim();
+    data.company = get2('ORG');
+    data.email = get2('EMAIL');
+    data.phone = get2('TEL');
+    return data;
+  }
+
+  if (raw.includes('=')) {
+    var pairs = {};
+    raw.split(/[;&\n]/).forEach(function(p) {
+      var parts = p.split('=');
+      if (parts[0] && parts[1]) pairs[parts[0].trim().toLowerCase()] = parts[1].trim();
+    });
+    data.name = pairs.name || pairs.fullname || '';
+    data.company = pairs.company || pairs.org || '';
+    data.title = pairs.title || pairs.role || '';
+    data.email = pairs.email || pairs.mail || '';
+    data.phone = pairs.phone || pairs.tel || '';
+    return data;
+  }
+
+  if (raw.includes('@')) data.email = raw.trim();
+  return data;
+}
+
+function simulateScan() {
+  var demo = DEMO_SCANS[demoIndex % DEMO_SCANS.length];
+  demoIndex++;
+  var data = Object.assign({}, demo, { qrRaw: 'BEGIN:VCARD\nFN:' + demo.name + '\nORG:' + demo.company + '\nTITLE:' + demo.title + '\nEMAIL:' + demo.email + '\nTEL:' + demo.phone + '\nEND:VCARD' });
+  if (navigator.vibrate) navigator.vibrate(50);
+  openEntrySheet(data, data.qrRaw);
+}
+
+function openEntrySheet(data, rawQR) {
+  editingId = null;
+  document.getElementById('sheetTitle').textContent = data.name ? data.name : 'New Attendee';
+  document.getElementById('fName').value = data.name || '';
+  document.getElementById('fCompany').value = data.company || '';
+  document.getElementById('fTitle').value = data.title || '';
+  document.getElementById('fEmail').value = data.email || '';
+  document.getElementById('fPhone').value = data.phone || '';
+  document.getElementById('fLinkedin').value = data.linkedin || '';
+  document.getElementById('fNotes').value = '';
+  document.getElementById('fConsent').checked = true;
+  document.getElementById('fName').dataset.qrRaw = rawQR || '';
+
+  document.querySelectorAll('.interest-chip').forEach(function(c) { c.classList.remove('selected'); });
+
+  var existing = attendees.find(function(a) { return a.email && a.email === data.email; });
+  if (existing) {
+    document.getElementById('sheetTitle').textContent = '\u26A0\uFE0F Existing contact';
+    document.getElementById('fNotes').value = '';
+    document.getElementById('fNotes').placeholder = 'Add new interaction notes\u2026';
+    editingId = existing.id;
+    existing.interests.forEach(function(interest) {
+      var chip = document.querySelector('[data-interest="' + interest + '"]');
+      if (chip) chip.classList.add('selected');
+    });
+  }
+
+  document.getElementById('saveBtn').innerHTML = existing
+    ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:16px;height:16px"><path d="M20 6L9 17l-5-5"/></svg> Update'
+    : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:16px;height:16px"><path d="M20 6L9 17l-5-5"/></svg> Save';
+
+  document.getElementById('entryOverlay').classList.add('active');
+  setTimeout(function() { document.getElementById('fName').focus(); }, 300);
+}
+
+function showManualEntry() {
+  openEntrySheet({ name: '', company: '', title: '', email: '', phone: '', linkedin: '' }, '');
+  document.getElementById('sheetTitle').textContent = 'Manual Entry';
+}
+
+function closeOverlay() {
+  document.getElementById('entryOverlay').classList.remove('active');
+  if (html5QrCode && html5QrCode.getState() === 3) {
+    html5QrCode.resume();
+  }
+}
+
+function closeOverlayOnBackdrop(e) {
+  if (e.target === e.currentTarget) closeOverlay();
+}
+
+function toggleInterest(el) {
+  el.classList.toggle('selected');
+}
+
+function saveAttendee() {
+  var name = document.getElementById('fName').value.trim();
+  var email = document.getElementById('fEmail').value.trim();
+  if (!name) { showToast('Name is required'); return; }
+
+  var interests = Array.from(document.querySelectorAll('.interest-chip.selected'))
+    .map(function(c) { return c.dataset.interest; });
+
+  if (editingId) {
+    var idx = attendees.findIndex(function(a) { return a.id === editingId; });
+    if (idx >= 0) {
+      var notes = document.getElementById('fNotes').value.trim();
+      if (notes) {
+        attendees[idx].notes = attendees[idx].notes
+          ? attendees[idx].notes + '\n---\n' + notes
+          : notes;
+      }
+      var newInterests = interests.slice();
+      attendees[idx].interests.forEach(function(i) { if (newInterests.indexOf(i) === -1) newInterests.push(i); });
+      attendees[idx].interests = newInterests;
+      attendees[idx].company = document.getElementById('fCompany').value.trim() || attendees[idx].company;
+      attendees[idx].title = document.getElementById('fTitle').value.trim() || attendees[idx].title;
+    }
+  } else {
+    var attendee = {
+      id: Date.now().toString(36) + Math.random().toString(36).substr(2, 5),
+      name: name,
+      company: document.getElementById('fCompany').value.trim(),
+      title: document.getElementById('fTitle').value.trim(),
+      email: email,
+      phone: document.getElementById('fPhone').value.trim(),
+      linkedin: document.getElementById('fLinkedin').value.trim(),
+      interests: interests,
+      notes: document.getElementById('fNotes').value.trim(),
+      consent: document.getElementById('fConsent').checked,
+      event: currentEvent,
+      capturedAt: new Date().toISOString(),
+      capturedBy: 'You',
+      qrRaw: document.getElementById('fName').dataset.qrRaw || ''
+    };
+    attendees.unshift(attendee);
+  }
+
+  persist();
+  closeOverlay();
+  showSuccessFlash();
+  showToast(editingId ? 'Contact updated!' : 'Contact saved!');
+}
+
+function renderCaptures() {
+  var list = document.getElementById('attendeeList');
+  var search = document.getElementById('searchInput').value.toLowerCase();
+
+  var filtered = attendees.filter(function(a) {
+    if (search && a.name.toLowerCase().indexOf(search) === -1 && a.company.toLowerCase().indexOf(search) === -1) return false;
+    if (activeFilter !== 'all' && a.interests.indexOf(activeFilter) === -1) return false;
+    return true;
+  });
+
+  document.getElementById('captureCount').textContent = filtered.length;
+  document.getElementById('emptyState').style.display = filtered.length ? 'none' : 'block';
+
+  var filterBar = document.getElementById('filterBar');
+  var allInterestsSet = {};
+  attendees.forEach(function(a) { a.interests.forEach(function(i) { allInterestsSet[i] = true; }); });
+  var allInterests = Object.keys(allInterestsSet);
+  filterBar.innerHTML = '<button class="filter-pill ' + (activeFilter === 'all' ? 'active' : '') + '" onclick="setFilter(\'all\')">All</button>';
+  allInterests.forEach(function(interest) {
+    filterBar.innerHTML += '<button class="filter-pill ' + (activeFilter === interest ? 'active' : '') + '" onclick="setFilter(\'' + interest.replace(/'/g, "\\'") + '\')">' + interest + '</button>';
+  });
+
+  var cards = filtered.map(function(a) {
+    var time = formatTime(a.capturedAt);
+    var tags = a.interests.map(function(i) {
+      return '<span class="attendee-interest-tag tag-' + (INTEREST_COLORS[i] || 'blue') + '">' + i + '</span>';
+    }).join('');
+    return '<div class="attendee-card" onclick="showProfile(\'' + a.id + '\')">' +
+      '<div class="attendee-card-header">' +
+      '<span class="attendee-name">' + esc(a.name) + '</span>' +
+      '<span class="attendee-time">' + time + '</span>' +
+      '</div>' +
+      '<div class="attendee-meta">' + esc(a.title) + (a.title && a.company ? ' \u00B7 ' : '') + esc(a.company) + '</div>' +
+      (tags ? '<div class="attendee-interests">' + tags + '</div>' : '') +
+      '</div>';
+  }).join('');
+
+  var emptyEl = document.getElementById('emptyState');
+  list.innerHTML = '';
+  list.appendChild(emptyEl);
+  list.insertAdjacentHTML('afterbegin', cards);
+}
+
+function filterCaptures() { renderCaptures(); }
+function setFilter(f) { activeFilter = f; renderCaptures(); }
+
+function showProfile(id) {
+  viewingId = id;
+  var a = attendees.find(function(x) { return x.id === id; });
+  if (!a) return;
+
+  var initials = a.name.split(' ').map(function(w) { return w[0]; }).join('').substring(0, 2).toUpperCase();
+  var tags = a.interests.map(function(i) {
+    return '<span class="attendee-interest-tag tag-' + (INTEREST_COLORS[i] || 'blue') + '" style="font-size:13px;padding:4px 10px">' + i + '</span>';
+  }).join(' ');
+
+  document.getElementById('profileBody').innerHTML =
+    '<div class="profile-avatar">' + initials + '</div>' +
+    '<div class="profile-name">' + esc(a.name) + '</div>' +
+    '<div class="profile-role">' + esc(a.title) + (a.title && a.company ? ' at ' : '') + esc(a.company) + '</div>' +
+    (tags ? '<div class="profile-section"><div class="profile-section-title">Interests</div><div style="display:flex;flex-wrap:wrap;gap:6px">' + tags + '</div></div>' : '') +
+    '<div class="profile-section">' +
+    '<div class="profile-section-title">Contact</div>' +
+    (a.email ? '<div class="profile-field"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg><span class="profile-field-value"><a href="mailto:' + esc(a.email) + '">' + esc(a.email) + '</a></span></div>' : '') +
+    (a.phone ? '<div class="profile-field"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg><span class="profile-field-value"><a href="tel:' + esc(a.phone) + '">' + esc(a.phone) + '</a></span></div>' : '') +
+    (a.linkedin ? '<div class="profile-field"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg><span class="profile-field-value"><a href="https://' + esc(a.linkedin) + '" target="_blank">' + esc(a.linkedin) + '</a></span></div>' : '') +
+    '</div>' +
+    (a.notes ? '<div class="profile-section"><div class="profile-section-title">Notes</div><div class="profile-notes">' + esc(a.notes) + '</div></div>' : '') +
+    '<div class="profile-section">' +
+    '<div class="profile-section-title">Details</div>' +
+    '<div class="profile-field"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span class="profile-field-value">' + new Date(a.capturedAt).toLocaleString() + '</span></div>' +
+    '<div class="profile-field"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg><span class="profile-field-value">' + esc(a.event) + '</span></div>' +
+    '<div class="profile-field"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span class="profile-field-value">' + esc(a.capturedBy) + '</span></div>' +
+    (a.consent ? '<div class="profile-field" style="color:var(--green)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg><span class="profile-field-value">Consent to follow up</span></div>' : '') +
+    '</div>';
+
+  document.getElementById('profileOverlay').classList.add('active');
+}
+
+function closeProfile() {
+  document.getElementById('profileOverlay').classList.remove('active');
+  viewingId = null;
+}
+
+function editAttendee() {
+  var a = attendees.find(function(x) { return x.id === viewingId; });
+  if (!a) return;
+  closeProfile();
+  editingId = a.id;
+  document.getElementById('sheetTitle').textContent = 'Edit ' + a.name;
+  document.getElementById('fName').value = a.name;
+  document.getElementById('fCompany').value = a.company;
+  document.getElementById('fTitle').value = a.title;
+  document.getElementById('fEmail').value = a.email;
+  document.getElementById('fPhone').value = a.phone;
+  document.getElementById('fLinkedin').value = a.linkedin;
+  document.getElementById('fNotes').value = a.notes;
+  document.getElementById('fConsent').checked = a.consent;
+  document.getElementById('fName').dataset.qrRaw = a.qrRaw || '';
+
+  document.querySelectorAll('.interest-chip').forEach(function(c) {
+    c.classList.toggle('selected', a.interests.indexOf(c.dataset.interest) !== -1);
+  });
+
+  document.getElementById('saveBtn').innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:16px;height:16px"><path d="M20 6L9 17l-5-5"/></svg> Update';
+  document.getElementById('entryOverlay').classList.add('active');
+}
+
+function deleteCurrentAttendee() {
+  if (!viewingId) return;
+  if (!confirm('Delete this contact?')) return;
+  attendees = attendees.filter(function(a) { return a.id !== viewingId; });
+  persist();
+  closeProfile();
+  renderCaptures();
+  showToast('Contact deleted');
+}
+
+function updateStats() {
+  document.getElementById('statTotal').textContent = attendees.length;
+  var today = new Date().toDateString();
+  document.getElementById('statToday').textContent = attendees.filter(function(a) { return new Date(a.capturedAt).toDateString() === today; }).length;
+  var allInterestsSet = {};
+  attendees.forEach(function(a) { a.interests.forEach(function(i) { allInterestsSet[i] = true; }); });
+  document.getElementById('statInterests').textContent = Object.keys(allInterestsSet).length;
+}
+
+function exportCSV() {
+  if (!attendees.length) { showToast('No captures to export'); return; }
+  var headers = ['Name','Company','Title','Email','Phone','LinkedIn','Interests','Notes','Event','Captured At','Consent'];
+  var rows = attendees.map(function(a) {
+    return [
+      a.name, a.company, a.title, a.email, a.phone, a.linkedin,
+      a.interests.join('; '), (a.notes || '').replace(/\n/g, ' '), a.event,
+      new Date(a.capturedAt).toLocaleString(), a.consent ? 'Yes' : 'No'
+    ];
+  });
+  var csv = [headers].concat(rows).map(function(r) { return r.map(function(c) { return '"' + (c||'').replace(/"/g, '""') + '"'; }).join(','); }).join('\n');
+  var blob = new Blob([csv], { type: 'text/csv' });
+  var url = URL.createObjectURL(blob);
+  var link = document.createElement('a');
+  link.href = url;
+  link.download = 'conference-buddy-' + currentEvent.replace(/\s/g, '-').toLowerCase() + '-' + new Date().toISOString().split('T')[0] + '.csv';
+  link.click();
+  showToast('CSV downloaded!');
+}
+
+function syncToNotion() {
+  if (!attendees.length) { showToast('No captures to sync'); return; }
+  showToast('Syncing ' + attendees.length + ' contacts\u2026');
+  setTimeout(function() { showToast('\u2713 Synced to Notion!'); }, 1500);
+}
+
+function clearAllData() {
+  if (!confirm('Delete all ' + attendees.length + ' captures? This cannot be undone.')) return;
+  attendees = [];
+  persist();
+  renderCaptures();
+  updateStats();
+  showToast('All captures cleared');
+}
+
+function persist() {
+  localStorage.setItem('cb_attendees', JSON.stringify(attendees));
+}
+
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(function() { t.classList.remove('show'); }, 2200);
+}
+
+function showSuccessFlash() {
+  var el = document.getElementById('successFlash');
+  el.classList.add('show');
+  setTimeout(function() { el.classList.remove('show'); }, 700);
+}
+
+function formatTime(iso) {
+  var d = new Date(iso);
+  var now = new Date();
+  var diff = (now - d) / 1000;
+  if (diff < 60) return 'Just now';
+  if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
+  if (diff < 86400 && d.getDate() === now.getDate()) return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  return d.toLocaleDateString([], { month: 'short', day: 'numeric' });
+}
+
+function esc(s) {
+  if (!s) return '';
+  var d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+document.getElementById('eventBadge').textContent = currentEvent + ' \u25BE';
+</script>
+</body>
+</html>
