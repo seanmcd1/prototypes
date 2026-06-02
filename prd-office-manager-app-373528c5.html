@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Office Manager – All Sites</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f7f8fa;--surface:#fff;--border:#e5e7eb;--text:#1a1a2e;--text2:#6b7280;
+  --primary:#4f46e5;--primary-light:#eef2ff;--green:#16a34a;--green-bg:#dcfce7;
+  --amber:#d97706;--amber-bg:#fef3c7;--red:#dc2626;--red-bg:#fee2e2;
+  --blue:#2563eb;--blue-bg:#dbeafe;--gray:#6b7280;--gray-bg:#f3f4f6;
+  --radius:12px;--shadow:0 1px 3px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.06);
+  --shadow-lg:0 10px 15px -3px rgba(0,0,0,.1),0 4px 6px -4px rgba(0,0,0,.1);
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.5;min-height:100vh}
+
+/* Layout */
+.app{display:flex;min-height:100vh}
+.sidebar{width:240px;background:var(--text);color:#fff;padding:24px 16px;flex-shrink:0;display:flex;flex-direction:column}
+.sidebar-logo{font-size:18px;font-weight:700;margin-bottom:32px;display:flex;align-items:center;gap:10px}
+.sidebar-logo .icon{width:32px;height:32px;background:var(--primary);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px}
+.sidebar nav a{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:rgba(255,255,255,.7);text-decoration:none;font-size:14px;margin-bottom:2px;transition:.15s}
+.sidebar nav a:hover,.sidebar nav a.active{background:rgba(255,255,255,.1);color:#fff}
+.sidebar nav a.active{background:var(--primary)}
+.sidebar nav a svg{width:18px;height:18px;flex-shrink:0}
+.sidebar-footer{margin-top:auto;padding-top:16px;border-top:1px solid rgba(255,255,255,.1)}
+.sidebar-user{display:flex;align-items:center;gap:10px;font-size:13px}
+.sidebar-user .avatar{width:32px;height:32px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600}
+
+.main{flex:1;overflow-y:auto;max-height:100vh}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:16px 32px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10}
+.topbar h1{font-size:20px;font-weight:700}
+.topbar-actions{display:flex;align-items:center;gap:12px}
+
+.content{padding:32px}
+
+/* Search & Filters */
+.controls{display:flex;align-items:center;gap:12px;margin-bottom:24px;flex-wrap:wrap}
+.search-box{position:relative;flex:1;min-width:240px;max-width:400px}
+.search-box input{width:100%;padding:10px 12px 10px 38px;border:1px solid var(--border);border-radius:8px;font-size:14px;background:var(--surface);transition:.15s}
+.search-box input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(79,70,229,.12)}
+.search-box svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--text2)}
+.filter-btn{padding:9px 16px;border:1px solid var(--border);border-radius:8px;background:var(--surface);font-size:13px;cursor:pointer;display:flex;align-items:center;gap:6px;color:var(--text);transition:.15s}
+.filter-btn:hover{border-color:var(--primary);color:var(--primary)}
+.filter-btn.active{background:var(--primary-light);border-color:var(--primary);color:var(--primary)}
+.view-toggle{display:flex;border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-left:auto}
+.view-toggle button{padding:8px 12px;border:none;background:var(--surface);cursor:pointer;color:var(--text2);transition:.15s}
+.view-toggle button.active{background:var(--primary);color:#fff}
+.view-toggle button:hover:not(.active){background:var(--gray-bg)}
+
+/* Stats Bar */
+.stats-bar{display:flex;gap:16px;margin-bottom:24px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 20px;flex:1;box-shadow:var(--shadow)}
+.stat-card .label{font-size:12px;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.stat-card .value{font-size:24px;font-weight:700}
+.stat-card .change{font-size:12px;color:var(--green);margin-top:2px}
+
+/* Table View */
+.sites-table{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+.sites-table table{width:100%;border-collapse:collapse}
+.sites-table th{text-align:left;padding:12px 16px;font-size:12px;text-transform:uppercase;letter-spacing:.5px;color:var(--text2);background:var(--gray-bg);border-bottom:1px solid var(--border);font-weight:600}
+.sites-table td{padding:14px 16px;border-bottom:1px solid var(--border);font-size:14px}
+.sites-table tr:last-child td{border-bottom:none}
+.sites-table tr:hover td{background:var(--primary-light);cursor:pointer}
+.site-name-cell{display:flex;align-items:center;gap:10px}
+.site-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.site-name{font-weight:600}
+.site-address{font-size:12px;color:var(--text2)}
+
+/* Status Badge */
+.status{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:600}
+.status-active{background:var(--green-bg);color:var(--green)}
+.status-maintenance{background:var(--amber-bg);color:var(--amber)}
+.status-inactive{background:var(--red-bg);color:var(--red)}
+.status-planned{background:var(--blue-bg);color:var(--blue)}
+.status::before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor}
+
+/* Card View */
+.sites-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+.site-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);cursor:pointer;transition:.2s}
+.site-card:hover{box-shadow:var(--shadow-lg);transform:translateY(-2px);border-color:var(--primary)}
+.site-card-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px}
+.site-card-icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px}
+.site-card-name{font-weight:700;font-size:16px;margin-bottom:2px}
+.site-card-location{font-size:13px;color:var(--text2)}
+.site-card-meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)}
+.meta-item{font-size:12px;color:var(--text2);display:flex;align-items:center;gap:4px}
+.meta-item svg{width:14px;height:14px}
+
+/* Detail Overlay */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:100;opacity:0;visibility:hidden;transition:.2s}
+.overlay.open{opacity:1;visibility:visible}
+.detail-panel{position:fixed;right:0;top:0;bottom:0;width:560px;max-width:100vw;background:var(--surface);z-index:101;box-shadow:-4px 0 24px rgba(0,0,0,.12);transform:translateX(100%);transition:.3s ease;overflow-y:auto}
+.detail-panel.open{transform:translateX(0)}
+.detail-header{padding:24px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:16px;position:sticky;top:0;background:var(--surface);z-index:1}
+.detail-close{width:32px;height:32px;border:none;background:var(--gray-bg);border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--text2);transition:.15s;flex-shrink:0}
+.detail-close:hover{background:var(--red-bg);color:var(--red)}
+.detail-icon{width:52px;height:52px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
+.detail-title{font-size:20px;font-weight:700}
+.detail-subtitle{font-size:14px;color:var(--text2)}
+.detail-body{padding:24px}
+.detail-section{margin-bottom:24px}
+.detail-section h3{font-size:13px;text-transform:uppercase;letter-spacing:.5px;color:var(--text2);margin-bottom:12px;font-weight:600}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.detail-field{background:var(--gray-bg);border-radius:8px;padding:12px}
+.detail-field .field-label{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--text2);margin-bottom:4px}
+.detail-field .field-value{font-size:14px;font-weight:600}
+.detail-links a{display:flex;align-items:center;gap:10px;padding:12px;border:1px solid var(--border);border-radius:8px;text-decoration:none;color:var(--text);font-size:14px;margin-bottom:8px;transition:.15s}
+.detail-links a:hover{border-color:var(--primary);background:var(--primary-light);color:var(--primary)}
+.detail-links a svg{width:18px;height:18px;color:var(--text2)}
+.detail-links a .link-arrow{margin-left:auto;color:var(--text2)}
+
+/* Region Filter Dropdown */
+.dropdown{position:relative;display:inline-block}
+.dropdown-menu{position:absolute;top:100%;left:0;margin-top:4px;background:var(--surface);border:1px solid var(--border);border-radius:8px;box-shadow:var(--shadow-lg);min-width:180px;z-index:20;display:none;padding:4px}
+.dropdown-menu.show{display:block}
+.dropdown-menu button{display:block;width:100%;text-align:left;padding:8px 12px;border:none;background:none;font-size:13px;cursor:pointer;border-radius:6px;color:var(--text)}
+.dropdown-menu button:hover{background:var(--primary-light);color:var(--primary)}
+.dropdown-menu button.selected{background:var(--primary);color:#fff}
+
+/* Empty State */
+.empty-state{text-align:center;padding:60px 20px;color:var(--text2)}
+.empty-state svg{width:48px;height:48px;margin-bottom:12px;opacity:.4}
+.empty-state h3{font-size:16px;color:var(--text);margin-bottom:4px}
+
+/* Responsive */
+@media(max-width:768px){
+  .sidebar{display:none}
+  .stats-bar{flex-wrap:wrap}
+  .stat-card{min-width:calc(50% - 8px)}
+  .detail-panel{width:100%}
+  .controls{flex-direction:column;align-items:stretch}
+  .search-box{max-width:100%}
+  .view-toggle{margin-left:0}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="icon">🏢</div>
+      Office Manager
+    </div>
+    <nav>
+      <a href="#" class="active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        All Sites
+      </a>
+      <a href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 1118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        Regions
+      </a>
+      <a href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+        Reports
+      </a>
+      <a href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 6v6m11-7h-6m-6 0H1m16.66-5.66l-4.24 4.24M9.58 14.42l-4.24 4.24m0-13.32l4.24 4.24m4.24 4.24l4.24 4.24"/></svg>
+        Settings
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="avatar">JR</div>
+        <div>
+          <div style="font-weight:600;font-size:13px">Jamie Rivera</div>
+          <div style="font-size:11px;opacity:.6">Office Manager</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <div class="main">
+    <div class="topbar">
+      <h1>All Sites</h1>
+      <div class="topbar-actions">
+        <span style="font-size:13px;color:var(--text2)">Last synced: 2 min ago</span>
+      </div>
+    </div>
+
+    <div class="content">
+      <!-- Stats -->
+      <div class="stats-bar">
+        <div class="stat-card">
+          <div class="label">Total Sites</div>
+          <div class="value" id="statTotal">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Active</div>
+          <div class="value" id="statActive" style="color:var(--green)">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Maintenance</div>
+          <div class="value" id="statMaint" style="color:var(--amber)">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Regions</div>
+          <div class="value" id="statRegions">0</div>
+        </div>
+      </div>
+
+      <!-- Controls -->
+      <div class="controls">
+        <div class="search-box">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          <input type="text" id="searchInput" placeholder="Search sites by name or address…">
+        </div>
+        <div class="dropdown">
+          <button class="filter-btn" id="regionFilter" onclick="toggleDropdown()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 1118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            All Regions
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="dropdown-menu" id="regionDropdown"></div>
+        </div>
+        <div class="dropdown">
+          <button class="filter-btn" id="statusFilter" onclick="toggleStatusDropdown()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+            All Statuses
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="dropdown-menu" id="statusDropdown"></div>
+        </div>
+        <div class="view-toggle">
+          <button class="active" onclick="setView('table')" id="viewTable" title="Table view">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+          </button>
+          <button onclick="setView('grid')" id="viewGrid" title="Card view">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Table View -->
+      <div id="tableView" class="sites-table">
+        <table>
+          <thead>
+            <tr>
+              <th>Site</th>
+              <th>Region</th>
+              <th>Status</th>
+              <th>Capacity</th>
+              <th>Occupancy</th>
+              <th>Last Updated</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+
+      <!-- Grid View -->
+      <div id="gridView" class="sites-grid" style="display:none"></div>
+
+      <!-- Empty State -->
+      <div id="emptyState" class="empty-state" style="display:none">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <h3>No sites found</h3>
+        <p>Try adjusting your search or filters.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Detail Panel -->
+<div class="overlay" id="overlay" onclick="closeDetail()"></div>
+<div class="detail-panel" id="detailPanel">
+  <div class="detail-header">
+    <button class="detail-close" onclick="closeDetail()">✕</button>
+    <div class="detail-icon" id="detailIcon"></div>
+    <div>
+      <div class="detail-title" id="detailTitle"></div>
+      <div class="detail-subtitle" id="detailSubtitle"></div>
+    </div>
+  </div>
+  <div class="detail-body">
+    <div class="detail-section">
+      <h3>Overview</h3>
+      <div class="detail-grid" id="detailGrid"></div>
+    </div>
+    <div class="detail-section">
+      <h3>Quick Links</h3>
+      <div class="detail-links" id="detailLinks"></div>
+    </div>
+    <div class="detail-section">
+      <h3>Recent Activity</h3>
+      <div id="detailActivity" style="font-size:14px;color:var(--text2)"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Mock Data
+const sites = [
+  {id:1,name:"HQ – San Francisco",address:"425 Market St, San Francisco, CA",region:"North America",status:"Active",capacity:850,occupancy:72,manager:"Jamie Rivera",phone:"+1 415-555-0142",updated:"2026-06-02",icon:"🏙️",color:"#eef2ff",floors:12,sqft:"145,000",lease:"2029-03-15"},
+  {id:2,name:"NYC – Hudson Yards",address:"30 Hudson Yards, New York, NY",region:"North America",status:"Active",capacity:620,occupancy:81,manager:"Alex Chen",phone:"+1 212-555-0198",updated:"2026-06-01",icon:"🗽",color:"#dbeafe",floors:8,sqft:"98,000",lease:"2028-11-30"},
+  {id:3,name:"London – Shoreditch",address:"50 Finsbury Square, London EC2A",region:"EMEA",status:"Active",capacity:410,occupancy:68,manager:"Sophie Turner",phone:"+44 20 7946 0958",updated:"2026-06-02",icon:"🇬🇧",color:"#fef3c7",floors:6,sqft:"72,000",lease:"2027-09-01"},
+  {id:4,name:"Berlin – Mitte",address:"Friedrichstraße 123, 10117 Berlin",region:"EMEA",status:"Maintenance",capacity:280,occupancy:45,manager:"Lukas Weber",phone:"+49 30 555-0147",updated:"2026-05-30",icon:"🇩🇪",color:"#fef3c7",floors:4,sqft:"48,000",lease:"2028-06-15"},
+  {id:5,name:"Tokyo – Shibuya",address:"2-21-1 Shibuya, Shibuya-ku, Tokyo",region:"APAC",status:"Active",capacity:390,occupancy:88,manager:"Yuki Tanaka",phone:"+81 3-5555-0124",updated:"2026-06-01",icon:"🇯🇵",color:"#dcfce7",floors:7,sqft:"65,000",lease:"2029-01-20"},
+  {id:6,name:"Singapore – Marina Bay",address:"10 Marina Blvd, Singapore 018983",region:"APAC",status:"Active",capacity:310,occupancy:76,manager:"Wei Lin",phone:"+65 6555-0183",updated:"2026-06-02",icon:"🇸🇬",color:"#dcfce7",floors:5,sqft:"52,000",lease:"2028-04-10"},
+  {id:7,name:"Sydney – Barangaroo",address:"Tower 1, 100 Barangaroo Ave, Sydney",region:"APAC",status:"Active",capacity:260,occupancy:63,manager:"Liam O'Brien",phone:"+61 2 5555-0167",updated:"2026-05-31",icon:"🇦🇺",color:"#dbeafe",floors:4,sqft:"44,000",lease:"2027-12-01"},
+  {id:8,name:"Austin – Domain",address:"11501 Domain Dr, Austin, TX",region:"North America",status:"Active",capacity:340,occupancy:59,manager:"Maria Gonzalez",phone:"+1 512-555-0131",updated:"2026-06-01",icon:"🤠",color:"#eef2ff",floors:3,sqft:"58,000",lease:"2028-08-20"},
+  {id:9,name:"Toronto – King West",address:"100 King St W, Toronto, ON",region:"North America",status:"Active",capacity:220,occupancy:71,manager:"David Park",phone:"+1 416-555-0156",updated:"2026-05-29",icon:"🇨🇦",color:"#eef2ff",floors:3,sqft:"36,000",lease:"2027-07-15"},
+  {id:10,name:"Paris – La Défense",address:"1 Parvis de la Défense, 92800 Puteaux",region:"EMEA",status:"Active",capacity:350,occupancy:74,manager:"Claire Dubois",phone:"+33 1 55 55 01 42",updated:"2026-06-02",icon:"🇫🇷",color:"#fef3c7",floors:5,sqft:"60,000",lease:"2029-02-28"},
+  {id:11,name:"Mumbai – BKC",address:"G Block, Bandra Kurla Complex, Mumbai",region:"APAC",status:"Planned",capacity:200,occupancy:0,manager:"Priya Sharma",phone:"+91 22 5555 0189",updated:"2026-05-28",icon:"🇮🇳",color:"#dbeafe",floors:3,sqft:"34,000",lease:"2029-06-01"},
+  {id:12,name:"Amsterdam – Zuidas",address:"Gustav Mahlerlaan 10, 1082 Amsterdam",region:"EMEA",status:"Active",capacity:180,occupancy:82,manager:"Jan de Vries",phone:"+31 20 555 0174",updated:"2026-06-01",icon:"🇳🇱",color:"#fef3c7",floors:3,sqft:"30,000",lease:"2028-01-15"},
+  {id:13,name:"São Paulo – Faria Lima",address:"Av. Faria Lima, 3477, São Paulo",region:"LATAM",status:"Maintenance",capacity:270,occupancy:38,manager:"Carlos Silva",phone:"+55 11 5555-0163",updated:"2026-05-27",icon:"🇧🇷",color:"#fee2e2",floors:4,sqft:"46,000",lease:"2027-11-01"},
+  {id:14,name:"Denver – LoDo",address:"1600 Platte St, Denver, CO",region:"North America",status:"Active",capacity:180,occupancy:64,manager:"Rachel Kim",phone:"+1 303-555-0178",updated:"2026-06-01",icon:"⛰️",color:"#eef2ff",floors:2,sqft:"31,000",lease:"2028-05-01"},
+  {id:15,name:"Dublin – Grand Canal",address:"1 Grand Canal Square, Dublin D02",region:"EMEA",status:"Active",capacity:240,occupancy:69,manager:"Sean Murphy",phone:"+353 1 555 0192",updated:"2026-05-30",icon:"🇮🇪",color:"#fef3c7",floors:4,sqft:"40,000",lease:"2029-04-01"},
+  {id:16,name:"Mexico City – Reforma",address:"Av. Paseo de la Reforma 250, CDMX",region:"LATAM",status:"Active",capacity:190,occupancy:55,manager:"Ana López",phone:"+52 55 5555 0146",updated:"2026-06-02",icon:"🇲🇽",color:"#fee2e2",floors:3,sqft:"33,000",lease:"2028-10-15"},
+  {id:17,name:"Seoul – Gangnam",address:"311 Gangnam-daero, Seocho-gu, Seoul",region:"APAC",status:"Active",capacity:290,occupancy:79,manager:"Min-jun Lee",phone:"+82 2 5555 0135",updated:"2026-06-01",icon:"🇰🇷",color:"#dcfce7",floors:5,sqft:"49,000",lease:"2028-12-01"},
+  {id:18,name:"Chicago – West Loop",address:"1K Fulton, 1000 W Fulton Market, Chicago",region:"North America",status:"Inactive",capacity:150,occupancy:0,manager:"—",phone:"—",updated:"2026-05-15",icon:"🌆",color:"#f3f4f6",floors:2,sqft:"26,000",lease:"2026-08-30"}
+];
+
+// State
+let currentView = 'table';
+let searchTerm = '';
+let regionFilterVal = 'All';
+let statusFilterVal = 'All';
+
+// Regions and statuses
+const regions = ['All', ...new Set(sites.map(s => s.region))];
+const statuses = ['All', 'Active', 'Maintenance', 'Planned', 'Inactive'];
+
+// Init
+function init() {
+  buildDropdowns();
+  updateStats();
+  render();
+  document.getElementById('searchInput').addEventListener('input', e => {
+    searchTerm = e.target.value.toLowerCase();
+    render();
+  });
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.dropdown')) {
+      document.querySelectorAll('.dropdown-menu').forEach(d => d.classList.remove('show'));
+    }
+  });
+}
+
+function buildDropdowns() {
+  const rd = document.getElementById('regionDropdown');
+  regions.forEach(r => {
+    const b = document.createElement('button');
+    b.textContent = r === 'All' ? 'All Regions' : r;
+    if (r === regionFilterVal) b.classList.add('selected');
+    b.onclick = () => { regionFilterVal = r; updateFilterBtns(); render(); rd.classList.remove('show'); };
+    rd.appendChild(b);
+  });
+  const sd = document.getElementById('statusDropdown');
+  statuses.forEach(s => {
+    const b = document.createElement('button');
+    b.textContent = s === 'All' ? 'All Statuses' : s;
+    if (s === statusFilterVal) b.classList.add('selected');
+    b.onclick = () => { statusFilterVal = s; updateFilterBtns(); render(); sd.classList.remove('show'); };
+    sd.appendChild(b);
+  });
+}
+
+function toggleDropdown() { document.getElementById('regionDropdown').classList.toggle('show'); document.getElementById('statusDropdown').classList.remove('show'); }
+function toggleStatusDropdown() { document.getElementById('statusDropdown').classList.toggle('show'); document.getElementById('regionDropdown').classList.remove('show'); }
+
+function updateFilterBtns() {
+  const rb = document.getElementById('regionFilter');
+  const sb = document.getElementById('statusFilter');
+  rb.querySelector('svg:last-child').previousSibling.textContent = regionFilterVal === 'All' ? ' All Regions ' : ` ${regionFilterVal} `;
+  sb.querySelector('svg:last-child').previousSibling.textContent = statusFilterVal === 'All' ? ' All Statuses ' : ` ${statusFilterVal} `;
+  rb.classList.toggle('active', regionFilterVal !== 'All');
+  sb.classList.toggle('active', statusFilterVal !== 'All');
+  // Update dropdown selected states
+  document.getElementById('regionDropdown').querySelectorAll('button').forEach((b,i) => b.classList.toggle('selected', regions[i] === regionFilterVal));
+  document.getElementById('statusDropdown').querySelectorAll('button').forEach((b,i) => b.classList.toggle('selected', statuses[i] === statusFilterVal));
+}
+
+function getFiltered() {
+  return sites.filter(s => {
+    if (searchTerm && !s.name.toLowerCase().includes(searchTerm) && !s.address.toLowerCase().includes(searchTerm)) return false;
+    if (regionFilterVal !== 'All' && s.region !== regionFilterVal) return false;
+    if (statusFilterVal !== 'All' && s.status !== statusFilterVal) return false;
+    return true;
+  });
+}
+
+function updateStats() {
+  document.getElementById('statTotal').textContent = sites.length;
+  document.getElementById('statActive').textContent = sites.filter(s => s.status === 'Active').length;
+  document.getElementById('statMaint').textContent = sites.filter(s => s.status === 'Maintenance').length;
+  document.getElementById('statRegions').textContent = new Set(sites.map(s => s.region)).size;
+}
+
+function statusClass(s) {
+  return 'status status-' + s.toLowerCase();
+}
+
+function formatDate(d) {
+  const dt = new Date(d);
+  return dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+function render() {
+  const filtered = getFiltered();
+  const empty = document.getElementById('emptyState');
+  const tv = document.getElementById('tableView');
+  const gv = document.getElementById('gridView');
+
+  if (filtered.length === 0) {
+    empty.style.display = 'block';
+    tv.style.display = 'none';
+    gv.style.display = 'none';
+    return;
+  }
+  empty.style.display = 'none';
+
+  if (currentView === 'table') {
+    tv.style.display = 'block';
+    gv.style.display = 'none';
+    renderTable(filtered);
+  } else {
+    tv.style.display = 'none';
+    gv.style.display = 'grid';
+    renderGrid(filtered);
+  }
+}
+
+function renderTable(data) {
+  const tbody = document.getElementById('tableBody');
+  tbody.innerHTML = data.map(s => `
+    <tr onclick="openDetail(${s.id})">
+      <td>
+        <div class="site-name-cell">
+          <div class="site-icon" style="background:${s.color}">${s.icon}</div>
+          <div>
+            <div class="site-name">${s.name}</div>
+            <div class="site-address">${s.address}</div>
+          </div>
+        </div>
+      </td>
+      <td>${s.region}</td>
+      <td><span class="${statusClass(s.status)}">${s.status}</span></td>
+      <td>${s.capacity}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="flex:1;height:6px;background:var(--gray-bg);border-radius:3px;max-width:80px">
+            <div style="height:100%;width:${s.occupancy}%;background:${s.occupancy > 80 ? 'var(--amber)' : 'var(--green)'};border-radius:3px"></div>
+          </div>
+          <span style="font-size:13px">${s.occupancy}%</span>
+        </div>
+      </td>
+      <td style="color:var(--text2);font-size:13px">${formatDate(s.updated)}</td>
+    </tr>
+  `).join('');
+}
+
+function renderGrid(data) {
+  const gv = document.getElementById('gridView');
+  gv.innerHTML = data.map(s => `
+    <div class="site-card" onclick="openDetail(${s.id})">
+      <div class="site-card-header">
+        <div>
+          <div class="site-card-name">${s.name}</div>
+          <div class="site-card-location">${s.address}</div>
+        </div>
+        <div class="site-card-icon" style="background:${s.color}">${s.icon}</div>
+      </div>
+      <span class="${statusClass(s.status)}">${s.status}</span>
+      <div class="site-card-meta">
+        <span class="meta-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4-4v2"/><circle cx="9" cy="7" r="4"/></svg>
+          ${s.capacity} capacity
+        </span>
+        <span class="meta-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+          ${s.occupancy}% occupied
+        </span>
+        <span class="meta-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          ${formatDate(s.updated)}
+        </span>
+      </div>
+    </div>
+  `).join('');
+}
+
+function setView(v) {
+  currentView = v;
+  document.getElementById('viewTable').classList.toggle('active', v === 'table');
+  document.getElementById('viewGrid').classList.toggle('active', v === 'grid');
+  render();
+}
+
+function openDetail(id) {
+  const s = sites.find(x => x.id === id);
+  if (!s) return;
+  document.getElementById('detailIcon').style.background = s.color;
+  document.getElementById('detailIcon').textContent = s.icon;
+  document.getElementById('detailTitle').textContent = s.name;
+  document.getElementById('detailSubtitle').textContent = s.address;
+
+  document.getElementById('detailGrid').innerHTML = `
+    <div class="detail-field"><div class="field-label">Status</div><div class="field-value"><span class="${statusClass(s.status)}">${s.status}</span></div></div>
+    <div class="detail-field"><div class="field-label">Region</div><div class="field-value">${s.region}</div></div>
+    <div class="detail-field"><div class="field-label">Capacity</div><div class="field-value">${s.capacity} desks</div></div>
+    <div class="detail-field"><div class="field-label">Occupancy</div><div class="field-value">${s.occupancy}%</div></div>
+    <div class="detail-field"><div class="field-label">Floors</div><div class="field-value">${s.floors}</div></div>
+    <div class="detail-field"><div class="field-label">Square Footage</div><div class="field-value">${s.sqft} sq ft</div></div>
+    <div class="detail-field"><div class="field-label">Site Manager</div><div class="field-value">${s.manager}</div></div>
+    <div class="detail-field"><div class="field-label">Contact</div><div class="field-value">${s.phone}</div></div>
+    <div class="detail-field"><div class="field-label">Lease Expiry</div><div class="field-value">${formatDate(s.lease)}</div></div>
+    <div class="detail-field"><div class="field-label">Last Updated</div><div class="field-value">${formatDate(s.updated)}</div></div>
+  `;
+
+  document.getElementById('detailLinks').innerHTML = `
+    <a href="#">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg>
+      Maintenance Requests
+      <span class="link-arrow">→</span>
+    </a>
+    <a href="#">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4-4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+      Team Directory
+      <span class="link-arrow">→</span>
+    </a>
+    <a href="#">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Booking Calendar
+      <span class="link-arrow">→</span>
+    </a>
+    <a href="#">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      Floor Plans & Docs
+      <span class="link-arrow">→</span>
+    </a>
+    <a href="#">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+      IT & AV Support
+      <span class="link-arrow">→</span>
+    </a>
+  `;
+
+  const activities = [
+    `<div style="padding:8px 0;border-bottom:1px solid var(--border)"><strong>HVAC service completed</strong><br><span style="font-size:12px;color:var(--text2)">May 30, 2026 · Facilities</span></div>`,
+    `<div style="padding:8px 0;border-bottom:1px solid var(--border)"><strong>Desk count updated</strong><br><span style="font-size:12px;color:var(--text2)">May 28, 2026 · Space Planning</span></div>`,
+    `<div style="padding:8px 0"><strong>Fire safety inspection passed</strong><br><span style="font-size:12px;color:var(--text2)">May 22, 2026 · Compliance</span></div>`
+  ];
+  document.getElementById('detailActivity').innerHTML = activities.join('');
+
+  document.getElementById('overlay').classList.add('open');
+  document.getElementById('detailPanel').classList.add('open');
+}
+
+function closeDetail() {
+  document.getElementById('overlay').classList.remove('open');
+  document.getElementById('detailPanel').classList.remove('open');
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDetail(); });
+
+init();
+</script>
+</body>
+</html>
