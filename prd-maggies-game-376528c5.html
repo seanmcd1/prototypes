@@ -1,0 +1,1132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Maggie's Game — Exploration × Times Tables</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #1a1a2e; display: flex; justify-content: center; align-items: center; min-height: 100vh; font-family: 'Courier New', monospace; overflow: hidden; }
+canvas { image-rendering: pixelated; image-rendering: crisp-edges; display: block; }
+#game-container { position: relative; }
+#ui-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
+
+/* Challenge Modal */
+#challenge-modal { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.75); pointer-events: all; z-index: 100; }
+#challenge-box { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #2d1b4e; border: 4px solid #8b5cf6; border-radius: 16px; padding: 32px; min-width: 380px; color: #fff; text-align: center; box-shadow: 0 0 40px rgba(139,92,246,0.4); }
+#challenge-box h2 { font-size: 20px; margin-bottom: 8px; color: #c4b5fd; }
+#challenge-box .npc-name { font-size: 14px; color: #a78bfa; margin-bottom: 20px; }
+#challenge-box .question { font-size: 28px; margin: 16px 0; color: #fbbf24; }
+#challenge-box input { font-family: 'Courier New', monospace; font-size: 24px; padding: 8px 16px; width: 120px; text-align: center; background: #1e1145; border: 2px solid #7c3aed; border-radius: 8px; color: #fff; outline: none; }
+#challenge-box input:focus { border-color: #a78bfa; box-shadow: 0 0 12px rgba(139,92,246,0.5); }
+#challenge-box .feedback { font-size: 18px; margin-top: 12px; min-height: 28px; }
+#challenge-box .score-bar { display: flex; justify-content: center; gap: 8px; margin: 12px 0; }
+#challenge-box .score-dot { width: 16px; height: 16px; border-radius: 50%; background: #374151; border: 2px solid #6b7280; }
+#challenge-box .score-dot.correct { background: #10b981; border-color: #34d399; }
+#challenge-box .score-dot.wrong { background: #ef4444; border-color: #f87171; }
+#challenge-box .btn { font-family: 'Courier New', monospace; font-size: 16px; padding: 10px 24px; background: #7c3aed; color: #fff; border: none; border-radius: 8px; cursor: pointer; margin-top: 12px; }
+#challenge-box .btn:hover { background: #6d28d9; }
+
+/* Summary Modal */
+#summary-modal { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.75); pointer-events: all; z-index: 100; }
+#summary-box { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #1e3a2f; border: 4px solid #10b981; border-radius: 16px; padding: 32px; min-width: 360px; color: #fff; text-align: center; box-shadow: 0 0 40px rgba(16,185,129,0.3); }
+#summary-box h2 { font-size: 22px; color: #6ee7b7; margin-bottom: 16px; }
+#summary-box .final-score { font-size: 48px; color: #fbbf24; margin: 8px 0; }
+#summary-box .reward-text { font-size: 16px; margin: 16px 0; color: #d1fae5; }
+#summary-box .reward-icon { font-size: 48px; margin: 8px 0; }
+#summary-box .btn { font-family: 'Courier New', monospace; font-size: 16px; padding: 10px 24px; background: #059669; color: #fff; border: none; border-radius: 8px; cursor: pointer; margin-top: 12px; }
+#summary-box .btn:hover { background: #047857; }
+
+/* Inventory */
+#inventory-modal { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); pointer-events: all; z-index: 100; }
+#inventory-box { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #1e293b; border: 4px solid #3b82f6; border-radius: 16px; padding: 32px; min-width: 400px; color: #fff; text-align: center; }
+#inventory-box h2 { color: #93c5fd; margin-bottom: 16px; }
+#inventory-box .rewards-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 16px; margin: 16px 0; }
+#inventory-box .reward-item { width: 64px; height: 64px; background: #334155; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 32px; border: 2px solid #475569; }
+#inventory-box .reward-item.empty { opacity: 0.3; }
+#inventory-box .btn { font-family: 'Courier New', monospace; font-size: 16px; padding: 10px 24px; background: #3b82f6; color: #fff; border: none; border-radius: 8px; cursor: pointer; margin-top: 12px; }
+
+/* Title Screen */
+#title-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #0f0f23; pointer-events: all; z-index: 200; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+#title-screen h1 { font-size: 36px; color: #fbbf24; text-shadow: 0 0 20px rgba(251,191,36,0.4); margin-bottom: 8px; }
+#title-screen .subtitle { font-size: 14px; color: #9ca3af; margin-bottom: 40px; }
+#title-screen .start-btn { font-family: 'Courier New', monospace; font-size: 20px; padding: 14px 40px; background: #7c3aed; color: #fff; border: none; border-radius: 12px; cursor: pointer; animation: pulse 2s infinite; }
+#title-screen .start-btn:hover { background: #6d28d9; }
+#title-screen .controls-hint { font-size: 12px; color: #6b7280; margin-top: 24px; line-height: 1.8; }
+@keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+
+/* Dialog bubble */
+#dialog-box { display: none; position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); background: #1e293b; border: 3px solid #e2e8f0; border-radius: 12px; padding: 16px 24px; color: #fff; font-size: 14px; max-width: 500px; text-align: center; pointer-events: all; z-index: 50; }
+#dialog-box .dialog-name { color: #fbbf24; font-weight: bold; margin-bottom: 6px; }
+#dialog-box .dialog-text { color: #e2e8f0; line-height: 1.5; }
+#dialog-box .dialog-prompt { color: #a78bfa; font-size: 12px; margin-top: 8px; }
+
+/* HUD */
+#hud { position: absolute; top: 12px; left: 12px; pointer-events: none; z-index: 10; }
+#hud .hud-item { background: rgba(0,0,0,0.6); color: #fff; padding: 6px 12px; border-radius: 8px; font-size: 12px; margin-bottom: 4px; display: inline-block; }
+#hud-right { position: absolute; top: 12px; right: 12px; pointer-events: all; z-index: 10; }
+#hud-right .hud-btn { background: rgba(0,0,0,0.6); color: #fff; padding: 6px 12px; border-radius: 8px; font-size: 12px; cursor: pointer; border: 1px solid #4b5563; font-family: 'Courier New', monospace; }
+#hud-right .hud-btn:hover { background: rgba(0,0,0,0.8); }
+
+/* Mobile controls */
+#mobile-controls { display: none; position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 10; pointer-events: all; }
+#mobile-controls .dpad { display: grid; grid-template-columns: 50px 50px 50px; grid-template-rows: 50px 50px 50px; gap: 2px; }
+#mobile-controls .dpad button { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); border-radius: 8px; color: #fff; font-size: 20px; cursor: pointer; }
+#mobile-controls .dpad button:active { background: rgba(255,255,255,0.3); }
+#mobile-controls .dpad .empty { visibility: hidden; }
+
+@media (max-width: 768px) { #mobile-controls { display: block; } }
+</style>
+</head>
+<body>
+<div id="game-container">
+  <canvas id="game"></canvas>
+  <div id="ui-overlay">
+    <div id="hud">
+      <span class="hud-item" id="hud-area">🏠 Village</span>
+      <span class="hud-item" id="hud-rewards">🎁 0</span>
+    </div>
+    <div id="hud-right">
+      <button class="hud-btn" onclick="toggleInventory()">🎒 Rewards</button>
+      <button class="hud-btn" onclick="toggleMusic()" id="music-btn">🔊 Music</button>
+    </div>
+  </div>
+
+  <div id="dialog-box">
+    <div class="dialog-name" id="dialog-name"></div>
+    <div class="dialog-text" id="dialog-text"></div>
+    <div class="dialog-prompt" id="dialog-prompt"></div>
+  </div>
+
+  <div id="challenge-modal">
+    <div id="challenge-box">
+      <h2 id="challenge-title">Math Challenge!</h2>
+      <div class="npc-name" id="challenge-npc"></div>
+      <div class="score-bar" id="score-bar"></div>
+      <div class="question" id="challenge-question"></div>
+      <input type="number" id="challenge-input" autocomplete="off">
+      <div class="feedback" id="challenge-feedback"></div>
+      <br>
+      <button class="btn" id="challenge-submit" onclick="submitAnswer()">Submit</button>
+    </div>
+  </div>
+
+  <div id="summary-modal">
+    <div id="summary-box">
+      <h2>Challenge Complete!</h2>
+      <div class="final-score" id="final-score"></div>
+      <div class="reward-icon" id="reward-icon"></div>
+      <div class="reward-text" id="reward-text"></div>
+      <button class="btn" onclick="closeSummary()">Continue Exploring</button>
+    </div>
+  </div>
+
+  <div id="inventory-modal" onclick="toggleInventory()">
+    <div id="inventory-box" onclick="event.stopPropagation()">
+      <h2>🎒 Maggie's Rewards</h2>
+      <div class="rewards-grid" id="rewards-grid"></div>
+      <p style="color:#94a3b8;font-size:12px;margin-top:8px;">Find NPCs and ace their challenges to collect rewards!</p>
+      <button class="btn" onclick="toggleInventory()">Close</button>
+    </div>
+  </div>
+
+  <div id="title-screen">
+    <h1>🐕 Maggie's Game</h1>
+    <div class="subtitle">An exploration × times tables adventure</div>
+    <button class="start-btn" onclick="startGame()">▶ Start Adventure</button>
+    <div class="controls-hint">
+      Arrow keys or WASD to move<br>
+      Space / Enter to talk to characters<br>
+      I to open inventory
+    </div>
+  </div>
+
+  <div id="mobile-controls">
+    <div class="dpad">
+      <button class="empty"></button>
+      <button onpointerdown="mobileDir('up')" onpointerup="mobileStop('up')">▲</button>
+      <button class="empty"></button>
+      <button onpointerdown="mobileDir('left')" onpointerup="mobileStop('left')">◀</button>
+      <button onpointerdown="interact()">●</button>
+      <button onpointerdown="mobileDir('right')" onpointerup="mobileStop('right')">▶</button>
+      <button class="empty"></button>
+      <button onpointerdown="mobileDir('down')" onpointerup="mobileStop('down')">▼</button>
+      <button class="empty"></button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Constants ───────────────────────────────────────────
+const TILE = 16;
+const SCALE = 3;
+const COLS = 50, ROWS = 40;
+const VIEWPORT_TILES_X = 18, VIEWPORT_TILES_Y = 14;
+const CANVAS_W = VIEWPORT_TILES_X * TILE * SCALE;
+const CANVAS_H = VIEWPORT_TILES_Y * TILE * SCALE;
+
+// Tile types
+const T = { GRASS: 0, PATH: 1, WATER: 2, MOUNTAIN: 3, TREE: 4, BRIDGE: 5, FLOWER: 6, SAND: 7, DEEP_WATER: 8, HOUSE: 9, DARK_GRASS: 10 };
+
+// ── Canvas Setup ─────────────────────────────────────────
+const canvas = document.getElementById('game');
+canvas.width = CANVAS_W; canvas.height = CANVAS_H;
+const ctx = canvas.getContext('2d');
+ctx.imageSmoothingEnabled = false;
+
+// ── Color Palettes ──────────────────────────────────────
+const TILE_COLORS = {
+  [T.GRASS]: ['#4ade80','#22c55e','#16a34a'],
+  [T.PATH]: ['#d4a574','#c2956a','#b8885e'],
+  [T.WATER]: ['#3b82f6','#2563eb','#60a5fa'],
+  [T.MOUNTAIN]: ['#78716c','#a8a29e','#57534e'],
+  [T.TREE]: ['#166534','#15803d','#14532d'],
+  [T.BRIDGE]: ['#92400e','#a16207','#78350f'],
+  [T.FLOWER]: ['#f472b6','#fb923c','#facc15'],
+  [T.SAND]: ['#fde68a','#fcd34d','#f59e0b'],
+  [T.DEEP_WATER]: ['#1e3a8a','#1e40af','#1d4ed8'],
+  [T.HOUSE]: ['#dc2626','#b91c1c','#991b1b'],
+  [T.DARK_GRASS]: ['#15803d','#166534','#14532d'],
+};
+
+// ── World Map ───────────────────────────────────────────
+const map = [];
+function generateMap() {
+  // Fill with grass
+  for (let y = 0; y < ROWS; y++) {
+    map[y] = [];
+    for (let x = 0; x < COLS; x++) {
+      map[y][x] = Math.random() < 0.08 ? T.DARK_GRASS : T.GRASS;
+    }
+  }
+
+  // Lake in center-right
+  for (let y = 12; y < 22; y++) for (let x = 28; x < 42; x++) {
+    const dx = x - 35, dy = y - 17;
+    if (dx*dx/49 + dy*dy/25 < 1) {
+      map[y][x] = (dx*dx/36 + dy*dy/16 < 0.5) ? T.DEEP_WATER : T.WATER;
+    }
+  }
+  // Sandy shores
+  for (let y = 11; y < 23; y++) for (let x = 27; x < 43; x++) {
+    if (map[y][x] === T.GRASS || map[y][x] === T.DARK_GRASS) {
+      let adj = false;
+      for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+        const ny = y+dy, nx = x+dx;
+        if (ny >= 0 && ny < ROWS && nx >= 0 && nx < COLS && (map[ny][nx] === T.WATER || map[ny][nx] === T.DEEP_WATER)) adj = true;
+      }
+      if (adj && Math.random() < 0.6) map[y][x] = T.SAND;
+    }
+  }
+
+  // River from top to lake
+  for (let y = 0; y < 14; y++) {
+    const x = 34 + Math.round(Math.sin(y * 0.4) * 2);
+    map[y][x] = T.WATER; map[y][x+1] = T.WATER;
+    if (Math.random() < 0.4) map[y][x-1] = T.SAND;
+    if (Math.random() < 0.4) map[y][x+2] = T.SAND;
+  }
+
+  // Small stream from lake going south
+  for (let y = 21; y < ROWS; y++) {
+    const x = 35 + Math.round(Math.sin(y * 0.3) * 2);
+    if (x >= 0 && x < COLS) { map[y][x] = T.WATER; if (x+1 < COLS) map[y][x+1] = T.WATER; }
+  }
+
+  // Mountains top-right
+  for (let y = 1; y < 10; y++) for (let x = 38; x < 49; x++) {
+    if (Math.random() < 0.7) map[y][x] = T.MOUNTAIN;
+  }
+  // Mountains scattered top
+  for (let y = 0; y < 5; y++) for (let x = 42; x < 50; x++) {
+    map[y][x] = T.MOUNTAIN;
+  }
+
+  // Forest top-left
+  for (let y = 1; y < 12; y++) for (let x = 1; x < 16; x++) {
+    if (Math.random() < 0.55) map[y][x] = T.TREE;
+  }
+  // Forest clearing for NPC
+  for (let y = 5; y < 9; y++) for (let x = 6; x < 11; x++) {
+    map[y][x] = T.GRASS;
+  }
+  map[6][8] = T.FLOWER; map[7][9] = T.FLOWER; map[5][7] = T.FLOWER;
+
+  // Scattered trees elsewhere
+  for (let y = 0; y < ROWS; y++) for (let x = 0; x < COLS; x++) {
+    if (map[y][x] === T.GRASS && Math.random() < 0.02) map[y][x] = T.TREE;
+  }
+
+  // Flowers near village
+  for (let y = 28; y < 35; y++) for (let x = 8; x < 25; x++) {
+    if (map[y][x] === T.GRASS && Math.random() < 0.06) map[y][x] = T.FLOWER;
+  }
+
+  // ── Main path system ──────────────────────────────
+  // Village main road (horizontal)
+  for (let x = 5; x < 30; x++) { map[32][x] = T.PATH; map[33][x] = T.PATH; }
+  // Path north from village
+  for (let y = 10; y < 33; y++) { map[y][14] = T.PATH; map[y][15] = T.PATH; }
+  // Path to forest
+  for (let x = 8; x < 15; x++) { map[10][x] = T.PATH; map[11][x] = T.PATH; }
+  // Path east toward lake
+  for (let x = 15; x < 28; x++) { map[20][x] = T.PATH; map[21][x] = T.PATH; }
+  // Path around lake (south)
+  for (let x = 28; x < 44; x++) { map[24][x] = T.PATH; map[25][x] = T.PATH; }
+  // Path up east side
+  for (let y = 10; y < 25; y++) { map[y][43] = T.PATH; map[y][44] = T.PATH; }
+  // Path to mountain area
+  for (let x = 38; x < 44; x++) { map[10][x] = T.PATH; map[11][x] = T.PATH; }
+  // Connect north path to east
+  for (let x = 15; x < 44; x++) { map[10][x] = T.PATH; }
+
+  // Bridge over river
+  map[20][34] = T.BRIDGE; map[20][35] = T.BRIDGE;
+  map[21][34] = T.BRIDGE; map[21][35] = T.BRIDGE;
+
+  // Bridge on north path over river
+  map[10][34] = T.BRIDGE; map[10][35] = T.BRIDGE;
+
+  // Village houses
+  const housePositions = [[10,32],[11,32],[10,34],[11,34],[18,31],[19,31],[18,34],[19,34],[23,31],[24,31],[23,34],[24,34]];
+  housePositions.forEach(([x,y]) => { if(map[y] && map[y][x] !== undefined) map[y][x] = T.HOUSE; });
+
+  // Small island in lake with NPC
+  map[17][36] = T.SAND; map[17][37] = T.SAND;
+  map[18][36] = T.GRASS; map[18][37] = T.GRASS;
+  map[19][36] = T.SAND; map[19][37] = T.SAND;
+  map[18][35] = T.SAND; map[18][38] = T.SAND;
+
+  // Ensure NPC locations are walkable
+  map[7][8] = T.GRASS;   // Forest NPC
+  map[32][20] = T.PATH;  // Village NPC
+  map[18][37] = T.GRASS; // Island NPC (dragon)
+  map[11][43] = T.PATH;  // Mountain area NPC alternative
+
+  // Edge borders
+  for (let x = 0; x < COLS; x++) { map[0][x] = T.TREE; map[ROWS-1][x] = T.TREE; }
+  for (let y = 0; y < ROWS; y++) { map[y][0] = T.TREE; map[y][COLS-1] = T.TREE; }
+}
+
+// ── Tile rendering ──────────────────────────────────────
+const tileCache = new Map();
+function getTileCanvas(type, x, y) {
+  const seed = (x * 7 + y * 13) % 100;
+  const key = `${type}_${seed % 4}`;
+  if (tileCache.has(key)) return tileCache.get(key);
+  const tc = document.createElement('canvas');
+  tc.width = TILE; tc.height = TILE;
+  const tctx = tc.getContext('2d');
+  const colors = TILE_COLORS[type] || TILE_COLORS[T.GRASS];
+
+  switch(type) {
+    case T.GRASS:
+    case T.DARK_GRASS:
+      tctx.fillStyle = colors[0]; tctx.fillRect(0,0,16,16);
+      for (let i = 0; i < 6; i++) {
+        tctx.fillStyle = colors[1 + (i%2)];
+        tctx.fillRect((seed*3+i*5)%14, (seed*7+i*3)%14, 2, 2);
+      }
+      break;
+    case T.PATH:
+      tctx.fillStyle = colors[0]; tctx.fillRect(0,0,16,16);
+      for (let i = 0; i < 4; i++) {
+        tctx.fillStyle = colors[1 + (i%2)];
+        tctx.fillRect((seed+i*7)%13, (seed+i*5)%13, 3, 2);
+      }
+      break;
+    case T.WATER:
+      tctx.fillStyle = colors[0]; tctx.fillRect(0,0,16,16);
+      tctx.fillStyle = colors[2];
+      tctx.fillRect(2+(seed%4), 4, 6, 1);
+      tctx.fillRect(8+(seed%3), 10, 5, 1);
+      break;
+    case T.DEEP_WATER:
+      tctx.fillStyle = colors[0]; tctx.fillRect(0,0,16,16);
+      tctx.fillStyle = colors[1]; tctx.fillRect(3,6,4,1); tctx.fillRect(10,12,4,1);
+      break;
+    case T.MOUNTAIN:
+      tctx.fillStyle = colors[2]; tctx.fillRect(0,0,16,16);
+      tctx.fillStyle = colors[0]; // mountain shape
+      tctx.fillRect(4,2,8,4); tctx.fillRect(2,6,12,4); tctx.fillRect(0,10,16,6);
+      tctx.fillStyle = colors[1]; // snow cap
+      tctx.fillRect(6,2,4,2); tctx.fillRect(7,0,2,2);
+      break;
+    case T.TREE:
+      tctx.fillStyle = '#4ade80'; tctx.fillRect(0,0,16,16); // grass base
+      tctx.fillStyle = colors[0]; // leaves
+      tctx.fillRect(4,2,8,6); tctx.fillRect(2,4,12,4);
+      tctx.fillStyle = colors[1];
+      tctx.fillRect(5,3,6,4);
+      tctx.fillStyle = '#92400e'; // trunk
+      tctx.fillRect(7,8,2,6);
+      break;
+    case T.BRIDGE:
+      tctx.fillStyle = '#3b82f6'; tctx.fillRect(0,0,16,16); // water below
+      tctx.fillStyle = colors[0]; tctx.fillRect(0,2,16,12);
+      tctx.fillStyle = colors[2];
+      tctx.fillRect(0,2,16,1); tctx.fillRect(0,13,16,1);
+      tctx.fillStyle = colors[1]; tctx.fillRect(3,4,2,8); tctx.fillRect(11,4,2,8);
+      break;
+    case T.FLOWER:
+      tctx.fillStyle = '#4ade80'; tctx.fillRect(0,0,16,16);
+      const fc = ['#f472b6','#fb923c','#facc15','#a78bfa'];
+      for (let i = 0; i < 3; i++) {
+        tctx.fillStyle = fc[(seed+i)%fc.length];
+        tctx.fillRect(3+(seed*3+i*5)%10, 3+(seed*7+i*3)%10, 2, 2);
+        tctx.fillStyle = '#22c55e';
+        tctx.fillRect(3+(seed*3+i*5)%10, 5+(seed*7+i*3)%10, 1, 2);
+      }
+      break;
+    case T.SAND:
+      tctx.fillStyle = colors[0]; tctx.fillRect(0,0,16,16);
+      tctx.fillStyle = colors[1];
+      for (let i = 0; i < 3; i++) tctx.fillRect((seed+i*6)%13, (seed+i*4)%13, 2, 2);
+      break;
+    case T.HOUSE:
+      tctx.fillStyle = '#4ade80'; tctx.fillRect(0,0,16,16);
+      tctx.fillStyle = colors[0]; // walls
+      tctx.fillRect(2,6,12,10);
+      tctx.fillStyle = '#1e3a5f'; // roof
+      tctx.fillRect(1,3,14,4); tctx.fillRect(3,1,10,3);
+      tctx.fillStyle = '#fbbf24'; // window
+      tctx.fillRect(5,8,2,2); tctx.fillRect(9,8,2,2);
+      tctx.fillStyle = '#92400e'; // door
+      tctx.fillRect(7,11,2,5);
+      break;
+  }
+  tileCache.set(key, tc);
+  return tc;
+}
+
+// ── Player (Maggie the dog) ─────────────────────────────
+const player = {
+  x: 14, y: 30, // start in village
+  dir: 0, // 0=down,1=left,2=right,3=up
+  frame: 0, animTimer: 0,
+  moving: false, swimming: false,
+  speed: 0.06
+};
+
+function drawPlayer(px, py) {
+  const s = TILE * SCALE;
+  const cx = px, cy = py;
+  const f = Math.floor(player.frame) % 2;
+
+  ctx.save();
+  // Shadow
+  ctx.fillStyle = 'rgba(0,0,0,0.2)';
+  ctx.fillRect(cx + s*0.2, cy + s*0.8, s*0.6, s*0.15);
+
+  const p = (v) => v * SCALE; // pixel scaler
+
+  if (player.swimming) {
+    // Swimming - only show head above water
+    ctx.fillStyle = '#1c1917'; // body
+    ctx.fillRect(cx+p(4), cy+p(6), p(8), p(5));
+    ctx.fillStyle = '#dc2626'; // collar
+    ctx.fillRect(cx+p(4), cy+p(10), p(8), p(2));
+    // head
+    ctx.fillRect(cx+p(5), cy+p(3), p(6), p(5));
+    // ears
+    ctx.fillRect(cx+p(4), cy+p(2), p(2), p(3));
+    ctx.fillRect(cx+p(10), cy+p(2), p(2), p(3));
+    // eyes
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(cx+p(6), cy+p(5), p(2), p(2));
+    ctx.fillRect(cx+p(9), cy+p(5), p(2), p(2));
+    // water ripple
+    ctx.fillStyle = 'rgba(96,165,250,0.5)';
+    ctx.fillRect(cx+p(2), cy+p(11), p(12), p(3));
+    ctx.fillStyle = 'rgba(147,197,253,0.4)';
+    ctx.fillRect(cx+p(1+f*2), cy+p(12), p(4), p(1));
+    ctx.fillRect(cx+p(9-f*2), cy+p(13), p(4), p(1));
+  } else {
+    const bounce = f * SCALE;
+    const by = player.moving ? -bounce : 0;
+
+    if (player.dir === 0) { // facing down
+      // body
+      ctx.fillStyle = '#1c1917';
+      ctx.fillRect(cx+p(4), cy+p(5)+by, p(8), p(7));
+      // legs
+      ctx.fillRect(cx+p(4), cy+p(12)+by, p(3), p(3)+(f?-SCALE:0));
+      ctx.fillRect(cx+p(9), cy+p(12)+by, p(3), p(3)+(f?SCALE:0));
+      // head
+      ctx.fillRect(cx+p(3), cy+p(1)+by, p(10), p(6));
+      // ears
+      ctx.fillRect(cx+p(2), cy+p(0)+by, p(3), p(3));
+      ctx.fillRect(cx+p(11), cy+p(0)+by, p(3), p(3));
+      // eyes
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(cx+p(5), cy+p(3)+by, p(2), p(2));
+      ctx.fillRect(cx+p(9), cy+p(3)+by, p(2), p(2));
+      ctx.fillStyle = '#000';
+      ctx.fillRect(cx+p(5), cy+p(4)+by, p(1), p(1));
+      ctx.fillRect(cx+p(10), cy+p(4)+by, p(1), p(1));
+      // nose
+      ctx.fillStyle = '#78350f';
+      ctx.fillRect(cx+p(7), cy+p(5)+by, p(2), p(1));
+      // collar
+      ctx.fillStyle = '#dc2626';
+      ctx.fillRect(cx+p(4), cy+p(6)+by, p(8), p(2));
+      // tail
+      ctx.fillStyle = '#1c1917';
+      ctx.fillRect(cx+p(1), cy+p(5)+by, p(3), p(2));
+    } else if (player.dir === 3) { // facing up
+      ctx.fillStyle = '#1c1917';
+      ctx.fillRect(cx+p(4), cy+p(5)+by, p(8), p(7));
+      ctx.fillRect(cx+p(4), cy+p(12)+by, p(3), p(3)+(f?SCALE:0));
+      ctx.fillRect(cx+p(9), cy+p(12)+by, p(3), p(3)+(f?-SCALE:0));
+      ctx.fillRect(cx+p(3), cy+p(1)+by, p(10), p(6));
+      ctx.fillRect(cx+p(2), cy+p(0)+by, p(3), p(3));
+      ctx.fillRect(cx+p(11), cy+p(0)+by, p(3), p(3));
+      // collar
+      ctx.fillStyle = '#dc2626';
+      ctx.fillRect(cx+p(4), cy+p(6)+by, p(8), p(2));
+      // tail up
+      ctx.fillStyle = '#1c1917';
+      ctx.fillRect(cx+p(7), cy+p(3)+by, p(2), p(2));
+      ctx.fillRect(cx+p(7), cy+p(1)+by, p(2), p(3));
+    } else { // left/right
+      const flip = player.dir === 2;
+      ctx.save();
+      if (flip) { ctx.translate(cx + s, 0); ctx.scale(-1, 1); cx = 0; } // cx reassigned for flipped
+      const lx = flip ? 0 : cx;
+      // body
+      ctx.fillStyle = '#1c1917';
+      ctx.fillRect(lx+p(3), cy+p(4)+by, p(10), p(6));
+      // legs
+      ctx.fillRect(lx+p(3), cy+p(10)+by, p(3), p(4)+(f?-SCALE:0));
+      ctx.fillRect(lx+p(9), cy+p(10)+by, p(3), p(4)+(f?SCALE:0));
+      // head
+      ctx.fillRect(lx+p(1), cy+p(1)+by, p(8), p(6));
+      // ear
+      ctx.fillRect(lx+p(2), cy+p(0)+by, p(3), p(2));
+      // eye
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(lx+p(2), cy+p(3)+by, p(2), p(2));
+      ctx.fillStyle = '#000';
+      ctx.fillRect(lx+p(2), cy+p(3)+by, p(1), p(1));
+      // nose
+      ctx.fillStyle = '#78350f';
+      ctx.fillRect(lx+p(1), cy+p(5)+by, p(2), p(1));
+      // collar
+      ctx.fillStyle = '#dc2626';
+      ctx.fillRect(lx+p(3), cy+p(5)+by, p(3), p(2));
+      // tail
+      ctx.fillStyle = '#1c1917';
+      ctx.fillRect(lx+p(12), cy+p(3)+by, p(2), p(2));
+      ctx.fillRect(lx+p(13), cy+p(1)+by, p(2), p(3));
+      ctx.restore();
+    }
+  }
+  ctx.restore();
+}
+
+// ── NPCs ────────────────────────────────────────────────
+const npcs = [
+  {
+    x: 20, y: 32, name: "Farmer Felix", emoji: "👨‍🌾",
+    color: '#92400e', hatColor: '#fbbf24',
+    dialog: "Howdy, Maggie! I've got some math puzzles for ya. Think you can solve 'em?",
+    acceptText: "Press ENTER to accept the challenge!",
+    tables: [2, 3, 5], // easy
+    difficulty: "Easy",
+    completed: false,
+    reward: null
+  },
+  {
+    x: 8, y: 7, name: "Wizard Willow", emoji: "🧙",
+    color: '#4c1d95', hatColor: '#8b5cf6',
+    dialog: "Ah, a brave pup enters my forest! Solve my riddles to prove your worth!",
+    acceptText: "Press ENTER to accept the challenge!",
+    tables: [4, 6, 7, 8], // medium
+    difficulty: "Medium",
+    completed: false,
+    reward: null
+  },
+  {
+    x: 37, y: 18, name: "Dragon Ember", emoji: "🐉",
+    color: '#dc2626', hatColor: '#f97316',
+    dialog: "You swam all the way here? Impressive! But can your brain match your bravery?",
+    acceptText: "Press ENTER to accept the challenge!",
+    tables: [7, 8, 9, 11, 12], // hard
+    difficulty: "Hard",
+    completed: false,
+    reward: null
+  }
+];
+
+function drawNPC(npc, px, py) {
+  const s = TILE * SCALE;
+  const t = Date.now() * 0.002;
+  const bob = Math.sin(t + npc.x * 3) * 2;
+
+  ctx.save();
+  // Shadow
+  ctx.fillStyle = 'rgba(0,0,0,0.2)';
+  ctx.fillRect(px + s*0.15, py + s*0.85, s*0.7, s*0.12);
+
+  const p = (v) => v * SCALE;
+  const by = bob;
+
+  // Body
+  ctx.fillStyle = npc.color;
+  ctx.fillRect(px+p(4), py+p(5)+by, p(8), p(8));
+  // Head
+  ctx.fillStyle = '#fcd34d';
+  ctx.fillRect(px+p(4), py+p(1)+by, p(8), p(6));
+  // Hat/hood
+  ctx.fillStyle = npc.hatColor;
+  ctx.fillRect(px+p(3), py+p(0)+by, p(10), p(3));
+  ctx.fillRect(px+p(5), py-p(1)+by, p(6), p(2));
+  // Eyes
+  ctx.fillStyle = '#000';
+  ctx.fillRect(px+p(5), py+p(3)+by, p(2), p(2));
+  ctx.fillRect(px+p(9), py+p(3)+by, p(2), p(2));
+  // Feet
+  ctx.fillStyle = '#78350f';
+  ctx.fillRect(px+p(4), py+p(13)+by, p(3), p(2));
+  ctx.fillRect(px+p(9), py+p(13)+by, p(3), p(2));
+
+  // Exclamation mark if not completed
+  if (!npc.completed) {
+    ctx.fillStyle = '#fbbf24';
+    ctx.fillRect(px+p(7), py-p(6)+bob, p(2), p(4));
+    ctx.fillRect(px+p(7), py-p(1)+bob, p(2), p(2));
+  } else {
+    ctx.fillStyle = '#10b981';
+    ctx.fillRect(px+p(6), py-p(4)+bob, p(2), p(2));
+    ctx.fillRect(px+p(8), py-p(6)+bob, p(2), p(2));
+    ctx.fillRect(px+p(10), py-p(4)+bob, p(2), p(2));
+  }
+
+  ctx.restore();
+}
+
+// ── Game State ──────────────────────────────────────────
+let gameState = 'title'; // title, playing, dialog, challenge, summary
+let keys = {};
+let currentNPC = null;
+let challengeState = { questions: [], current: 0, score: 0, answers: [] };
+let rewards = [];
+let musicPlaying = false;
+let audioCtx = null;
+
+// ── Input ───────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  keys[e.key.toLowerCase()] = true;
+  if (gameState === 'dialog' && (e.key === 'Enter' || e.key === ' ')) {
+    e.preventDefault();
+    startChallenge();
+  }
+  if (gameState === 'playing' && (e.key === 'Enter' || e.key === ' ')) {
+    e.preventDefault();
+    interact();
+  }
+  if (gameState === 'challenge' && e.key === 'Enter') {
+    e.preventDefault();
+    submitAnswer();
+  }
+  if (e.key.toLowerCase() === 'i' && gameState === 'playing') {
+    toggleInventory();
+  }
+});
+document.addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; });
+
+// Mobile controls
+function mobileDir(dir) { keys[dir === 'up' ? 'arrowup' : dir === 'down' ? 'arrowdown' : dir === 'left' ? 'arrowleft' : 'arrowright'] = true; }
+function mobileStop(dir) { keys[dir === 'up' ? 'arrowup' : dir === 'down' ? 'arrowdown' : dir === 'left' ? 'arrowleft' : 'arrowright'] = false; }
+
+// ── Collision ──────────────────────────────────────────
+function canWalk(x, y) {
+  const tx = Math.floor(x), ty = Math.floor(y);
+  if (tx < 0 || tx >= COLS || ty < 0 || ty >= ROWS) return false;
+  const tile = map[ty][tx];
+  if (tile === T.MOUNTAIN || tile === T.TREE || tile === T.HOUSE || tile === T.DEEP_WATER) return false;
+  return true;
+}
+
+function isWater(x, y) {
+  const tx = Math.floor(x), ty = Math.floor(y);
+  if (tx < 0 || tx >= COLS || ty < 0 || ty >= ROWS) return false;
+  return map[ty][tx] === T.WATER;
+}
+
+// ── Interaction ─────────────────────────────────────────
+function interact() {
+  if (gameState !== 'playing') return;
+  const facing = [
+    {dx: 0, dy: 1},  // down
+    {dx: -1, dy: 0}, // left
+    {dx: 1, dy: 0},  // right
+    {dx: 0, dy: -1}  // up
+  ][player.dir];
+
+  for (const npc of npcs) {
+    const dist = Math.abs(player.x - npc.x) + Math.abs(player.y - npc.y);
+    if (dist < 2.5) {
+      currentNPC = npc;
+      showDialog(npc);
+      return;
+    }
+  }
+}
+
+function showDialog(npc) {
+  gameState = 'dialog';
+  const el = document.getElementById('dialog-box');
+  el.style.display = 'block';
+  document.getElementById('dialog-name').textContent = npc.emoji + ' ' + npc.name + ` (${npc.difficulty})`;
+  if (npc.completed) {
+    document.getElementById('dialog-text').textContent = "Great job before! Want to try again for a better score?";
+  } else {
+    document.getElementById('dialog-text').textContent = npc.dialog;
+  }
+  document.getElementById('dialog-prompt').textContent = npc.acceptText;
+}
+
+// ── Challenge System ────────────────────────────────────
+function generateQuestions(tables) {
+  const questions = [];
+  for (let i = 0; i < 5; i++) {
+    const t = tables[Math.floor(Math.random() * tables.length)];
+    const m = Math.floor(Math.random() * 12) + 1;
+    questions.push({ a: t, b: m, answer: t * m });
+  }
+  return questions;
+}
+
+function startChallenge() {
+  if (!currentNPC) return;
+  document.getElementById('dialog-box').style.display = 'none';
+  gameState = 'challenge';
+
+  challengeState = {
+    questions: generateQuestions(currentNPC.tables),
+    current: 0, score: 0, answers: []
+  };
+
+  document.getElementById('challenge-modal').style.display = 'block';
+  document.getElementById('challenge-title').textContent = '⚔️ Math Challenge!';
+  document.getElementById('challenge-npc').textContent = currentNPC.emoji + ' ' + currentNPC.name + ' — ' + currentNPC.difficulty;
+
+  updateChallengeUI();
+}
+
+function updateChallengeUI() {
+  const q = challengeState.questions[challengeState.current];
+  document.getElementById('challenge-question').textContent = `${q.a} × ${q.b} = ?`;
+  document.getElementById('challenge-feedback').textContent = '';
+  document.getElementById('challenge-input').value = '';
+  document.getElementById('challenge-input').focus();
+  document.getElementById('challenge-submit').textContent = 'Submit';
+  document.getElementById('challenge-submit').disabled = false;
+
+  // Score dots
+  const bar = document.getElementById('score-bar');
+  bar.innerHTML = '';
+  for (let i = 0; i < 5; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'score-dot';
+    if (i < challengeState.answers.length) {
+      dot.className += challengeState.answers[i] ? ' correct' : ' wrong';
+    }
+    bar.appendChild(dot);
+  }
+}
+
+function submitAnswer() {
+  const input = document.getElementById('challenge-input');
+  const val = parseInt(input.value);
+  if (isNaN(val)) return;
+
+  const q = challengeState.questions[challengeState.current];
+  const correct = val === q.answer;
+  challengeState.answers.push(correct);
+  if (correct) challengeState.score++;
+
+  const fb = document.getElementById('challenge-feedback');
+  if (correct) {
+    fb.textContent = '✅ Correct!';
+    fb.style.color = '#10b981';
+    playSound('correct');
+  } else {
+    fb.textContent = `❌ It was ${q.answer}`;
+    fb.style.color = '#ef4444';
+    playSound('wrong');
+  }
+
+  // Update dots
+  const dots = document.querySelectorAll('.score-dot');
+  dots[challengeState.current].className = 'score-dot ' + (correct ? 'correct' : 'wrong');
+
+  document.getElementById('challenge-submit').disabled = true;
+
+  setTimeout(() => {
+    challengeState.current++;
+    if (challengeState.current >= 5) {
+      finishChallenge();
+    } else {
+      updateChallengeUI();
+    }
+  }, 1200);
+}
+
+function finishChallenge() {
+  document.getElementById('challenge-modal').style.display = 'none';
+  gameState = 'summary';
+
+  const score = challengeState.score;
+  document.getElementById('final-score').textContent = `${score} / 5`;
+  document.getElementById('summary-modal').style.display = 'block';
+
+  let rewardEmoji = '', rewardText = '';
+  if (score === 5) {
+    const greatRewards = ['⭐','💎','👑','🏆','🌟','🎖️'];
+    rewardEmoji = greatRewards[Math.floor(Math.random() * greatRewards.length)];
+    rewardText = 'Perfect score! You earned a rare treasure!';
+    playSound('perfect');
+  } else if (score >= 4) {
+    const goodRewards = ['🎁','🎀','🧁','🍬','🎈','🎵'];
+    rewardEmoji = goodRewards[Math.floor(Math.random() * goodRewards.length)];
+    rewardText = 'Great job! You earned a nice prize!';
+    playSound('good');
+  } else if (score >= 3) {
+    rewardEmoji = '🍪';
+    rewardText = 'Not bad! A cookie for your effort. Try again for a bigger prize!';
+  } else {
+    rewardEmoji = '';
+    rewardText = 'Keep practicing! Talk to me again to try once more.';
+  }
+
+  document.getElementById('reward-icon').textContent = rewardEmoji;
+  document.getElementById('reward-text').textContent = rewardText;
+
+  if (score >= 3) {
+    rewards.push({ emoji: rewardEmoji, from: currentNPC.name, score: score });
+    currentNPC.completed = true;
+    currentNPC.reward = rewardEmoji;
+    updateHUD();
+  }
+}
+
+function closeSummary() {
+  document.getElementById('summary-modal').style.display = 'none';
+  gameState = 'playing';
+  currentNPC = null;
+}
+
+// ── Inventory ───────────────────────────────────────────
+function toggleInventory() {
+  const el = document.getElementById('inventory-modal');
+  if (el.style.display === 'block') {
+    el.style.display = 'none';
+    if (gameState !== 'playing') gameState = 'playing';
+    return;
+  }
+  el.style.display = 'block';
+  const grid = document.getElementById('rewards-grid');
+  grid.innerHTML = '';
+  if (rewards.length === 0) {
+    grid.innerHTML = '<p style="color:#9ca3af;width:100%">No rewards yet! Find NPCs to earn prizes.</p>';
+  } else {
+    rewards.forEach(r => {
+      const item = document.createElement('div');
+      item.className = 'reward-item';
+      item.textContent = r.emoji;
+      item.title = `From ${r.from} (${r.score}/5)`;
+      grid.appendChild(item);
+    });
+  }
+}
+
+function updateHUD() {
+  document.getElementById('hud-rewards').textContent = '🎁 ' + rewards.length;
+  // Update area name
+  const areas = [
+    { name: '🏠 Village', check: () => player.y > 26 },
+    { name: '🌲 Forest', check: () => player.x < 16 && player.y < 14 },
+    { name: '⛰️ Mountains', check: () => player.x > 36 && player.y < 12 },
+    { name: '🏖️ Lake Shore', check: () => player.x > 26 && player.y > 10 && player.y < 26 },
+    { name: '🌊 Swimming!', check: () => player.swimming },
+    { name: '🌿 Meadow', check: () => true },
+  ];
+  for (const a of areas) {
+    if (a.check()) { document.getElementById('hud-area').textContent = a.name; break; }
+  }
+}
+
+// ── Audio (Web Audio API) ───────────────────────────────
+function initAudio() {
+  if (audioCtx) return;
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+}
+
+let bgmNodes = [];
+function startMusic() {
+  initAudio();
+  if (musicPlaying) return;
+  musicPlaying = true;
+  document.getElementById('music-btn').textContent = '🔊 Music';
+
+  // Calming melody using pentatonic scale
+  const notes = [261.63, 293.66, 329.63, 392.00, 440.00, 523.25, 587.33, 659.25];
+  const masterGain = audioCtx.createGain();
+  masterGain.gain.value = 0.08;
+  masterGain.connect(audioCtx.destination);
+  bgmNodes.push(masterGain);
+
+  // Pad drone
+  const padOsc = audioCtx.createOscillator();
+  padOsc.type = 'sine';
+  padOsc.frequency.value = 130.81; // C3
+  const padGain = audioCtx.createGain();
+  padGain.gain.value = 0.15;
+  padOsc.connect(padGain);
+  padGain.connect(masterGain);
+  padOsc.start();
+  bgmNodes.push(padOsc);
+
+  // Second pad harmony
+  const padOsc2 = audioCtx.createOscillator();
+  padOsc2.type = 'sine';
+  padOsc2.frequency.value = 196.00; // G3
+  const padGain2 = audioCtx.createGain();
+  padGain2.gain.value = 0.08;
+  padOsc2.connect(padGain2);
+  padGain2.connect(masterGain);
+  padOsc2.start();
+  bgmNodes.push(padOsc2);
+
+  // Melody sequence
+  let noteIndex = 0;
+  function playNote() {
+    if (!musicPlaying) return;
+    const osc = audioCtx.createOscillator();
+    osc.type = 'triangle';
+    const note = notes[noteIndex % notes.length];
+    osc.frequency.value = note;
+    const env = audioCtx.createGain();
+    env.gain.setValueAtTime(0.12, audioCtx.currentTime);
+    env.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.8);
+    osc.connect(env);
+    env.connect(masterGain);
+    osc.start();
+    osc.stop(audioCtx.currentTime + 2);
+    noteIndex++;
+    // Semi-random pattern using pentatonic
+    if (Math.random() < 0.3) noteIndex += 2;
+    setTimeout(playNote, 1500 + Math.random() * 1000);
+  }
+  playNote();
+}
+
+function stopMusic() {
+  musicPlaying = false;
+  document.getElementById('music-btn').textContent = '🔇 Music';
+  bgmNodes.forEach(n => { try { n.stop?.(); n.disconnect(); } catch(e) {} });
+  bgmNodes = [];
+}
+
+function toggleMusic() {
+  if (musicPlaying) stopMusic(); else startMusic();
+}
+
+function playSound(type) {
+  initAudio();
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  gain.gain.value = 0.15;
+
+  if (type === 'correct') {
+    osc.type = 'square';
+    osc.frequency.setValueAtTime(523, audioCtx.currentTime);
+    osc.frequency.setValueAtTime(659, audioCtx.currentTime + 0.1);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+    osc.start(); osc.stop(audioCtx.currentTime + 0.3);
+  } else if (type === 'wrong') {
+    osc.type = 'sawtooth';
+    osc.frequency.value = 200;
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+    osc.start(); osc.stop(audioCtx.currentTime + 0.3);
+  } else if (type === 'perfect') {
+    osc.type = 'square';
+    osc.frequency.setValueAtTime(523, audioCtx.currentTime);
+    osc.frequency.setValueAtTime(659, audioCtx.currentTime + 0.15);
+    osc.frequency.setValueAtTime(784, audioCtx.currentTime + 0.3);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.6);
+    osc.start(); osc.stop(audioCtx.currentTime + 0.6);
+  } else if (type === 'good') {
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(440, audioCtx.currentTime);
+    osc.frequency.setValueAtTime(523, audioCtx.currentTime + 0.15);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4);
+    osc.start(); osc.stop(audioCtx.currentTime + 0.4);
+  }
+}
+
+// ── Camera ──────────────────────────────────────────────
+const camera = { x: 0, y: 0 };
+
+function updateCamera() {
+  const targetX = player.x * TILE * SCALE - CANVAS_W / 2 + TILE * SCALE / 2;
+  const targetY = player.y * TILE * SCALE - CANVAS_H / 2 + TILE * SCALE / 2;
+  camera.x += (targetX - camera.x) * 0.1;
+  camera.y += (targetY - camera.y) * 0.1;
+  // Clamp
+  camera.x = Math.max(0, Math.min(camera.x, COLS * TILE * SCALE - CANVAS_W));
+  camera.y = Math.max(0, Math.min(camera.y, ROWS * TILE * SCALE - CANVAS_H));
+}
+
+// ── Day/Night Cycle ─────────────────────────────────────
+function getDayLight() {
+  const t = (Date.now() % 120000) / 120000; // 2 min cycle
+  if (t < 0.3) return 1.0; // day
+  if (t < 0.4) return 1.0 - (t - 0.3) / 0.1 * 0.3; // sunset
+  if (t < 0.7) return 0.7; // dusk
+  if (t < 0.8) return 0.7 + (t - 0.7) / 0.1 * 0.3; // dawn
+  return 1.0; // day
+}
+
+// ── Game Loop ───────────────────────────────────────────
+function update() {
+  if (gameState !== 'playing') return;
+
+  let dx = 0, dy = 0;
+  if (keys['arrowleft'] || keys['a']) { dx = -1; player.dir = 1; }
+  if (keys['arrowright'] || keys['d']) { dx = 1; player.dir = 2; }
+  if (keys['arrowup'] || keys['w']) { dy = -1; player.dir = 3; }
+  if (keys['arrowdown'] || keys['s']) { dy = 1; player.dir = 0; }
+
+  player.moving = dx !== 0 || dy !== 0;
+
+  if (player.moving) {
+    const speed = player.swimming ? player.speed * 0.6 : player.speed;
+    const nx = player.x + dx * speed;
+    const ny = player.y + dy * speed;
+    // Check collision with margin
+    if (canWalk(nx + 0.2, ny + 0.2) && canWalk(nx + 0.8, ny + 0.2) &&
+        canWalk(nx + 0.2, ny + 0.8) && canWalk(nx + 0.8, ny + 0.8)) {
+      player.x = nx;
+      player.y = ny;
+    } else if (canWalk(player.x + 0.2, ny + 0.2) && canWalk(player.x + 0.8, ny + 0.8)) {
+      player.y = ny; // slide along wall
+    } else if (canWalk(nx + 0.2, player.y + 0.2) && canWalk(nx + 0.8, player.y + 0.8)) {
+      player.x = nx; // slide along wall
+    }
+
+    player.animTimer += 0.15;
+    player.frame = Math.floor(player.animTimer) % 2;
+  }
+
+  // Swimming check
+  player.swimming = isWater(player.x + 0.5, player.y + 0.5);
+
+  updateCamera();
+  updateHUD();
+
+  // Auto-proximity dialog hint (subtle)
+  let nearNPC = null;
+  for (const npc of npcs) {
+    const dist = Math.abs(player.x - npc.x) + Math.abs(player.y - npc.y);
+    if (dist < 2.5) nearNPC = npc;
+  }
+  // Show a subtle hint when near NPC
+  if (nearNPC && gameState === 'playing') {
+    const el = document.getElementById('dialog-box');
+    if (el.style.display !== 'block') {
+      el.style.display = 'block';
+      document.getElementById('dialog-name').textContent = nearNPC.emoji + ' ' + nearNPC.name;
+      document.getElementById('dialog-text').textContent = nearNPC.completed ? 'Want to try again?' : 'Press SPACE or ENTER to talk';
+      document.getElementById('dialog-prompt').textContent = '';
+    }
+  } else if (gameState === 'playing') {
+    document.getElementById('dialog-box').style.display = 'none';
+  }
+}
+
+function render() {
+  ctx.fillStyle = '#1a1a2e';
+  ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
+
+  const startCol = Math.floor(camera.x / (TILE * SCALE));
+  const startRow = Math.floor(camera.y / (TILE * SCALE));
+  const endCol = Math.min(startCol + VIEWPORT_TILES_X + 2, COLS);
+  const endRow = Math.min(startRow + VIEWPORT_TILES_Y + 2, ROWS);
+
+  // Draw tiles
+  for (let y = startRow; y < endRow; y++) {
+    for (let x = startCol; x < endCol; x++) {
+      if (y < 0 || y >= ROWS || x < 0 || x >= COLS) continue;
+      const tile = map[y][x];
+      const px = x * TILE * SCALE - camera.x;
+      const py = y * TILE * SCALE - camera.y;
+      const tc = getTileCanvas(tile, x, y);
+      ctx.drawImage(tc, px, py, TILE * SCALE, TILE * SCALE);
+    }
+  }
+
+  // Animated water shimmer
+  const wt = Date.now() * 0.003;
+  ctx.fillStyle = 'rgba(147, 197, 253, 0.08)';
+  for (let y = startRow; y < endRow; y++) {
+    for (let x = startCol; x < endCol; x++) {
+      if (y < 0 || y >= ROWS || x < 0 || x >= COLS) continue;
+      if (map[y][x] === T.WATER || map[y][x] === T.DEEP_WATER) {
+        const px = x * TILE * SCALE - camera.x;
+        const py = y * TILE * SCALE - camera.y;
+        const shimmer = Math.sin(wt + x * 0.7 + y * 0.5) * 0.5 + 0.5;
+        ctx.globalAlpha = shimmer * 0.15;
+        ctx.fillRect(px, py, TILE * SCALE, TILE * SCALE);
+      }
+    }
+  }
+  ctx.globalAlpha = 1;
+
+  // Draw NPCs
+  for (const npc of npcs) {
+    const px = npc.x * TILE * SCALE - camera.x;
+    const py = npc.y * TILE * SCALE - camera.y;
+    if (px > -TILE*SCALE && px < CANVAS_W + TILE*SCALE && py > -TILE*SCALE && py < CANVAS_H + TILE*SCALE) {
+      drawNPC(npc, px, py);
+    }
+  }
+
+  // Draw player
+  const ppx = player.x * TILE * SCALE - camera.x;
+  const ppy = player.y * TILE * SCALE - camera.y;
+  drawPlayer(ppx, ppy);
+
+  // Day/night overlay
+  const light = getDayLight();
+  if (light < 1) {
+    ctx.fillStyle = `rgba(10, 10, 40, ${(1 - light) * 0.5})`;
+    ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
+  }
+}
+
+function gameLoop() {
+  update();
+  render();
+  requestAnimationFrame(gameLoop);
+}
+
+// ── Start ───────────────────────────────────────────────
+function startGame() {
+  document.getElementById('title-screen').style.display = 'none';
+  gameState = 'playing';
+  startMusic();
+}
+
+// Init
+generateMap();
+camera.x = player.x * TILE * SCALE - CANVAS_W / 2;
+camera.y = player.y * TILE * SCALE - CANVAS_H / 2;
+gameLoop();
+</script>
+</body>
+</html>
