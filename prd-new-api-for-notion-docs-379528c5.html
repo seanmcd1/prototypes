@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Notion Docs API — Developer Documentation</title>
+<style>
+  :root {
+    --bg: #191919;
+    --surface: #222222;
+    --surface2: #2a2a2a;
+    --border: #333;
+    --text: #e8e8e8;
+    --text-muted: #999;
+    --accent: #2383e2;
+    --accent-hover: #1b6dbf;
+    --green: #4dab6f;
+    --red: #e85454;
+    --orange: #d9730d;
+    --yellow: #dfab01;
+    --purple: #9065b0;
+    --sidebar-w: 260px;
+    --header-h: 56px;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    --mono: 'SF Mono', SFMono-Regular, 'Consolas', 'Liberation Mono', Menlo, monospace;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: var(--font); background: var(--bg); color: var(--text); line-height: 1.6; }
+  .app { display: flex; height: 100vh; overflow: hidden; }
+  .sidebar { width: var(--sidebar-w); background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; overflow-y: auto; }
+  .main { flex: 1; overflow-y: auto; }
+  .content { max-width: 900px; margin: 0 auto; padding: 40px 48px 80px; }
+  .sidebar-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+  .sidebar-header svg { width: 24px; height: 24px; }
+  .sidebar-header span { font-weight: 600; font-size: 15px; }
+  .sidebar-section { padding: 12px 0 4px; }
+  .sidebar-section-title { padding: 4px 20px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .8px; color: var(--text-muted); }
+  .sidebar-link { display: flex; align-items: center; gap: 8px; padding: 6px 20px; font-size: 14px; color: var(--text-muted); cursor: pointer; text-decoration: none; transition: all .15s; border-left: 3px solid transparent; }
+  .sidebar-link:hover { background: var(--surface2); color: var(--text); }
+  .sidebar-link.active { color: var(--text); background: var(--surface2); border-left-color: var(--accent); font-weight: 500; }
+  .sidebar-link .method { font-size: 10px; font-weight: 700; font-family: var(--mono); padding: 2px 6px; border-radius: 3px; min-width: 40px; text-align: center; }
+  .method-get { background: rgba(77,171,111,.15); color: var(--green); }
+  .method-post { background: rgba(35,131,226,.15); color: var(--accent); }
+  .method-patch { background: rgba(223,171,1,.15); color: var(--yellow); }
+  .method-delete { background: rgba(232,84,84,.15); color: var(--red); }
+  .sidebar-badge { font-size: 10px; padding: 1px 6px; border-radius: 8px; background: var(--accent); color: #fff; margin-left: auto; }
+  h1 { font-size: 32px; font-weight: 700; margin-bottom: 8px; }
+  h2 { font-size: 22px; font-weight: 600; margin: 36px 0 12px; color: var(--text); }
+  h3 { font-size: 17px; font-weight: 600; margin: 24px 0 8px; }
+  p { margin-bottom: 12px; color: var(--text-muted); font-size: 15px; }
+  .subtitle { font-size: 16px; color: var(--text-muted); margin-bottom: 24px; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  code { font-family: var(--mono); font-size: 13px; background: var(--surface2); padding: 2px 6px; border-radius: 4px; }
+  .tag { display: inline-block; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 4px; margin-right: 6px; }
+  .tag-stable { background: rgba(77,171,111,.15); color: var(--green); }
+  .tag-beta { background: rgba(223,171,1,.15); color: var(--yellow); }
+  .tag-auth { background: rgba(144,101,176,.15); color: var(--purple); }
+  .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 16px; margin: 16px 0; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 20px; cursor: pointer; transition: all .2s; }
+  .card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,.3); }
+  .card-icon { font-size: 24px; margin-bottom: 8px; }
+  .card-title { font-weight: 600; font-size: 15px; margin-bottom: 4px; color: var(--text); }
+  .card-desc { font-size: 13px; color: var(--text-muted); }
+  .endpoint-header { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px 20px; display: flex; align-items: center; gap: 12px; margin: 16px 0; }
+  .endpoint-method { font-size: 13px; font-weight: 700; font-family: var(--mono); padding: 4px 10px; border-radius: 4px; }
+  .endpoint-path { font-family: var(--mono); font-size: 14px; color: var(--text-muted); }
+  .endpoint-path .param { color: var(--orange); }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0 20px; font-size: 14px; }
+  th { text-align: left; padding: 8px 12px; background: var(--surface); border: 1px solid var(--border); color: var(--text-muted); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: .5px; }
+  td { padding: 8px 12px; border: 1px solid var(--border); vertical-align: top; }
+  td code { font-size: 12px; }
+  .required { color: var(--red); font-size: 11px; font-weight: 600; }
+  .optional { color: var(--text-muted); font-size: 11px; }
+  .code-block { background: #1a1a2e; border-radius: 8px; margin: 12px 0 20px; overflow: hidden; }
+  .code-tabs { display: flex; border-bottom: 1px solid #2a2a3e; }
+  .code-tab { padding: 8px 16px; font-size: 12px; color: var(--text-muted); cursor: pointer; border-bottom: 2px solid transparent; font-family: var(--mono); }
+  .code-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .code-tab:hover { color: var(--text); }
+  .code-content { padding: 16px 20px; font-family: var(--mono); font-size: 13px; line-height: 1.5; overflow-x: auto; white-space: pre; color: #c9d1d9; }
+  .code-content .kw { color: #ff7b72; }
+  .code-content .str { color: #a5d6ff; }
+  .code-content .num { color: #79c0ff; }
+  .code-content .cm { color: #8b949e; }
+  .code-content .key { color: #d2a8ff; }
+  .code-content .bool { color: #79c0ff; }
+  .playground { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; margin: 20px 0; overflow: hidden; }
+  .playground-header { padding: 12px 20px; background: var(--surface2); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  .playground-title { font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+  .playground-title svg { width: 16px; height: 16px; }
+  .playground-body { display: grid; grid-template-columns: 1fr 1fr; }
+  .playground-req, .playground-res { padding: 16px 20px; }
+  .playground-res { border-left: 1px solid var(--border); background: rgba(0,0,0,.15); }
+  .playground-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; color: var(--text-muted); margin-bottom: 8px; }
+  .playground textarea { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-family: var(--mono); font-size: 12px; padding: 12px; resize: vertical; min-height: 180px; line-height: 1.5; }
+  .playground textarea:focus { outline: none; border-color: var(--accent); }
+  .playground-output { width: 100%; min-height: 180px; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 12px; font-family: var(--mono); font-size: 12px; line-height: 1.5; overflow: auto; white-space: pre-wrap; }
+  .btn { background: var(--accent); color: #fff; border: none; padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; transition: background .15s; display: inline-flex; align-items: center; gap: 6px; }
+  .btn:hover { background: var(--accent-hover); }
+  .btn-sm { padding: 4px 12px; font-size: 12px; }
+  .status-badge { font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 4px; }
+  .status-200 { background: rgba(77,171,111,.15); color: var(--green); }
+  .status-201 { background: rgba(77,171,111,.15); color: var(--green); }
+  .status-400 { background: rgba(223,171,1,.15); color: var(--yellow); }
+  .status-401 { background: rgba(232,84,84,.15); color: var(--red); }
+  .status-409 { background: rgba(232,84,84,.15); color: var(--red); }
+  .status-429 { background: rgba(223,171,1,.15); color: var(--yellow); }
+  .auth-flow { display: flex; align-items: center; gap: 12px; margin: 16px 0; flex-wrap: wrap; }
+  .auth-step { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px; flex: 1; min-width: 160px; text-align: center; }
+  .auth-step-num { font-size: 11px; font-weight: 700; color: var(--accent); margin-bottom: 4px; }
+  .auth-step-title { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+  .auth-step-desc { font-size: 12px; color: var(--text-muted); }
+  .auth-arrow { color: var(--text-muted); font-size: 20px; }
+  .block-tree { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 20px; margin: 16px 0; font-family: var(--mono); font-size: 13px; }
+  .tree-node { padding: 4px 0; }
+  .tree-node .indent { display: inline-block; width: 24px; }
+  .tree-icon { color: var(--accent); margin-right: 4px; }
+  .tree-type { color: var(--purple); }
+  .tree-id { color: var(--text-muted); font-size: 11px; }
+  .callout { background: var(--surface); border-left: 3px solid var(--accent); border-radius: 0 6px 6px 0; padding: 12px 16px; margin: 16px 0; display: flex; gap: 10px; font-size: 14px; }
+  .callout-icon { font-size: 18px; flex-shrink: 0; }
+  .callout p { margin: 0; }
+  .callout-warn { border-left-color: var(--yellow); }
+  .callout-success { border-left-color: var(--green); }
+  hr { border: none; border-top: 1px solid var(--border); margin: 32px 0; }
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    .content { padding: 20px 16px 60px; }
+    .playground-body { grid-template-columns: 1fr; }
+    .playground-res { border-left: none; border-top: 1px solid var(--border); }
+    .card-grid { grid-template-columns: 1fr; }
+    .auth-flow { flex-direction: column; }
+    .auth-arrow { transform: rotate(90deg); }
+  }
+  .version-pill { display: inline-flex; align-items: center; gap: 4px; background: var(--surface2); border: 1px solid var(--border); padding: 4px 10px; border-radius: 16px; font-size: 12px; font-weight: 500; }
+  .version-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); }
+  .rate-bar { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px 20px; margin: 16px 0; }
+  .rate-progress { height: 6px; background: var(--surface2); border-radius: 3px; overflow: hidden; margin: 8px 0; }
+  .rate-progress-fill { height: 100%; background: var(--green); border-radius: 3px; transition: width .5s; }
+  .rate-stats { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-muted); }
+</style>
+</head>
+<body>
+<div class="app">
+  <nav class="sidebar">
+    <div class="sidebar-header">
+      <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="3" stroke="currentColor" stroke-width="2"/><path d="M8 7h8M8 11h6M8 15h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      <span>Notion Docs API</span>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Getting Started</div>
+      <a class="sidebar-link active" data-page="overview" onclick="showPage('overview')">Overview</a>
+      <a class="sidebar-link" data-page="auth" onclick="showPage('auth')">Authentication</a>
+      <a class="sidebar-link" data-page="content-model" onclick="showPage('content-model')">Content Model</a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Endpoints</div>
+      <a class="sidebar-link" data-page="create-doc" onclick="showPage('create-doc')"><span class="method method-post">POST</span> Create Document</a>
+      <a class="sidebar-link" data-page="get-doc" onclick="showPage('get-doc')"><span class="method method-get">GET</span> Get Document</a>
+      <a class="sidebar-link" data-page="update-doc" onclick="showPage('update-doc')"><span class="method method-patch">PATCH</span> Update Document</a>
+      <a class="sidebar-link" data-page="append-blocks" onclick="showPage('append-blocks')"><span class="method method-post">POST</span> Append Blocks</a>
+      <a class="sidebar-link" data-page="delete-doc" onclick="showPage('delete-doc')"><span class="method method-delete">DEL</span> Archive Document</a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Concepts</div>
+      <a class="sidebar-link" data-page="versioning" onclick="showPage('versioning')">Versioning &amp; Conflicts</a>
+      <a class="sidebar-link" data-page="errors" onclick="showPage('errors')">Error Handling</a>
+      <a class="sidebar-link" data-page="rate-limits" onclick="showPage('rate-limits')">Rate Limits</a>
+      <a class="sidebar-link" data-page="playground" onclick="showPage('playground')">API Playground <span class="sidebar-badge">Try</span></a>
+    </div>
+  </nav>
+  <div class="main">
+    <div class="page" id="page-overview">
+      <div class="content">
+        <div class="version-pill"><span class="version-dot"></span> v2024-06-01 (stable)</div>
+        <h1 style="margin-top:12px">Notion Docs API</h1>
+        <p class="subtitle">Programmatic CRUD for Notion documents — blocks, rich text, versioning, and more.</p>
+        <div class="callout">
+          <span class="callout-icon">📖</span>
+          <div><p style="color:var(--text)"><strong>Base URL:</strong> <code>https://api.notion.com/v1/docs</code></p><p>All requests require an Authorization header with a valid bearer token.</p></div>
+        </div>
+        <div class="card-grid">
+          <div class="card" onclick="showPage('auth')"><div class="card-icon">🔐</div><div class="card-title">Authentication</div><div class="card-desc">OAuth 2.0 and internal integration tokens with scoped permissions.</div></div>
+          <div class="card" onclick="showPage('content-model')"><div class="card-icon">🌳</div><div class="card-title">Content Model</div><div class="card-desc">Documents as structured block trees with stable IDs and rich text.</div></div>
+          <div class="card" onclick="showPage('create-doc')"><div class="card-icon">⚡</div><div class="card-title">Quick Start</div><div class="card-desc">Create your first document in under 5 minutes.</div></div>
+          <div class="card" onclick="showPage('playground')"><div class="card-icon">🧪</div><div class="card-title">API Playground</div><div class="card-desc">Try API calls live against a sandbox workspace.</div></div>
+        </div>
+        <h2>Quick Example</h2>
+        <p>Create a document with a heading and paragraph in a single API call:</p>
+        <div class="code-block">
+          <div class="code-tabs">
+            <div class="code-tab active" onclick="switchTab(this,'curl')">cURL</div>
+            <div class="code-tab" onclick="switchTab(this,'python')">Python</div>
+            <div class="code-tab" onclick="switchTab(this,'js')">JavaScript</div>
+          </div>
+          <div class="code-content" data-lang="curl"><span class="kw">curl</span> -X POST https://api.notion.com/v1/docs \
+  -H <span class="str">"Authorization: Bearer ntn_****"</span> \
+  -H <span class="str">"Content-Type: application/json"</span> \
+  -H <span class="str">"Notion-Version: 2024-06-01"</span> \
+  -d <span class="str">'{
+    "parent": { "workspace_id": "ws_abc123" },
+    "title": "Getting Started Guide",
+    "blocks": [
+      {
+        "type": "heading_2",
+        "content": { "rich_text": [{ "text": "Welcome" }] }
+      },
+      {
+        "type": "paragraph",
+        "content": {
+          "rich_text": [
+            { "text": "This doc was created via the " },
+            { "text": "Docs API", "annotations": { "bold": true } },
+            { "text": "." }
+          ]
+        }
+      }
+    ]
+  }'</span></div>
+          <div class="code-content" data-lang="python" style="display:none"><span class="kw">import</span> requests
+
+response = requests.post(
+    <span class="str">"https://api.notion.com/v1/docs"</span>,
+    headers={
+        <span class="str">"Authorization"</span>: <span class="str">"Bearer ntn_****"</span>,
+        <span class="str">"Notion-Version"</span>: <span class="str">"2024-06-01"</span>,
+    },
+    json={
+        <span class="str">"parent"</span>: {<span class="str">"workspace_id"</span>: <span class="str">"ws_abc123"</span>},
+        <span class="str">"title"</span>: <span class="str">"Getting Started Guide"</span>,
+        <span class="str">"blocks"</span>: [
+            {
+                <span class="str">"type"</span>: <span class="str">"heading_2"</span>,
+                <span class="str">"content"</span>: {
+                    <span class="str">"rich_text"</span>: [{<span class="str">"text"</span>: <span class="str">"Welcome"</span>}]
+                }
+            },
+            {
+                <span class="str">"type"</span>: <span class="str">"paragraph"</span>,
+                <span class="str">"content"</span>: {
+                    <span class="str">"rich_text"</span>: [
+                        {<span class="str">"text"</span>: <span class="str">"Created via the "</span>},
+                        {<span class="str">"text"</span>: <span class="str">"Docs API"</span>, <span class="str">"annotations"</span>: {<span class="str">"bold"</span>: <span class="bool">True</span>}}
+                    ]
+                }
+            }
+        ]
+    }
+)
+<span class="kw">print</span>(response.json())</div>
+          <div class="code-content" data-lang="js" style="display:none"><span class="kw">const</span> response = <span class="kw">await</span> fetch(<span class="str">"https://api.notion.com/v1/docs"</span>, {
+  method: <span class="str">"POST"</span>,
+  headers: {
+    <span class="str">"Authorization"</span>: <span class="str">`Bearer ${process.env.NOTION_TOKEN}`</span>,
+    <span class="str">"Content-Type"</span>: <span class="str">"application/json"</span>,
+    <span class="str">"Notion-Version"</span>: <span class="str">"2024-06-01"</span>,
+  },
+  body: JSON.stringify({
+    parent: { workspace_id: <span class="str">"ws_abc123"</span> },
+    title: <span class="str">"Getting Started Guide"</span>,
+    blocks: [
+      {
+        type: <span class="str">"heading_2"</span>,
+        content: { rich_text: [{ text: <span class="str">"Welcome"</span> }] }
+      },
+      {
+        type: <span class="str">"paragraph"</span>,
+        content: {
+          rich_text: [
+            { text: <span class="str">"Created via the "</span> },
+            { text: <span class="str">"Docs API"</span>, annotations: { bold: <span class="bool">true</span> } }
+          ]
+        }
+      }
+    ]
+  })
+});
+<span class="kw">const</span> doc = <span class="kw">await</span> response.json();</div>
+        </div>
+        <h2>Key Features</h2>
+        <table>
+          <tr><th>Feature</th><th>Description</th><th>Status</th></tr>
+          <tr><td>OAuth 2.0 Auth</td><td>Scoped tokens for workspace + document access</td><td><span class="tag tag-stable">Stable</span></td></tr>
+          <tr><td>Block CRUD</td><td>Full create, read, update, delete for blocks</td><td><span class="tag tag-stable">Stable</span></td></tr>
+          <tr><td>Rich Text</td><td>Bold, italic, code, links, mentions, colors</td><td><span class="tag tag-stable">Stable</span></td></tr>
+          <tr><td>Optimistic Locking</td><td>ETag-based conflict detection for safe updates</td><td><span class="tag tag-stable">Stable</span></td></tr>
+          <tr><td>Attachments</td><td>File upload and embed support</td><td><span class="tag tag-beta">Beta</span></td></tr>
+          <tr><td>Comments API</td><td>Thread-based comments on blocks</td><td><span class="tag tag-beta">Beta</span></td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="page" id="page-auth" style="display:none">
+      <div class="content">
+        <h1>Authentication</h1>
+        <p class="subtitle">Secure, scoped access to workspaces and documents.</p>
+        <div class="callout"><span class="callout-icon">🔑</span><div><p style="color:var(--text)">All API requests must include an <code>Authorization: Bearer &lt;token&gt;</code> header and the <code>Notion-Version</code> header.</p></div></div>
+        <h2>Auth Methods</h2>
+        <table>
+          <tr><th>Method</th><th>Use Case</th><th>Token Prefix</th></tr>
+          <tr><td><strong>OAuth 2.0</strong></td><td>Public integrations &amp; partner apps</td><td><code>ntn_oauth_*</code></td></tr>
+          <tr><td><strong>Internal Token</strong></td><td>Private workspace automations</td><td><code>ntn_*</code></td></tr>
+        </table>
+        <h2>OAuth 2.0 Flow</h2>
+        <div class="auth-flow">
+          <div class="auth-step"><div class="auth-step-num">Step 1</div><div class="auth-step-title">Redirect</div><div class="auth-step-desc">Send user to Notion's auth URL with scopes</div></div>
+          <div class="auth-arrow">→</div>
+          <div class="auth-step"><div class="auth-step-num">Step 2</div><div class="auth-step-title">Authorize</div><div class="auth-step-desc">User selects workspace and grants access</div></div>
+          <div class="auth-arrow">→</div>
+          <div class="auth-step"><div class="auth-step-num">Step 3</div><div class="auth-step-title">Exchange</div><div class="auth-step-desc">Swap auth code for access + refresh tokens</div></div>
+          <div class="auth-arrow">→</div>
+          <div class="auth-step"><div class="auth-step-num">Step 4</div><div class="auth-step-title">Call API</div><div class="auth-step-desc">Use Bearer token on all subsequent calls</div></div>
+        </div>
+        <h2>Scopes</h2>
+        <table>
+          <tr><th>Scope</th><th>Access</th><th>Description</th></tr>
+          <tr><td><code>docs:read</code></td><td>Read</td><td>Read document content, metadata, and blocks</td></tr>
+          <tr><td><code>docs:write</code></td><td>Write</td><td>Create, update, and archive documents</td></tr>
+          <tr><td><code>workspace:read</code></td><td>Read</td><td>List workspaces and permissions</td></tr>
+          <tr><td><code>comments:read</code></td><td>Read</td><td>Read document comments <span class="tag tag-beta">Beta</span></td></tr>
+          <tr><td><code>comments:write</code></td><td>Write</td><td>Create and resolve comments <span class="tag tag-beta">Beta</span></td></tr>
+        </table>
+        <div class="callout callout-warn"><span class="callout-icon">⚠️</span><div><p style="color:var(--text)"><strong>Default deny:</strong> Tokens have no access until scopes are explicitly granted. Always request the minimum scopes needed.</p></div></div>
+        <h2>Token Exchange</h2>
+        <div class="code-block">
+          <div class="code-tabs"><div class="code-tab active">Request</div></div>
+          <div class="code-content"><span class="kw">POST</span> https://api.notion.com/v1/oauth/token
+
+{
+  <span class="key">"grant_type"</span>: <span class="str">"authorization_code"</span>,
+  <span class="key">"code"</span>: <span class="str">"abc123..."</span>,
+  <span class="key">"redirect_uri"</span>: <span class="str">"https://yourapp.com/callback"</span>
+}
+
+<span class="cm">// Response</span>
+{
+  <span class="key">"access_token"</span>: <span class="str">"ntn_oauth_v2_abc..."</span>,
+  <span class="key">"token_type"</span>: <span class="str">"bearer"</span>,
+  <span class="key">"expires_in"</span>: <span class="num">3600</span>,
+  <span class="key">"refresh_token"</span>: <span class="str">"ntn_refresh_xyz..."</span>,
+  <span class="key">"workspace_id"</span>: <span class="str">"ws_abc123"</span>,
+  <span class="key">"scopes"</span>: [<span class="str">"docs:read"</span>, <span class="str">"docs:write"</span>]
+}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="page" id="page-content-model" style="display:none">
+      <div class="content">
+        <h1>Content Model</h1>
+        <p class="subtitle">Documents are structured trees of typed blocks, each with a stable ID.</p>
+        <h2>Document Structure</h2>
+        <p>Every document is a tree where the root represents the page, and children are content blocks. Each block has a globally unique ID that persists across edits.</p>
+        <div class="block-tree">
+          <div class="tree-node"><span class="tree-icon">📄</span> <span class="tree-type">document</span> <span class="tree-id">doc_8f3a2b1c</span></div>
+          <div class="tree-node"><span class="indent"></span><span class="tree-icon">├─</span> <span class="tree-type">heading_1</span> <span class="tree-id">blk_001</span> — "Project Overview"</div>
+          <div class="tree-node"><span class="indent"></span><span class="tree-icon">├─</span> <span class="tree-type">paragraph</span> <span class="tree-id">blk_002</span> — "This document outlines…"</div>
+          <div class="tree-node"><span class="indent"></span><span class="tree-icon">├─</span> <span class="tree-type">heading_2</span> <span class="tree-id">blk_003</span> — "Requirements"</div>
+          <div class="tree-node"><span class="indent"></span><span class="tree-icon">├─</span> <span class="tree-type">bulleted_list</span> <span class="tree-id">blk_004</span></div>
+          <div class="tree-node"><span class="indent"></span><span class="indent"></span><span class="tree-icon">├─</span> <span class="tree-type">list_item</span> <span class="tree-id">blk_005</span> — "Auth support"</div>
+          <div class="tree-node"><span class="indent"></span><span class="indent"></span><span class="tree-icon">├─</span> <span class="tree-type">list_item</span> <span class="tree-id">blk_006</span> — "CRUD operations"</div>
+          <div class="tree-node"><span class="indent"></span><span class="indent"></span><span class="tree-icon">└─</span> <span class="tree-type">list_item</span> <span class="tree-id">blk_007</span> — "Versioning"</div>
+          <div class="tree-node"><span class="indent"></span><span class="tree-icon">├─</span> <span class="tree-type">divider</span> <span class="tree-id">blk_008</span></div>
+          <div class="tree-node"><span class="indent"></span><span class="tree-icon">└─</span> <span class="tree-type">callout</span> <span class="tree-id">blk_009</span> — "⚡ See API playground"</div>
+        </div>
+        <h2>Block Types</h2>
+        <table>
+          <tr><th>Type</th><th>Description</th><th>Has Children</th></tr>
+          <tr><td><code>paragraph</code></td><td>Text paragraph with rich text</td><td>No</td></tr>
+          <tr><td><code>heading_1</code></td><td>Top-level heading</td><td>Yes (toggleable)</td></tr>
+          <tr><td><code>heading_2</code></td><td>Second-level heading</td><td>Yes (toggleable)</td></tr>
+          <tr><td><code>heading_3</code></td><td>Third-level heading</td><td>Yes (toggleable)</td></tr>
+          <tr><td><code>bulleted_list</code></td><td>Bulleted list container</td><td>Yes</td></tr>
+          <tr><td><code>numbered_list</code></td><td>Numbered list container</td><td>Yes</td></tr>
+          <tr><td><code>to_do</code></td><td>Checkbox item</td><td>No</td></tr>
+          <tr><td><code>code</code></td><td>Code block with language</td><td>No</td></tr>
+          <tr><td><code>callout</code></td><td>Callout box with icon</td><td>Yes</td></tr>
+          <tr><td><code>quote</code></td><td>Block quote</td><td>Yes</td></tr>
+          <tr><td><code>divider</code></td><td>Horizontal rule</td><td>No</td></tr>
+          <tr><td><code>image</code></td><td>Image embed</td><td>No</td></tr>
+          <tr><td><code>table</code></td><td>Table with rows and cells</td><td>Yes</td></tr>
+        </table>
+        <h2>Rich Text Object</h2>
+        <div class="code-block">
+          <div class="code-tabs"><div class="code-tab active">Schema</div></div>
+          <div class="code-content">{
+  <span class="key">"text"</span>: <span class="str">"Hello world"</span>,
+  <span class="key">"annotations"</span>: {
+    <span class="key">"bold"</span>: <span class="bool">false</span>,
+    <span class="key">"italic"</span>: <span class="bool">false</span>,
+    <span class="key">"strikethrough"</span>: <span class="bool">false</span>,
+    <span class="key">"underline"</span>: <span class="bool">false</span>,
+    <span class="key">"code"</span>: <span class="bool">false</span>,
+    <span class="key">"color"</span>: <span class="str">"default"</span>
+  },
+  <span class="key">"link"</span>: { <span class="key">"url"</span>: <span class="str">"https://example.com"</span> },
+  <span class="key">"mention"</span>: <span class="bool">null</span>
+}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="page" id="page-create-doc" style="display:none">
+      <div class="content">
+        <h1>Create Document</h1>
+        <p class="subtitle">Create a new document with optional initial blocks.</p>
+        <div class="endpoint-header"><span class="endpoint-method method-post">POST</span><span class="endpoint-path">/v1/docs</span><span class="tag tag-auth">🔐 docs:write</span></div>
+        <h3>Request Body</h3>
+        <table>
+          <tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr>
+          <tr><td><code>parent</code></td><td>object</td><td><span class="required">Required</span></td><td>Parent workspace or page</td></tr>
+          <tr><td><code>title</code></td><td>string</td><td><span class="required">Required</span></td><td>Document title</td></tr>
+          <tr><td><code>blocks</code></td><td>array</td><td><span class="optional">Optional</span></td><td>Initial block content</td></tr>
+          <tr><td><code>icon</code></td><td>string</td><td><span class="optional">Optional</span></td><td>Emoji or URL for icon</td></tr>
+          <tr><td><code>cover</code></td><td>object</td><td><span class="optional">Optional</span></td><td>Cover image</td></tr>
+        </table>
+        <h3>Headers</h3>
+        <table>
+          <tr><th>Header</th><th>Value</th></tr>
+          <tr><td><code>Idempotency-Key</code></td><td>Unique key for safe retries</td></tr>
+          <tr><td><code>Notion-Version</code></td><td><code>2024-06-01</code></td></tr>
+        </table>
+        <h3>Response — <span class="status-badge status-201">201 Created</span></h3>
+        <div class="code-block">
+          <div class="code-tabs"><div class="code-tab active">Response</div></div>
+          <div class="code-content">{
+  <span class="key">"id"</span>: <span class="str">"doc_8f3a2b1c-4d5e-6f7a-8b9c-0d1e2f3a4b5c"</span>,
+  <span class="key">"object"</span>: <span class="str">"document"</span>,
+  <span class="key">"title"</span>: <span class="str">"Getting Started Guide"</span>,
+  <span class="key">"version"</span>: <span class="num">1</span>,
+  <span class="key">"etag"</span>: <span class="str">"W/\"v1-abc123\""</span>,
+  <span class="key">"created_time"</span>: <span class="str">"2024-06-08T10:30:00Z"</span>,
+  <span class="key">"last_edited_time"</span>: <span class="str">"2024-06-08T10:30:00Z"</span>,
+  <span class="key">"created_by"</span>: { <span class="key">"id"</span>: <span class="str">"usr_abc"</span> },
+  <span class="key">"parent"</span>: { <span class="key">"workspace_id"</span>: <span class="str">"ws_abc123"</span> },
+  <span class="key">"icon"</span>: <span class="str">"📄"</span>,
+  <span class="key">"url"</span>: <span class="str">"https://notion.so/Getting-Started-Guide-8f3a2b1c..."</span>,
+  <span class="key">"blocks"</span>: [
+    {
+      <span class="key">"id"</span>: <span class="str">"blk_001"</span>,
+      <span class="key">"type"</span>: <span class="str">"heading_2"</span>,
+      <span class="key">"content"</span>: {
+        <span class="key">"rich_text"</span>: [{ <span class="key">"text"</span>: <span class="str">"Welcome"</span> }]
+      }
+    }
+  ],
+  <span class="key">"request_id"</span>: <span class="str">"req_f7e8d9c0"</span>
+}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="page" id="page-get-doc" style="display:none">
+      <div class="content">
+        <h1>Get Document</h1>
+        <p class="subtitle">Retrieve a document's metadata and block content.</p>
+        <div class="endpoint-header"><span class="endpoint-method method-get">GET</span><span class="endpoint-path">/v1/docs/<span class="param">{doc_id}</span></span><span class="tag tag-auth">🔐 docs:read</span></div>
+        <h3>Path Parameters</h3>
+        <table><tr><th>Param</th><th>Type</th><th>Description</th></tr><tr><td><code>doc_id</code></td><td>string</td><td>The document's unique ID</td></tr></table>
+        <h3>Query Parameters</h3>
+        <table>
+          <tr><th>Param</th><th>Type</th><th>Default</th><th>Description</th></tr>
+          <tr><td><code>include_blocks</code></td><td>boolean</td><td><code>true</code></td><td>Include block content in response</td></tr>
+          <tr><td><code>block_depth</code></td><td>integer</td><td><code>2</code></td><td>Depth of nested blocks to return (1-10)</td></tr>
+          <tr><td><code>version</code></td><td>integer</td><td>latest</td><td>Return a specific version</td></tr>
+        </table>
+        <h3>Response Headers</h3>
+        <table>
+          <tr><th>Header</th><th>Description</th></tr>
+          <tr><td><code>ETag</code></td><td>Version tag for conditional updates</td></tr>
+          <tr><td><code>X-Request-Id</code></td><td>Unique request identifier</td></tr>
+          <tr><td><code>X-RateLimit-Remaining</code></td><td>Remaining API calls in current window</td></tr>
+        </table>
+        <h3>Response — <span class="status-badge status-200">200 OK</span></h3>
+        <div class="code-block">
+          <div class="code-tabs"><div class="code-tab active">Response</div></div>
+          <div class="code-content">{
+  <span class="key">"id"</span>: <span class="str">"doc_8f3a2b1c-4d5e-6f7a-8b9c-0d1e2f3a4b5c"</span>,
+  <span class="key">"object"</span>: <span class="str">"document"</span>,
+  <span class="key">"title"</span>: <span class="str">"Getting Started Guide"</span>,
+  <span class="key">"version"</span>: <span class="num">3</span>,
+  <span class="key">"etag"</span>: <span class="str">"W/\"v3-def456\""</span>,
+  <span class="key">"archived"</span>: <span class="bool">false</span>,
+  <span class="key">"created_time"</span>: <span class="str">"2024-06-08T10:30:00Z"</span>,
+  <span class="key">"last_edited_time"</span>: <span class="str">"2024-06-08T14:22:00Z"</span>,
+  <span class="key">"last_edited_by"</span>: { <span class="key">"id"</span>: <span class="str">"usr_xyz"</span> },
+  <span class="key">"blocks"</span>: [ <span class="cm">/* ... block tree ... */</span> ],
+  <span class="key">"request_id"</span>: <span class="str">"req_a1b2c3d4"</span>
+}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="page" id="page-update-doc" style="display:none">
+      <div class="content">
+        <h1>Update Document</h1>
+        <p class="subtitle">Update document metadata or modify existing blocks with conflict detection.</p>
+        <div class="endpoint-header"><span class="endpoint-method method-patch">PATCH</span><span class="endpoint-path">/v1/docs/<span class="param">{doc_id}</span></span><span class="tag tag-auth">🔐 docs:write</span></div>
+        <div class="callout callout-warn"><span class="callout-icon">⚠️</span><div><p style="color:var(--text)"><strong>Optimistic locking required.</strong> Include <code>If-Match</code> header with the document's current ETag. Stale ETags return <code>409 Conflict</code>.</p></div></div>
+        <h3>Required Headers</h3>
+        <table>
+          <tr><th>Header</th><th>Description</th></tr>
+          <tr><td><code>If-Match</code></td><td>ETag from the last GET response</td></tr>
+          <tr><td><code>Idempotency-Key</code></td><td>Unique key for safe retries</td></tr>
+        </table>
+        <h3>Request Body</h3>
+        <table>
+          <tr><th>Field</th><th>Type</th><th>Description</th></tr>
+          <tr><td><code>title</code></td><td>string</td><td>New document title</td></tr>
+          <tr><td><code>icon</code></td><td>string</td><td>New icon emoji or URL</td></tr>
+          <tr><td><code>blocks</code></td><td>array</td><td>Blocks to update (by block ID)</td></tr>
+        </table>
+        <h3>Example — Update a block</h3>
+        <div class="code-block">
+          <div class="code-tabs"><div class="code-tab active">Request</div></div>
+          <div class="code-content"><span class="kw">PATCH</span> /v1/docs/doc_8f3a2b1c
+If-Match: <span class="str">"W/\"v3-def456\""</span>
+Idempotency-Key: <span class="str">"idem_update_001"</span>
+
+{
+  <span class="key">"blocks"</span>: [
+    {
+      <span class="key">"id"</span>: <span class="str">"blk_002"</span>,
+      <span class="key">"content"</span>: {
+        <span class="key">"rich_text"</span>: [
+          { <span class="key">"text"</span>: <span class="str">"Updated paragraph content."</span> }
+        ]
+      }
+    }
+  ]
+}</div>
+        </div>
+        <h3>Conflict Response — <span class="status-badge status-409">409 Conflict</span></h3>
+        <div class="code-block">
+          <div class="code-tabs"><div class="code-tab active">Error</div></div>
+          <div class="code-content">{
+  <span class="key">"object"</span>: <span class="str">"error"</span>,
+  <span class="key">"code"</span>: <span class="str">"conflict"</span>,
+  <span class="key">"message"</span>: <span class="str">"Document has been modified since your last read."</span>,
+  <span class="key">"current_version"</span>: <span class="num">5</span>,
+  <span class="key">"your_version"</span>: <span class="num">3</span>,
+  <span class="key">"current_etag"</span>: <span class="str">"W/\"v5-ghi789\""</span>,
+  <span class="key">"request_id"</span>: <span class="str">"req_e5f6a7b8"</span>
+}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="page" id="page-append-blocks" style="display:none">
+      <div class="content">
+        <h1>Append Blocks</h1>
+        <p class="subtitle">Add new blocks to the end of a document or after a specific block.</p>
+        <div class="endpoint-header"><span class="endpoint-method method-post">POST</span><span class="endpoint-path">/v1/docs/<span class="param">{doc_id}</span>/blocks</span><span class="tag tag-auth">🔐 docs:write</span></div>
+        <h3>Request Body</h3>
+        <table>
+          <tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr>
+          <tr><td><code>blocks</code></td><td>array</td><td><span class="required">Required</span></td><td>Array of block objects to append</td></tr>
+          <tr><td><code>after</code></td><td>string</td><td><span class="optional">Optional</span></td><td>Block ID to insert after (default: end)</td></tr>
+        </table>
+        <h3>Example</h3>
+        <div class="code-block">
+          <div class="code-tabs"><div class="code-tab active">Request</div></div>
+          <div class="code-content"><span class="kw">POST</span> /v1/docs/doc_8f3a2b1c/blocks
+
+{
+  <span class="key">"after"</span>: <span class="str">"blk_003"</span>,
+  <span class="key">"blocks"</span>: [
+    {
+      <span class="key">"type"</span>: <span class="str">"callout"</span>,
+      <span class="key">"content"</span>: {
+        <span class="key">"icon"</span>: <span class="str">"💡"</span>,
+        <span class="key">"rich_text"</span>: [
+          { <span class="key">"text"</span>: <span class="str">"This section was auto-generated."</span> }
+        ]
+      }
+    },
+    {
+      <span class="key">"type"</span>: <span class="str">"code"</span>,
+      <span class="key">"content"</span>: {
+        <span class="key">"language"</span>: <span class="str">"python"</span>,
+        <span class="key">"rich_text"</span>: [
+          { <span class="key">"text"</span>: <span class="str">"print('Hello from Docs API!')"</span> }
+        ]
+      }
+    }
+  ]
+}</div>
+        </div>
+        <h3>Response — <span class="status-badge status-200">200 OK</span></h3>
+        <div class="code-block">
+          <div class="code-tabs"><div class="code-tab active">Response</div></div>
+          <div class="code-content">{
+  <span class="key">"object"</span>: <span class="str">"list"</span>,
+  <span class="key">"results"</span>: [
+    { <span class="key">"id"</span>: <span class="str">"blk_010"</span>, <span class="key">"type"</span>: <span class="str">"callout"</span> },
+    { <span class="key">"id"</span>: <span class="str">"blk_011"</span>, <span class="key">"type"</span>: <span class="str">"code"</span> }
+  ],
+  <span class="key">"new_version"</span>: <span class="num">4</span>,
+  <span class="key">"request_id"</span>: <span class="str">"req_c9d0e1f2"</span>
+}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="page" id="page-delete-doc" style="display:none">
+      <div class="content">
+        <h1>Archive Document</h1>
+        <p class="subtitle">Soft-delete a document by moving it to the archive. Recoverable for 30 days.</p>
+        <div class="endpoint-header"><span class="endpoint-method method-delete">DELETE</span><span class="endpoint-path">/v1/docs/<span class="param">{doc_id}</span></span><span class="tag tag-auth">🔐 docs:write</span></div>
+        <h3>Query Parameters</h3>
+        <table>
+          <tr><th>Param</th><th>Type</th><th>Default</th><th>Description</th></tr>
+          <tr><td><code>permanent</code></td><td>boolean</td><td><code>false</code></td><td>Permanently delete (admin only)</td></tr>
+        </table>
+        <h3>Response — <span class="status-badge status-200">200 OK</span></h3>
+        <div class="code-block">
+          <div class="code-tabs"><div class="code-tab active">Response</div></div>
+          <div class="code-content">{
+  <span class="key">"id"</span>: <span class="str">"doc_8f3a2b1c"</span>,
+  <span class="key">"object"</span>: <span class="str">"document"</span>,
+  <span class="key">"archived"</span>: <span class="bool">true</span>,
+  <span class="key">"archived_time"</span>: <span class="str">"2024-06-08T16:00:00Z"</span>,
+  <span class="key">"recoverable_until"</span>: <span class="str">"2024-07-08T16:00:00Z"</span>,
+  <span class="key">"request_id"</span>: <span class="str">"req_d3e4f5a6"</span>
+}</div>
+        </div>
+        <div class="callout callout-warn"><span class="callout-icon">🗑️</span><div><p style="color:var(--text)">Archived documents are <strong>recoverable for 30 days</strong>. After that, permanently deleted.</p></div></div>
+      </div>
+    </div>
+
+    <div class="page" id="page-versioning" style="display:none">
+      <div class="content">
+        <h1>Versioning &amp; Conflict Detection</h1>
+        <p class="subtitle">Every write creates a new version. Use ETags to prevent lost updates.</p>
+        <h2>How It Works</h2>
+        <p>Documents use an incrementing version counter and ETags for optimistic concurrency control.</p>
+        <div class="auth-flow">
+          <div class="auth-step"><div class="auth-step-num">1</div><div class="auth-step-title">GET Document</div><div class="auth-step-desc">Response includes <code>ETag</code> header</div></div>
+          <div class="auth-arrow">→</div>
+          <div class="auth-step"><div class="auth-step-num">2</div><div class="auth-step-title">PATCH with If-Match</div><div class="auth-step-desc">Send ETag in <code>If-Match</code> header</div></div>
+          <div class="auth-arrow">→</div>
+          <div class="auth-step"><div class="auth-step-num">3</div><div class="auth-step-title">Success or Conflict</div><div class="auth-step-desc">200 OK or 409 with current version</div></div>
+        </div>
+        <h2>Version History</h2>
+        <div class="code-block">
+          <div class="code-tabs"><div class="code-tab active">Request</div></div>
+          <div class="code-content"><span class="kw">GET</span> /v1/docs/doc_8f3a2b1c/versions
+
+<span class="cm">// Response</span>
+{
+  <span class="key">"object"</span>: <span class="str">"list"</span>,
+  <span class="key">"results"</span>: [
+    {
+      <span class="key">"version"</span>: <span class="num">5</span>,
+      <span class="key">"etag"</span>: <span class="str">"W/\"v5-ghi789\""</span>,
+      <span class="key">"edited_by"</span>: { <span class="key">"id"</span>: <span class="str">"usr_abc"</span>, <span class="key">"name"</span>: <span class="str">"Alice"</span> },
+      <span class="key">"edited_time"</span>: <span class="str">"2024-06-08T15:30:00Z"</span>,
+      <span class="key">"summary"</span>: <span class="str">"Updated 2 blocks"</span>
+    },
+    {
+      <span class="key">"version"</span>: <span class="num">4</span>,
+      <span class="key">"etag"</span>: <span class="str">"W/\"v4-xyz123\""</span>,
+      <span class="key">"edited_by"</span>: { <span class="key">"id"</span>: <span class="str">"bot_pipeline"</span>, <span class="key">"name"</span>: <span class="str">"CI Bot"</span> },
+      <span class="key">"edited_time"</span>: <span class="str">"2024-06-08T14:00:00Z"</span>,
+      <span class="key">"summary"</span>: <span class="str">"Appended 3 blocks"</span>
+    }
+  ],
+  <span class="key">"has_more"</span>: <span class="bool">true</span>,
+  <span class="key">"next_cursor"</span>: <span class="str">"v3"</span>
+}</div>
+        </div>
+        <h2>Conflict Resolution Pattern</h2>
+        <div class="code-block">
+          <div class="code-tabs"><div class="code-tab active">Recommended</div></div>
+          <div class="code-content"><span class="cm">// 1. Fetch current document</span>
+<span class="kw">const</span> doc = <span class="kw">await</span> fetch(<span class="str">`/v1/docs/${docId}`</span>);
+<span class="kw">const</span> etag = doc.headers.get(<span class="str">"ETag"</span>);
+
+<span class="cm">// 2. Attempt update with ETag</span>
+<span class="kw">const</span> res = <span class="kw">await</span> fetch(<span class="str">`/v1/docs/${docId}`</span>, {
+  method: <span class="str">"PATCH"</span>,
+  headers: { <span class="str">"If-Match"</span>: etag },
+  body: JSON.stringify({ <span class="cm">/* changes */</span> })
+});
+
+<span class="cm">// 3. Handle conflict</span>
+<span class="kw">if</span> (res.status === <span class="num">409</span>) {
+  <span class="kw">const</span> conflict = <span class="kw">await</span> res.json();
+  <span class="cm">// Re-fetch, merge changes, retry with new etag</span>
+}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="page" id="page-errors" style="display:none">
+      <div class="content">
+        <h1>Error Handling</h1>
+        <p class="subtitle">Consistent error responses with actionable codes and request tracking.</p>
+        <h2>Error Response Format</h2>
+        <div class="code-block">
+          <div class="code-tabs"><div class="code-tab active">Schema</div></div>
+          <div class="code-content">{
+  <span class="key">"object"</span>: <span class="str">"error"</span>,
+  <span class="key">"status"</span>: <span class="num">400</span>,
+  <span class="key">"code"</span>: <span class="str">"validation_error"</span>,
+  <span class="key">"message"</span>: <span class="str">"Human-readable description of the error."</span>,
+  <span class="key">"details"</span>: [
+    {
+      <span class="key">"field"</span>: <span class="str">"blocks[0].type"</span>,
+      <span class="key">"message"</span>: <span class="str">"Unknown block type 'headng_1'. Did you mean 'heading_1'?"</span>
+    }
+  ],
+  <span class="key">"request_id"</span>: <span class="str">"req_a1b2c3d4"</span>
+}</div>
+        </div>
+        <h2>Error Codes</h2>
+        <table>
+          <tr><th>HTTP</th><th>Code</th><th>Description</th><th>Action</th></tr>
+          <tr><td><span class="status-badge status-400">400</span></td><td><code>validation_error</code></td><td>Invalid request body</td><td>Fix and retry</td></tr>
+          <tr><td><span class="status-badge status-401">401</span></td><td><code>unauthorized</code></td><td>Missing/invalid token</td><td>Check auth</td></tr>
+          <tr><td><span class="status-badge status-401">403</span></td><td><code>insufficient_scope</code></td><td>Token lacks scope</td><td>Request scopes</td></tr>
+          <tr><td><span class="status-badge status-400">404</span></td><td><code>not_found</code></td><td>Resource not found</td><td>Verify ID</td></tr>
+          <tr><td><span class="status-badge status-409">409</span></td><td><code>conflict</code></td><td>ETag mismatch</td><td>Re-fetch, retry</td></tr>
+          <tr><td><span class="status-badge status-429">429</span></td><td><code>rate_limited</code></td><td>Too many requests</td><td>Wait Retry-After</td></tr>
+          <tr><td><span class="status-badge status-400">500</span></td><td><code>internal_error</code></td><td>Server error</td><td>Retry w/ backoff</td></tr>
+        </table>
+        <div class="callout callout-success"><span class="callout-icon">💡</span><div><p style="color:var(--text)"><strong>Tip:</strong> The <code>details</code> array includes field-level validation errors with suggestions like typo corrections.</p></div></div>
+      </div>
+    </div>
+
+    <div class="page" id="page-rate-limits" style="display:none">
+      <div class="content">
+        <h1>Rate Limits</h1>
+        <p class="subtitle">Fair usage limits with transparent headers and graceful degradation.</p>
+        <h2>Limits</h2>
+        <table>
+          <tr><th>Plan</th><th>Read Requests</th><th>Write Requests</th><th>Window</th></tr>
+          <tr><td>Free</td><td>100 req/min</td><td>30 req/min</td><td>1 minute sliding</td></tr>
+          <tr><td>Team</td><td>500 req/min</td><td>100 req/min</td><td>1 minute sliding</td></tr>
+          <tr><td>Enterprise</td><td>2000 req/min</td><td>500 req/min</td><td>1 minute sliding</td></tr>
+        </table>
+        <h2>Rate Limit Headers</h2>
+        <table>
+          <tr><th>Header</th><th>Description</th></tr>
+          <tr><td><code>X-RateLimit-Limit</code></td><td>Max requests in current window</td></tr>
+          <tr><td><code>X-RateLimit-Remaining</code></td><td>Remaining requests</td></tr>
+          <tr><td><code>X-RateLimit-Reset</code></td><td>Unix timestamp when window resets</td></tr>
+          <tr><td><code>Retry-After</code></td><td>Seconds to wait (on 429 only)</td></tr>
+        </table>
+        <h2>Live Usage Monitor</h2>
+        <div class="rate-bar" id="rateMonitor">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <strong style="font-size:14px">Read Requests</strong>
+            <span class="status-badge status-200" id="rateStatus">Healthy</span>
+          </div>
+          <div class="rate-progress"><div class="rate-progress-fill" id="rateFill" style="width:35%"></div></div>
+          <div class="rate-stats"><span id="rateUsed">175 / 500 used</span><span id="rateReset">Resets in 42s</span></div>
+        </div>
+        <div style="text-align:center;margin-top:8px"><button class="btn btn-sm" onclick="simulateRateLimit()">Simulate API Calls</button></div>
+        <h2>Handling 429 Responses</h2>
+        <div class="code-block">
+          <div class="code-tabs"><div class="code-tab active">Retry Pattern</div></div>
+          <div class="code-content"><span class="kw">async function</span> callWithRetry(url, options, maxRetries = <span class="num">3</span>) {
+  <span class="kw">for</span> (<span class="kw">let</span> attempt = <span class="num">0</span>; attempt &lt; maxRetries; attempt++) {
+    <span class="kw">const</span> res = <span class="kw">await</span> fetch(url, options);
+    <span class="kw">if</span> (res.status !== <span class="num">429</span>) <span class="kw">return</span> res;
+    <span class="kw">const</span> retryAfter = parseInt(res.headers.get(<span class="str">"Retry-After"</span>)) || <span class="num">1</span>;
+    <span class="kw">await</span> <span class="kw">new</span> Promise(r =&gt; setTimeout(r, retryAfter * <span class="num">1000</span>));
+  }
+  <span class="kw">throw new</span> Error(<span class="str">"Max retries exceeded"</span>);
+}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="page" id="page-playground" style="display:none">
+      <div class="content">
+        <h1>API Playground</h1>
+        <p class="subtitle">Test API calls interactively against a sandbox environment.</p>
+        <div class="callout callout-success"><span class="callout-icon">🧪</span><div><p style="color:var(--text)">This is a <strong>simulated sandbox</strong>. Responses are generated locally to demonstrate API behavior.</p></div></div>
+        <div style="display:flex;gap:12px;margin:16px 0;flex-wrap:wrap">
+          <button class="btn" onclick="loadPreset('create')" style="font-size:13px">📄 Create Doc</button>
+          <button class="btn" onclick="loadPreset('get')" style="background:rgba(77,171,111,.8);font-size:13px">📖 Get Doc</button>
+          <button class="btn" onclick="loadPreset('update')" style="background:rgba(223,171,1,.8);font-size:13px">✏️ Update Doc</button>
+          <button class="btn" onclick="loadPreset('append')" style="font-size:13px">➕ Append Blocks</button>
+          <button class="btn" onclick="loadPreset('conflict')" style="background:rgba(232,84,84,.8);font-size:13px">⚡ Trigger Conflict</button>
+        </div>
+        <div class="playground">
+          <div class="playground-header">
+            <div class="playground-title">
+              <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 0a8 8 0 100 16A8 8 0 008 0zm3.5 9l-5 3V6l5 3z"/></svg>
+              Interactive Sandbox
+            </div>
+            <button class="btn btn-sm" onclick="runPlayground()">▶ Send Request</button>
+          </div>
+          <div class="playground-body">
+            <div class="playground-req">
+              <div class="playground-label">Request</div>
+              <textarea id="pgInput" spellcheck="false"></textarea>
+            </div>
+            <div class="playground-res">
+              <div class="playground-label">Response <span id="pgStatus"></span></div>
+              <div class="playground-output" id="pgOutput">Click "Send Request" or select a preset to try an API call.</div>
+            </div>
+          </div>
+        </div>
+        <h3 style="margin-top:24px">Request Log</h3>
+        <div id="requestLog" style="font-family:var(--mono);font-size:12px;color:var(--text-muted);background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px;max-height:200px;overflow-y:auto">
+          <div style="opacity:.5">No requests yet. Try sending one above!</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
+  document.getElementById('page-' + id).style.display = 'block';
+  document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+  const link = document.querySelector('.sidebar-link[data-page="' + id + '"]');
+  if (link) link.classList.add('active');
+  document.querySelector('.main').scrollTop = 0;
+}
+function switchTab(tab, lang) {
+  const block = tab.closest('.code-block');
+  block.querySelectorAll('.code-tab').forEach(t => t.classList.remove('active'));
+  tab.classList.add('active');
+  block.querySelectorAll('.code-content').forEach(c => {
+    c.style.display = c.dataset.lang === lang ? 'block' : 'none';
+  });
+}
+let rateUsed = 175;
+function simulateRateLimit() {
+  const interval = setInterval(() => {
+    rateUsed += Math.floor(Math.random() * 30 + 10);
+    if (rateUsed > 500) rateUsed = 500;
+    const pct = (rateUsed / 500) * 100;
+    document.getElementById('rateFill').style.width = pct + '%';
+    document.getElementById('rateUsed').textContent = rateUsed + ' / 500 used';
+    if (pct > 90) {
+      document.getElementById('rateFill').style.background = 'var(--red)';
+      document.getElementById('rateStatus').className = 'status-badge status-429';
+      document.getElementById('rateStatus').textContent = 'Rate Limited';
+    } else if (pct > 70) {
+      document.getElementById('rateFill').style.background = 'var(--yellow)';
+      document.getElementById('rateStatus').className = 'status-badge status-400';
+      document.getElementById('rateStatus').textContent = 'Warning';
+    }
+    if (rateUsed >= 500) {
+      clearInterval(interval);
+      setTimeout(() => {
+        rateUsed = 12;
+        document.getElementById('rateFill').style.width = '2.4%';
+        document.getElementById('rateFill').style.background = 'var(--green)';
+        document.getElementById('rateUsed').textContent = '12 / 500 used';
+        document.getElementById('rateStatus').className = 'status-badge status-200';
+        document.getElementById('rateStatus').textContent = 'Healthy';
+      }, 2000);
+    }
+  }, 300);
+}
+const presets = {
+  create: 'POST /v1/docs\nAuthorization: Bearer ntn_sandbox_****\nNotion-Version: 2024-06-01\nIdempotency-Key: idem_' + Date.now() + '\n\n{\n  "parent": { "workspace_id": "ws_sandbox" },\n  "title": "Release Notes v2.1",\n  "icon": "🚀",\n  "blocks": [\n    {\n      "type": "heading_2",\n      "content": { "rich_text": [{ "text": "What\'s New" }] }\n    },\n    {\n      "type": "paragraph",\n      "content": {\n        "rich_text": [\n          { "text": "We\'ve shipped " },\n          { "text": "3 major features", "annotations": { "bold": true } },\n          { "text": " this release." }\n        ]\n      }\n    }\n  ]\n}',
+  get: 'GET /v1/docs/doc_8f3a2b1c?include_blocks=true&block_depth=3\nAuthorization: Bearer ntn_sandbox_****\nNotion-Version: 2024-06-01',
+  update: 'PATCH /v1/docs/doc_8f3a2b1c\nAuthorization: Bearer ntn_sandbox_****\nNotion-Version: 2024-06-01\nIf-Match: W/"v3-def456"\nIdempotency-Key: idem_upd_001\n\n{\n  "title": "Release Notes v2.1 (Updated)",\n  "blocks": [\n    {\n      "id": "blk_002",\n      "content": {\n        "rich_text": [{ "text": "Updated content via API." }]\n      }\n    }\n  ]\n}',
+  append: 'POST /v1/docs/doc_8f3a2b1c/blocks\nAuthorization: Bearer ntn_sandbox_****\nNotion-Version: 2024-06-01\n\n{\n  "after": "blk_002",\n  "blocks": [\n    {\n      "type": "to_do",\n      "content": {\n        "checked": false,\n        "rich_text": [{ "text": "Review API design doc" }]\n      }\n    },\n    {\n      "type": "to_do",\n      "content": {\n        "checked": true,\n        "rich_text": [{ "text": "Set up auth tokens" }]\n      }\n    }\n  ]\n}',
+  conflict: 'PATCH /v1/docs/doc_8f3a2b1c\nAuthorization: Bearer ntn_sandbox_****\nNotion-Version: 2024-06-01\nIf-Match: W/"v1-stale"\n\n{\n  "title": "This will conflict!"\n}'
+};
+const responses = {
+  create: { status: 201, label: '201 Created', cls: 'status-201', body: { id: "doc_" + Math.random().toString(36).slice(2,10), object: "document", title: "Release Notes v2.1", version: 1, etag: 'W/"v1-' + Math.random().toString(36).slice(2,8) + '"', created_time: new Date().toISOString(), icon: "🚀", blocks: [{ id: "blk_001", type: "heading_2" }, { id: "blk_002", type: "paragraph" }], request_id: "req_" + Math.random().toString(36).slice(2,10) }},
+  get: { status: 200, label: '200 OK', cls: 'status-200', body: { id: "doc_8f3a2b1c", object: "document", title: "Getting Started Guide", version: 3, etag: 'W/"v3-def456"', archived: false, blocks: [{ id: "blk_001", type: "heading_1", content: { rich_text: [{ text: "Project Overview" }] }}, { id: "blk_002", type: "paragraph", content: { rich_text: [{ text: "This document outlines our API approach." }] }}, { id: "blk_003", type: "heading_2", content: { rich_text: [{ text: "Requirements" }] }}], request_id: "req_a1b2c3d4" }},
+  update: { status: 200, label: '200 OK', cls: 'status-200', body: { id: "doc_8f3a2b1c", object: "document", title: "Release Notes v2.1 (Updated)", version: 4, etag: 'W/"v4-ghi789"', blocks_updated: [{ id: "blk_002" }], request_id: "req_" + Math.random().toString(36).slice(2,10) }},
+  append: { status: 200, label: '200 OK', cls: 'status-200', body: { object: "list", results: [{ id: "blk_010", type: "to_do" }, { id: "blk_011", type: "to_do" }], new_version: 5, request_id: "req_" + Math.random().toString(36).slice(2,10) }},
+  conflict: { status: 409, label: '409 Conflict', cls: 'status-409', body: { object: "error", status: 409, code: "conflict", message: "Document has been modified since your last read. Re-fetch and retry.", current_version: 5, your_version: 1, current_etag: 'W/"v5-xyz999"', request_id: "req_" + Math.random().toString(36).slice(2,10) }}
+};
+function loadPreset(name) {
+  document.getElementById('pgInput').value = presets[name];
+  document.getElementById('pgOutput').textContent = 'Ready. Click "Send Request" to execute.';
+  document.getElementById('pgStatus').textContent = '';
+}
+let requestCount = 0;
+function runPlayground() {
+  const input = document.getElementById('pgInput').value;
+  const firstLine = input.split('\n')[0].trim();
+  let type = 'create';
+  if (firstLine.startsWith('GET')) type = 'get';
+  else if (firstLine.startsWith('PATCH') && input.includes('v1-stale')) type = 'conflict';
+  else if (firstLine.startsWith('PATCH')) type = 'update';
+  else if (firstLine.includes('/blocks')) type = 'append';
+  const resp = responses[type];
+  document.getElementById('pgOutput').textContent = 'Sending request...';
+  document.getElementById('pgStatus').textContent = '';
+  setTimeout(() => {
+    document.getElementById('pgStatus').innerHTML = '<span class="status-badge ' + resp.cls + '">' + resp.label + '</span>';
+    document.getElementById('pgOutput').textContent = JSON.stringify(resp.body, null, 2);
+    requestCount++;
+    const log = document.getElementById('requestLog');
+    if (requestCount === 1) log.innerHTML = '';
+    const entry = document.createElement('div');
+    entry.style.cssText = 'padding:4px 0;border-bottom:1px solid var(--border)';
+    const ts = new Date().toLocaleTimeString();
+    entry.innerHTML = '<span style="color:var(--text-muted)">' + ts + '</span> <span style="color:' + (resp.status < 400 ? 'var(--green)' : 'var(--red)') + '">' + resp.label + '</span> ' + firstLine + ' <span style="color:var(--text-muted)">' + resp.body.request_id + '</span>';
+    log.prepend(entry);
+  }, 600);
+}
+loadPreset('create');
+</script>
+</body>
+</html>
