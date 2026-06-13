@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>My Matchday</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F0F0F0;--white:#FFFFFF;--blue:#009DE0;--blue-light:#E6F6FD;--blue-dark:#007AB8;--black:#1A1A1A;--gray-900:#2D2D2D;--gray-700:#4A4A4A;--gray-500:#7A7A7A;--gray-400:#999;--gray-200:#E5E5E5;--gray-100:#F5F5F5;--green:#00875A;--green-bg:#E3F7EE;--amber:#C67A00;--amber-bg:#FFF4E0;--red:#D92B2B;--font:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{font-family:var(--font);-webkit-font-smoothing:antialiased}
+body{background:var(--bg);display:flex;align-items:flex-start;justify-content:center;min-height:100vh;padding:32px 16px}
+
+/* Device */
+.device{width:390px;max-width:100%;min-height:844px;background:var(--white);border-radius:48px;box-shadow:0 0 0 1px rgba(0,0,0,.08),0 24px 80px rgba(0,0,0,.14);overflow:hidden;position:relative;display:flex;flex-direction:column}
+.notch{width:126px;height:34px;background:#000;border-radius:0 0 20px 20px;position:absolute;top:0;left:50%;transform:translateX(-50%);z-index:10}
+
+/* Status bar */
+.statusbar{display:flex;justify-content:space-between;align-items:center;padding:14px 28px 6px;font-size:15px;font-weight:600;color:var(--black)}
+
+/* Screens */
+.screen{display:none;flex-direction:column;flex:1;overflow:hidden}
+.screen.active{display:flex}
+.scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+
+/* Bottom nav — Wolt style */
+.tabnav{display:flex;background:var(--white);border-top:1px solid var(--gray-200);padding:6px 0 12px;flex-shrink:0}
+.tabnav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;font-size:10px;font-weight:500;font-family:var(--font);color:var(--gray-400);cursor:pointer;padding:6px 0;min-height:48px}
+.tabnav button.on{color:var(--blue)}
+.tabnav button svg{width:22px;height:22px;stroke-width:1.75}
+
+/* Utility */
+.px{padding-left:20px;padding-right:20px}
+.section-head{display:flex;align-items:baseline;justify-content:space-between;padding:20px 20px 12px}
+.section-head h2{font-size:20px;font-weight:800;color:var(--black);letter-spacing:-.3px}
+.section-head a{font-size:14px;font-weight:600;color:var(--blue);text-decoration:none;cursor:pointer}
+
+/* ═══ HOME ═══ */
+
+/* Top header */
+.home-top{display:flex;align-items:center;justify-content:space-between;padding:10px 20px 4px}
+.home-top .logo{font-size:20px;font-weight:800;color:var(--black);letter-spacing:-.5px}
+.home-top .icons{display:flex;gap:8px}
+.home-top .icon-btn{width:40px;height:40px;border-radius:50%;border:1px solid var(--gray-200);display:flex;align-items:center;justify-content:center;cursor:pointer;background:var(--white)}
+.home-top .icon-btn svg{width:20px;height:20px;stroke:var(--gray-700);fill:none;stroke-width:1.75}
+
+/* Hero carousel card */
+.hero{margin:12px 20px 0;border-radius:16px;overflow:hidden;position:relative;height:180px;background:linear-gradient(135deg,#0B1D3A 0%,#1A3A5C 60%,#2A5A8C 100%);cursor:pointer}
+.hero-overlay{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;padding:20px}
+.hero-label{font-size:11px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:rgba(255,255,255,.6);margin-bottom:4px}
+.hero h2{font-size:22px;font-weight:800;color:#FFF;line-height:1.2;margin-bottom:2px}
+.hero p{font-size:13px;color:rgba(255,255,255,.75);margin-bottom:12px}
+.hero .pill-row{display:flex;gap:6px}
+.hero .h-pill{padding:4px 10px;border-radius:100px;font-size:11px;font-weight:600;background:rgba(255,255,255,.18);color:#FFF;backdrop-filter:blur(4px)}
+/* Decorative stadium silhouette */
+.stadium-art{position:absolute;right:-10px;top:-10px;width:200px;height:200px;opacity:.07}
+.stadium-art svg{width:100%;height:100%}
+/* dots */
+.hero-dots{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);display:flex;gap:5px}
+.hero-dots span{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.3)}
+.hero-dots span.on{background:#FFF}
+
+/* Status strip */
+.status-strip{margin:16px 20px 0;padding:14px 16px;border-radius:14px;display:flex;align-items:center;gap:12px}
+.status-strip.ok{background:var(--green-bg)}
+.status-strip .s-icon{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.status-strip.ok .s-icon{background:var(--green)}
+.status-strip .s-text{flex:1}
+.status-strip .s-title{font-size:15px;font-weight:700;color:var(--green)}
+.status-strip .s-sub{font-size:12px;color:var(--gray-500);margin-top:1px}
+.status-strip .s-time{font-size:22px;font-weight:800;color:var(--green)}
+
+/* Disruption card */
+.disrupt{margin:10px 20px 0;padding:14px 16px;border-radius:14px;background:var(--amber-bg);cursor:pointer}
+.disrupt .d-top{display:flex;align-items:center;gap:6px;margin-bottom:6px}
+.disrupt .d-dot{width:7px;height:7px;border-radius:50%;background:var(--amber);animation:blink 1.6s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.disrupt .d-label{font-size:12px;font-weight:700;color:var(--amber)}
+.disrupt .d-time{font-size:11px;color:var(--gray-400);margin-left:auto}
+.disrupt .d-body{font-size:13px;color:var(--gray-700);line-height:1.5;margin-bottom:10px}
+.disrupt .d-foot{display:flex;align-items:center;justify-content:space-between}
+.disrupt .d-pill{padding:3px 10px;border-radius:100px;font-size:11px;font-weight:600;background:var(--green-bg);color:var(--green);display:flex;align-items:center;gap:4px}
+.disrupt .d-pill .dp{width:5px;height:5px;border-radius:50%;background:var(--green)}
+.disrupt .d-link{font-size:13px;font-weight:600;color:var(--blue);display:flex;align-items:center;gap:2px}
+
+/* Horizontal cards section */
+.hscroll{display:flex;gap:12px;padding:0 20px 4px;overflow-x:auto;scroll-snap-type:x mandatory}
+.hscroll::-webkit-scrollbar{display:none}
+.hcard{min-width:260px;border-radius:14px;overflow:hidden;border:1px solid var(--gray-200);scroll-snap-align:start;cursor:pointer;background:var(--white);transition:box-shadow .15s}
+.hcard:hover{box-shadow:0 4px 16px rgba(0,0,0,.08)}
+.hcard-img{height:120px;background:linear-gradient(135deg,#0B1D3A,#1A3A5C);display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.3);font-size:32px;position:relative}
+.hcard-img .hc-badge{position:absolute;top:8px;left:8px;padding:3px 8px;border-radius:6px;font-size:10px;font-weight:700;background:rgba(0,0,0,.5);color:#FFF}
+.hcard-body{padding:12px 14px}
+.hcard-body h3{font-size:15px;font-weight:700;color:var(--black);margin-bottom:2px}
+.hcard-body .meta{font-size:12px;color:var(--gray-500);display:flex;align-items:center;gap:4px}
+.hcard-body .meta svg{width:13px;height:13px;stroke:var(--gray-400);fill:none;stroke-width:1.75}
+
+/* Quick links row */
+.qlinks{display:flex;gap:8px;padding:4px 20px 20px;overflow-x:auto}
+.qlinks::-webkit-scrollbar{display:none}
+.qlink{display:flex;align-items:center;gap:6px;padding:10px 16px;border:1px solid var(--gray-200);border-radius:100px;font-size:13px;font-weight:500;color:var(--gray-700);white-space:nowrap;cursor:pointer;min-height:44px;background:var(--white)}
+.qlink:hover{background:var(--gray-100)}
+.qlink svg{width:18px;height:18px;stroke:var(--gray-500);fill:none;stroke-width:1.75}
+
+/* CTA bar */
+.cta-bar{padding:0 20px 16px}
+.cta-bar button{width:100%;padding:16px;border-radius:14px;border:none;background:var(--blue);color:#FFF;font-size:16px;font-weight:700;font-family:var(--font);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;min-height:52px;transition:background .15s}
+.cta-bar button:hover{background:var(--blue-dark)}
+.cta-bar button:active{transform:scale(.99)}
+.cta-bar button svg{width:18px;height:18px;stroke:#FFF;fill:none;stroke-width:2.5}
+
+/* ═══ TIMELINE ═══ */
+.tl-header{display:flex;align-items:center;gap:12px;padding:8px 20px 12px}
+.tl-back{width:40px;height:40px;border-radius:50%;border:1px solid var(--gray-200);display:flex;align-items:center;justify-content:center;cursor:pointer;background:var(--white)}
+.tl-back svg{width:20px;height:20px;stroke:var(--black);fill:none;stroke-width:2}
+.tl-header h1{font-size:18px;font-weight:800;flex:1}
+
+.tl-mini{margin:0 20px 10px;padding:12px 14px;border-radius:12px;background:#0B1D3A;color:#FFF;display:flex;align-items:center;gap:10px}
+.tl-mini .flags{font-size:18px;display:flex;gap:6px;align-items:center}
+.tl-mini .flags .vs{font-size:10px;opacity:.4;font-weight:700}
+.tl-mini .info{flex:1;font-size:13px;font-weight:600}
+.tl-mini .ko{text-align:right}
+.tl-mini .ko .t{font-size:18px;font-weight:800}
+.tl-mini .ko .l{font-size:10px;opacity:.5}
+
+.tl-banner{margin:0 20px 10px;padding:10px 14px;border-radius:12px;background:var(--amber-bg);display:flex;align-items:center;gap:8px;font-size:12px;color:var(--amber);cursor:pointer}
+.tl-banner svg{width:16px;height:16px;stroke:var(--amber);fill:none;stroke-width:2;flex-shrink:0}
+.tl-banner strong{font-weight:600}
+
+.apills{display:flex;gap:6px;padding:0 20px 12px;overflow-x:auto}
+.apills::-webkit-scrollbar{display:none}
+.apill{padding:4px 12px;border-radius:100px;font-size:11px;font-weight:600;background:#EDE9FE;color:#6D28D9;white-space:nowrap;display:flex;align-items:center;gap:4px}
+.apill svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2}
+
+/* Timeline steps */
+.steps{padding:0 20px 20px}
+.step{display:flex;gap:14px;position:relative;padding-bottom:22px}
+.step:last-child{padding-bottom:0}
+.step:not(:last-child)::before{content:'';position:absolute;left:19px;top:42px;bottom:0;width:1.5px;background:var(--gray-200)}
+.step .marker{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;z-index:1;background:var(--white);border:1.5px solid var(--gray-200);color:var(--gray-400)}
+.step .marker svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.75}
+.step .marker.now{background:var(--blue);color:#FFF;border-color:var(--blue)}
+.step .marker.warn{background:var(--amber);color:#FFF;border-color:var(--amber)}
+.step .marker.done{background:var(--green);color:#FFF;border-color:var(--green)}
+.step .body{flex:1;padding-top:2px}
+.step .time{font-size:12px;font-weight:600;color:var(--gray-400)}
+.step .time.now{color:var(--blue)}
+.step .title{font-size:15px;font-weight:600;color:var(--black);margin:1px 0}
+.step .desc{font-size:13px;color:var(--gray-500);line-height:1.45}
+.step .inline-alert{margin-top:6px;padding:10px 12px;border-radius:10px;background:var(--amber-bg);font-size:12px;color:var(--amber);display:flex;gap:8px;align-items:flex-start;cursor:pointer}
+.step .inline-alert svg{width:15px;height:15px;stroke:var(--amber);fill:none;stroke-width:2;flex-shrink:0;margin-top:1px}
+.step .inline-alert strong{font-weight:600;display:block;margin-bottom:1px}
+.step .inline-rec{margin-top:6px;padding:10px 12px;border-radius:10px;background:var(--green-bg);font-size:12px;color:var(--green);display:flex;gap:8px;align-items:flex-start}
+.step .inline-rec svg{width:15px;height:15px;stroke:var(--green);fill:none;stroke-width:2;flex-shrink:0;margin-top:1px}
+.step .inline-rec strong{font-weight:600;display:block;margin-bottom:1px}
+.step .pill-sm{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:600;background:var(--green-bg);color:var(--green);margin-top:6px}
+.step .pill-sm .d{width:5px;height:5px;border-radius:50%;background:var(--green)}
+
+.tl-actions{padding:4px 20px 20px;display:flex;flex-direction:column;gap:8px}
+.tl-actions button{width:100%;padding:14px;border-radius:12px;border:1.5px solid var(--gray-200);background:var(--white);font-size:14px;font-weight:600;font-family:var(--font);color:var(--gray-700);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;min-height:48px}
+.tl-actions button:hover{background:var(--gray-100)}
+.tl-actions button svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.75}
+.tl-actions .danger{color:var(--red);border-color:rgba(217,43,43,.2)}
+
+/* Animations */
+.scroll>*{animation:up .22s ease-out both}
+@keyframes up{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+.scroll>*:nth-child(1){animation-delay:0s}
+.scroll>*:nth-child(2){animation-delay:.03s}
+.scroll>*:nth-child(3){animation-delay:.06s}
+.scroll>*:nth-child(4){animation-delay:.09s}
+.scroll>*:nth-child(5){animation-delay:.12s}
+.scroll>*:nth-child(6){animation-delay:.15s}
+.scroll>*:nth-child(7){animation-delay:.18s}
+.scroll>*:nth-child(8){animation-delay:.21s}
+.scroll>*:nth-child(9){animation-delay:.24s}
+
+@media(max-width:420px){body{padding:0}.device{border-radius:0;min-height:100vh;box-shadow:none}.notch{display:none}}
+</style>
+</head>
+<body>
+<div class="device">
+<div class="notch"></div>
+
+<!-- ═══════════ HOME ═══════════ -->
+<div class="screen active" id="s-home">
+<div class="statusbar"><span>16:10</span><div style="display:flex;gap:6px"><svg width="16" height="12" viewBox="0 0 16 12" fill="currentColor"><path d="M1.5 7.5h1.5v4H1.5zM5 5.5h1.5v6H5zM8.5 3.5H10v8H8.5zM12 1h1.5v10.5H12z"/></svg><svg width="22" height="12" viewBox="0 0 28 14" fill="currentColor"><rect x=".5" y="1" width="22" height="12" rx="2.5" stroke="currentColor" stroke-width="1" fill="none"/><rect x="23.5" y="4.5" width="2" height="5" rx="1"/><rect x="2" y="2.5" width="17" height="9" rx="1.5"/></svg></div></div>
+
+<div class="scroll">
+<!-- Header -->
+<div class="home-top">
+<div class="logo">My Matchday</div>
+<div class="icons">
+<div class="icon-btn"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg></div>
+<div class="icon-btn" style="background:linear-gradient(135deg,#0B1D3A,#1A3A5C);border:none"><span style="color:#FFF;font-weight:700;font-size:14px">A</span></div>
+</div>
+</div>
+
+<!-- Hero match card -->
+<div class="hero" onclick="go('timeline')">
+<div class="stadium-art"><svg viewBox="0 0 200 200"><ellipse cx="100" cy="120" rx="90" ry="55" stroke="white" stroke-width="3" fill="none"/><ellipse cx="100" cy="120" rx="60" ry="35" stroke="white" stroke-width="2" fill="none"/><path d="M20 80 Q100 30 180 80" stroke="white" stroke-width="2" fill="none"/></svg></div>
+<div class="hero-overlay">
+<div class="hero-label">Group Stage · Match 23</div>
+<h2>🇪🇸 Spain vs Brazil 🇧🇷</h2>
+<p>Today, 18:00 · MetLife Stadium</p>
+<div class="pill-row">
+<span class="h-pill">Sec 134 · Row D · Seat 7</span>
+<span class="h-pill">🎟 Valid</span>
+</div>
+</div>
+<div class="hero-dots"><span class="on"></span><span></span><span></span></div>
+</div>
+
+<!-- Status -->
+<div class="status-strip ok">
+<div class="s-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+<div class="s-text"><div class="s-title">You're on track</div><div class="s-sub">Leave in 5 min to arrive on time</div></div>
+<div class="s-time">1h 50m</div>
+</div>
+
+<!-- Disruption -->
+<div class="disrupt" onclick="go('timeline')">
+<div class="d-top"><span class="d-dot"></span><span class="d-label">Route updated</span><span class="d-time">2 min ago</span></div>
+<div class="d-body">NJ Transit signal issue — 16:28 cancelled. Rerouted to 16:35 (+7 min). Itinerary updated.</div>
+<div class="d-foot"><span class="d-pill"><span class="dp"></span> Still on time</span><span class="d-link">Review route <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></span></div>
+</div>
+
+<!-- CTA -->
+<div class="cta-bar" style="margin-top:16px">
+<button onclick="go('timeline')">View my matchday <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+</div>
+
+<!-- Nearby section -->
+<div class="section-head"><h2>Getting there</h2><a>See all</a></div>
+<div class="hscroll">
+<div class="hcard">
+<div class="hcard-img"><div class="hc-badge">LIVE</div>🚇</div>
+<div class="hcard-body"><h3>NJ Transit to MetLife</h3><div class="meta"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>59 min · Step-free</div></div>
+</div>
+<div class="hcard">
+<div class="hcard-img" style="background:linear-gradient(135deg,#1A3A5C,#2A5A8C)">🏟</div>
+<div class="hcard-body"><h3>MetLife Stadium Map</h3><div class="meta"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>Gates · Food · Accessible</div></div>
+</div>
+</div>
+
+<!-- Quick links -->
+<div style="padding:16px 20px 6px"><span style="font-size:14px;font-weight:700;color:var(--black)">Quick links</span></div>
+<div class="qlinks">
+<div class="qlink"><svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M22 10H2M12 6v12"/></svg>My ticket</div>
+<div class="qlink"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>Stadium map</div>
+<div class="qlink"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>Get help</div>
+</div>
+</div>
+
+<div class="tabnav">
+<button class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Home</button>
+<button onclick="go('timeline')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Journey</button>
+<button><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>Map</button>
+<button><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>Help</button>
+</div>
+</div>
+
+<!-- ═══════════ TIMELINE ═══════════ -->
+<div class="screen" id="s-timeline">
+<div class="statusbar"><span>16:10</span><div style="display:flex;gap:6px"><svg width="16" height="12" viewBox="0 0 16 12" fill="currentColor"><path d="M1.5 7.5h1.5v4H1.5zM5 5.5h1.5v6H5zM8.5 3.5H10v8H8.5zM12 1h1.5v10.5H12z"/></svg><svg width="22" height="12" viewBox="0 0 28 14" fill="currentColor"><rect x=".5" y="1" width="22" height="12" rx="2.5" stroke="currentColor" stroke-width="1" fill="none"/><rect x="23.5" y="4.5" width="2" height="5" rx="1"/><rect x="2" y="2.5" width="17" height="9" rx="1.5"/></svg></div></div>
+
+<div class="tl-header"><div class="tl-back" onclick="go('home')"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></div><h1>My Matchday</h1></div>
+
+<div class="scroll">
+<div class="tl-mini"><div class="flags">🇪🇸 <span class="vs">VS</span> 🇧🇷</div><div class="info">Spain vs Brazil</div><div class="ko"><div class="t">18:00</div><div class="l">in 1h 50m</div></div></div>
+
+<div class="tl-banner"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg><span><strong>Route updated</strong> — NJ Transit disruption · <u>View details</u></span></div>
+
+<div class="apills"><div class="apill"><svg viewBox="0 0 24 24"><circle cx="12" cy="4" r="2"/><path d="M19 13v-2c0-1.1-.9-2-2-2H7c-1.1 0-2 .9-2 2v2M12 10v4M8 21l2-7h4l2 7"/></svg>Step-free</div><div class="apill"><svg viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>Public transport</div></div>
+
+<div class="steps">
+<div class="step"><div class="marker now"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg></div><div class="body"><div class="time now">16:10 · Now</div><div class="title">Leave your hotel</div><div class="desc">Hilton Midtown, 6th Ave — 5 min walk to Penn Station</div></div></div>
+
+<div class="step"><div class="marker"><svg viewBox="0 0 24 24"><circle cx="12" cy="4" r="1.5" fill="currentColor" stroke="none"/><path d="M7 21l3-9 3 2V8l4 1"/></svg></div><div class="body"><div class="time">16:15</div><div class="title">Walk to Penn Station</div><div class="desc">5 min · Elevator via 33rd St entrance</div></div></div>
+
+<div class="step"><div class="marker warn"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M12 8v4M12 16h.01"/></svg></div><div class="body"><div class="time"><span style="text-decoration:line-through;opacity:.4">16:28</span> → 16:35</div><div class="title">NJ Transit to Secaucus</div><div class="desc">Platform 4 · ~25 min</div><div class="inline-alert"><svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><div><strong>Signal issue — take 16:35 instead</strong>7 min later. You'll still arrive on time.</div></div></div></div>
+
+<div class="step"><div class="marker"><svg viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 014-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 01-4 4H3"/></svg></div><div class="body"><div class="time">17:00</div><div class="title">Transfer at Secaucus Jn</div><div class="desc">Meadowlands shuttle · Platform 2 · Lift available</div></div></div>
+
+<div class="step"><div class="marker"><svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13" rx="2"/><polygon points="16 8 20 12 20 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></div><div class="body"><div class="time">17:08</div><div class="title">Shuttle to MetLife</div><div class="desc">~12 min · Step-free boarding</div></div></div>
+
+<div class="step"><div class="marker"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg></div><div class="body"><div class="time">17:20</div><div class="title">Arrive at MetLife Stadium</div><div class="desc">Head to Gate D</div><div class="inline-rec"><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg><div><strong>Gate D recommended</strong>~6 min wait · Step-free · Saves 12 min vs Gate C</div></div></div></div>
+
+<div class="step"><div class="marker"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><div class="body"><div class="time">17:26</div><div class="title">Security & ticket scan</div><div class="desc">Est. 6 min · Mobile ticket ready</div></div></div>
+
+<div class="step"><div class="marker done"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><div class="body"><div class="time">17:35</div><div class="title">In your seat</div><div class="desc">Section 134 · Row D · Seat 7</div><span class="pill-sm"><span class="d"></span>25 min before kick-off</span></div></div>
+</div>
+
+<div class="tl-actions">
+<button><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>View live route map</button>
+<button class="danger"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>Emergency assistance</button>
+</div>
+</div>
+
+<div class="tabnav">
+<button onclick="go('home')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Home</button>
+<button class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Journey</button>
+<button><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>Map</button>
+<button><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>Help</button>
+</div>
+</div>
+</div>
+<script>function go(n){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById('s-'+n).classList.add('active');}</script>
+</body>
+</html>
