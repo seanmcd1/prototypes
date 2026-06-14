@@ -1,0 +1,1653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>FIFA World Cup 2026 — Companion App</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+
+:root{
+  --bg:#F7F7F5;--white:#FFFFFF;--ink:#1A1A1A;--ink-secondary:#6A6A6A;
+  --gray-100:#F2F2F0;--gray-200:#E8E8E5;--gray-300:#D4D4D0;--gray-400:#ABABAB;
+  --divider:#E2E2DF;--accent:#FFD700;--accent-dark:#E6C200;--accent-bg:rgba(255,215,0,0.12);
+  --charcoal:#2E2E38;--charcoal-light:#3D3D4A;
+  --green:#22C55E;--green-bg:rgba(34,197,94,0.1);
+  --red:#EF4444;--red-bg:rgba(239,68,68,0.1);
+  --blue:#3B82F6;--blue-bg:rgba(59,130,246,0.1);
+  --card-r:10px;--shadow:0 1px 3px rgba(0,0,0,0.06);
+  --shadow-lg:0 4px 20px rgba(0,0,0,0.08);
+  --transition:0.3s cubic-bezier(0.4,0,0.2,1);
+}
+
+body{
+  font-family:'Inter',-apple-system,BlinkMacSystemFont,'SF Pro Display',sans-serif;
+  background:#E8E8ED;color:var(--ink);-webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+
+/* ═══ SHOWCASE WRAPPER ═══ */
+.showcase{
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  padding:48px 20px 40px;
+  background:linear-gradient(160deg,#F5F5F2 0%,#EDEDEA 50%,#F0F0ED 100%);
+}
+.showcase-header{text-align:center;margin-bottom:48px;max-width:640px}
+.showcase-header .badge{
+  display:inline-flex;align-items:center;gap:6px;
+  background:var(--charcoal);color:var(--accent);
+  padding:6px 16px;border-radius:20px;font-size:11px;font-weight:700;
+  letter-spacing:1px;text-transform:uppercase;margin-bottom:20px;
+}
+.showcase-header h1{
+  font-size:42px;font-weight:800;line-height:1.1;letter-spacing:-1.5px;
+  color:var(--charcoal);margin-bottom:12px;
+}
+.showcase-header h1 span{color:var(--accent-dark)}
+.showcase-header p{font-size:16px;color:var(--ink-secondary);line-height:1.6}
+
+/* ═══ PHONE FRAME ═══ */
+.phone-container{
+  display:flex;gap:40px;align-items:flex-start;
+  justify-content:center;flex-wrap:wrap;max-width:1200px;
+}
+.phone-wrap{display:flex;flex-direction:column;align-items:center;gap:12px}
+.phone-label{font-size:12px;font-weight:600;color:var(--ink-secondary);letter-spacing:0.5px;text-transform:uppercase}
+.phone{
+  width:375px;height:812px;background:var(--bg);border-radius:44px;
+  overflow:hidden;position:relative;
+  box-shadow:0 40px 80px rgba(0,0,0,0.15),0 10px 30px rgba(0,0,0,0.1),inset 0 0 0 1px rgba(0,0,0,0.08);
+}
+
+/* ═══ STATUS BAR ═══ */
+.status-bar{
+  height:54px;display:flex;align-items:flex-end;justify-content:space-between;
+  padding:0 28px 8px;font-size:14px;font-weight:600;color:var(--ink);
+  background:var(--bg);position:relative;z-index:100;
+}
+.status-bar .time{font-weight:700}
+.status-bar .icons{display:flex;gap:5px;align-items:center;font-size:12px}
+.status-bar .icons svg{width:16px;height:16px}
+
+/* ═══ SCREENS ═══ */
+.screen{
+  position:absolute;top:54px;left:0;right:0;bottom:80px;
+  overflow-y:auto;overflow-x:hidden;
+  background:var(--bg);
+  opacity:0;pointer-events:none;
+  transition:opacity 0.25s ease,transform 0.25s ease;
+  transform:translateX(8px);
+  -webkit-overflow-scrolling:touch;
+}
+.screen.active{opacity:1;pointer-events:all;transform:translateX(0)}
+.screen::-webkit-scrollbar{display:none}
+
+/* ═══ TAB BAR ═══ */
+.tab-bar{
+  position:absolute;bottom:0;left:0;right:0;height:80px;
+  background:rgba(255,255,255,0.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border-top:0.5px solid var(--divider);
+  display:flex;align-items:flex-start;justify-content:space-around;
+  padding-top:8px;z-index:200;
+}
+.tab-item{
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+  background:none;border:none;cursor:pointer;padding:4px 12px;
+  transition:all 0.2s ease;
+}
+.tab-item svg{width:24px;height:24px;color:var(--gray-400);transition:color 0.2s}
+.tab-item span{font-size:10px;font-weight:500;color:var(--gray-400);transition:color 0.2s}
+.tab-item.active svg{color:var(--charcoal)}
+.tab-item.active span{color:var(--charcoal);font-weight:600}
+
+/* ═══ COMMON ═══ */
+.screen-pad{padding:0 20px}
+.section-title{font-size:13px;font-weight:700;color:var(--ink-secondary);letter-spacing:0.8px;text-transform:uppercase;margin-bottom:12px}
+.screen-title{font-size:28px;font-weight:800;letter-spacing:-0.5px;color:var(--ink);margin-bottom:4px}
+.screen-subtitle{font-size:14px;color:var(--ink-secondary);margin-bottom:20px}
+
+/* ═══ CARDS ═══ */
+.card{
+  background:var(--white);border-radius:var(--card-r);
+  box-shadow:var(--shadow);overflow:hidden;
+  transition:transform 0.2s ease,box-shadow 0.2s ease;
+  cursor:pointer;
+}
+.card:active{transform:scale(0.98);box-shadow:var(--shadow-lg)}
+
+/* ═══ HOME SCREEN ═══ */
+.home-hero{
+  margin:16px 20px;padding:24px;border-radius:14px;
+  background:var(--charcoal);color:#fff;position:relative;overflow:hidden;
+}
+.home-hero::before{
+  content:'';position:absolute;top:-40px;right:-40px;
+  width:160px;height:160px;border-radius:50%;
+  background:var(--accent);opacity:0.15;
+}
+.home-hero .label{
+  font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;
+  color:var(--accent);margin-bottom:12px;display:flex;align-items:center;gap:6px;
+}
+.home-hero .label .dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+.home-hero .match-teams{
+  display:flex;align-items:center;gap:12px;margin-bottom:12px;
+}
+.home-hero .team-flag{
+  width:40px;height:40px;border-radius:8px;background:rgba(255,255,255,0.15);
+  display:flex;align-items:center;justify-content:center;font-size:24px;
+}
+.home-hero .team-name{font-size:15px;font-weight:600}
+.home-hero .vs{font-size:12px;color:rgba(255,255,255,0.5);font-weight:700}
+.home-hero .match-meta{font-size:13px;color:rgba(255,255,255,0.6);display:flex;gap:12px}
+.home-hero .countdown{
+  margin-top:16px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.1);
+  display:flex;gap:20px;
+}
+.home-hero .countdown .unit{text-align:center}
+.home-hero .countdown .num{font-size:24px;font-weight:800;color:var(--accent)}
+.home-hero .countdown .lbl{font-size:10px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.5px}
+
+.quick-actions{display:flex;gap:10px;margin:0 20px 20px;overflow-x:auto}
+.quick-actions::-webkit-scrollbar{display:none}
+.qa-btn{
+  flex-shrink:0;display:flex;align-items:center;gap:8px;
+  padding:10px 16px;border-radius:10px;background:var(--white);
+  border:1px solid var(--divider);font-size:13px;font-weight:600;
+  color:var(--ink);cursor:pointer;transition:all 0.2s;
+  white-space:nowrap;
+}
+.qa-btn:active{background:var(--gray-100)}
+.qa-btn svg{width:18px;height:18px;color:var(--charcoal)}
+
+.match-card{
+  display:flex;align-items:center;padding:14px 16px;gap:12px;
+  background:var(--white);border-radius:var(--card-r);margin-bottom:8px;
+  box-shadow:var(--shadow);cursor:pointer;transition:all 0.2s;
+}
+.match-card:active{transform:scale(0.98)}
+.match-card .time-col{
+  text-align:center;min-width:48px;
+}
+.match-card .time-col .time{font-size:15px;font-weight:700;color:var(--ink)}
+.match-card .time-col .period{font-size:10px;color:var(--ink-secondary);text-transform:uppercase}
+.match-card .teams-col{flex:1}
+.match-card .team-row{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.match-card .team-row:last-child{margin-bottom:0}
+.match-card .team-row .flag{font-size:18px}
+.match-card .team-row .name{font-size:14px;font-weight:600}
+.match-card .venue-col{font-size:11px;color:var(--ink-secondary);text-align:right;max-width:80px}
+.match-card .live-badge{
+  font-size:10px;font-weight:700;color:var(--red);
+  background:var(--red-bg);padding:2px 8px;border-radius:4px;
+}
+
+/* ═══ SCHEDULE ═══ */
+.filter-tabs{
+  display:flex;gap:6px;margin:0 20px 16px;overflow-x:auto;
+}
+.filter-tabs::-webkit-scrollbar{display:none}
+.filter-tab{
+  flex-shrink:0;padding:8px 16px;border-radius:8px;
+  font-size:13px;font-weight:600;cursor:pointer;
+  background:var(--white);color:var(--ink-secondary);
+  border:1px solid var(--divider);transition:all 0.2s;
+  white-space:nowrap;
+}
+.filter-tab.active{background:var(--charcoal);color:#fff;border-color:var(--charcoal)}
+.filter-tab:active{transform:scale(0.96)}
+
+.date-header{
+  font-size:14px;font-weight:700;color:var(--ink);
+  margin:20px 20px 10px;display:flex;align-items:center;gap:8px;
+}
+.date-header .day-badge{
+  font-size:11px;font-weight:600;color:var(--accent-dark);
+  background:var(--accent-bg);padding:2px 8px;border-radius:4px;
+}
+
+/* ═══ MATCH DETAIL OVERLAY ═══ */
+.overlay{
+  position:absolute;top:0;left:0;right:0;bottom:0;
+  background:var(--bg);z-index:300;
+  transform:translateY(100%);transition:transform 0.35s cubic-bezier(0.4,0,0.2,1);
+  overflow-y:auto;
+}
+.overlay.open{transform:translateY(0)}
+.overlay-header{
+  display:flex;align-items:center;padding:16px 20px;
+  position:sticky;top:0;background:rgba(247,247,245,0.95);
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);z-index:10;
+}
+.overlay-back{
+  background:none;border:none;cursor:pointer;display:flex;align-items:center;
+  gap:4px;font-size:14px;font-weight:600;color:var(--charcoal);
+}
+.overlay-back svg{width:20px;height:20px}
+
+.detail-hero{
+  text-align:center;padding:20px;
+}
+.detail-stage{
+  font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;
+  color:var(--ink-secondary);margin-bottom:16px;
+}
+.detail-teams{
+  display:flex;align-items:center;justify-content:center;gap:24px;margin-bottom:16px;
+}
+.detail-team{text-align:center}
+.detail-team .flag{font-size:48px;margin-bottom:8px;display:block}
+.detail-team .name{font-size:16px;font-weight:700}
+.detail-vs{font-size:14px;font-weight:700;color:var(--gray-400)}
+.detail-info{
+  display:flex;flex-direction:column;gap:8px;align-items:center;
+  font-size:13px;color:var(--ink-secondary);
+}
+.detail-info .row{display:flex;align-items:center;gap:6px}
+.detail-info svg{width:16px;height:16px;color:var(--gray-400)}
+
+.detail-actions{
+  display:flex;gap:10px;padding:0 20px;margin:20px 0;
+}
+.btn-primary{
+  flex:1;padding:14px;border-radius:10px;font-size:14px;font-weight:700;
+  border:none;cursor:pointer;transition:all 0.2s;
+  background:var(--charcoal);color:#fff;
+}
+.btn-primary:active{transform:scale(0.97);opacity:0.9}
+.btn-secondary{
+  flex:1;padding:14px;border-radius:10px;font-size:14px;font-weight:700;
+  border:1.5px solid var(--charcoal);cursor:pointer;transition:all 0.2s;
+  background:transparent;color:var(--charcoal);
+}
+.btn-secondary:active{transform:scale(0.97);background:var(--gray-100)}
+
+.detail-section{padding:20px;border-top:1px solid var(--divider)}
+.detail-section h3{font-size:15px;font-weight:700;margin-bottom:12px}
+
+.venue-card{
+  display:flex;gap:12px;background:var(--white);border-radius:var(--card-r);
+  padding:14px;box-shadow:var(--shadow);
+}
+.venue-card .venue-img{
+  width:80px;height:60px;border-radius:8px;
+  background:linear-gradient(135deg,var(--gray-200),var(--gray-300));
+  display:flex;align-items:center;justify-content:center;font-size:28px;
+}
+.venue-card .venue-info{flex:1}
+.venue-card .venue-name{font-size:14px;font-weight:700;margin-bottom:4px}
+.venue-card .venue-loc{font-size:12px;color:var(--ink-secondary)}
+.venue-card .venue-cap{font-size:11px;color:var(--gray-400);margin-top:4px}
+
+/* ═══ MAP SCREEN ═══ */
+#map-container{
+  position:absolute;top:0;left:0;right:0;bottom:0;
+}
+#main-map{width:100%;height:100%}
+.map-search{
+  position:absolute;top:12px;left:16px;right:16px;z-index:1000;
+  background:var(--white);border-radius:10px;box-shadow:var(--shadow-lg);
+  padding:10px 14px;display:flex;align-items:center;gap:10px;
+}
+.map-search svg{width:18px;height:18px;color:var(--gray-400);flex-shrink:0}
+.map-search input{
+  flex:1;border:none;outline:none;font-size:14px;font-weight:500;
+  font-family:inherit;background:transparent;color:var(--ink);
+}
+.map-search input::placeholder{color:var(--gray-400)}
+
+.map-bottom-sheet{
+  position:absolute;bottom:0;left:0;right:0;z-index:1000;
+  background:var(--white);border-radius:16px 16px 0 0;
+  box-shadow:0 -4px 20px rgba(0,0,0,0.08);
+  max-height:280px;overflow-y:auto;
+  transition:transform 0.35s cubic-bezier(0.4,0,0.2,1);
+}
+.map-bottom-sheet .handle{
+  width:36px;height:4px;border-radius:2px;background:var(--gray-300);
+  margin:10px auto 6px;
+}
+.map-bottom-sheet .sheet-title{
+  font-size:15px;font-weight:700;padding:8px 20px 12px;
+}
+.venue-list-item{
+  display:flex;align-items:center;gap:12px;padding:12px 20px;
+  border-top:0.5px solid var(--divider);cursor:pointer;transition:background 0.15s;
+}
+.venue-list-item:active{background:var(--gray-100)}
+.venue-list-item .v-icon{
+  width:40px;height:40px;border-radius:10px;
+  background:var(--accent-bg);display:flex;align-items:center;justify-content:center;
+  font-size:18px;
+}
+.venue-list-item .v-info{flex:1}
+.venue-list-item .v-name{font-size:14px;font-weight:600}
+.venue-list-item .v-city{font-size:12px;color:var(--ink-secondary)}
+.venue-list-item .v-matches{font-size:11px;color:var(--accent-dark);font-weight:600}
+
+/* Custom map markers */
+.custom-marker{
+  width:32px;height:32px;border-radius:50%;
+  background:var(--charcoal);border:2.5px solid var(--accent);
+  display:flex;align-items:center;justify-content:center;
+  color:#fff;font-size:14px;font-weight:700;
+  box-shadow:0 2px 8px rgba(0,0,0,0.2);
+  transition:transform 0.2s;cursor:pointer;
+}
+.custom-marker:hover{transform:scale(1.15)}
+.custom-marker.fan-zone{background:var(--accent);color:var(--charcoal)}
+
+.map-popup{
+  font-family:'Inter',sans-serif !important;
+}
+.map-popup h4{font-size:14px;font-weight:700;margin-bottom:4px}
+.map-popup p{font-size:12px;color:var(--ink-secondary);margin-bottom:2px}
+
+/* ═══ TEAMS SCREEN ═══ */
+.team-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:10px;
+  padding:0 20px 20px;
+}
+.team-card{
+  background:var(--white);border-radius:var(--card-r);padding:16px;
+  box-shadow:var(--shadow);cursor:pointer;transition:all 0.2s;
+  display:flex;flex-direction:column;align-items:center;text-align:center;
+}
+.team-card:active{transform:scale(0.96)}
+.team-card .t-flag{font-size:36px;margin-bottom:8px}
+.team-card .t-name{font-size:14px;font-weight:700;margin-bottom:2px}
+.team-card .t-group{font-size:11px;color:var(--ink-secondary);font-weight:500}
+
+/* ═══ TEAM DETAIL ═══ */
+.team-detail-header{
+  text-align:center;padding:24px 20px 16px;
+}
+.team-detail-header .flag{font-size:56px;margin-bottom:8px;display:block}
+.team-detail-header .name{font-size:24px;font-weight:800;margin-bottom:4px}
+.team-detail-header .meta{font-size:13px;color:var(--ink-secondary)}
+
+.team-tabs{
+  display:flex;gap:0;margin:0 20px;border-bottom:1.5px solid var(--divider);
+}
+.team-tab{
+  flex:1;padding:10px 0;text-align:center;font-size:13px;font-weight:600;
+  color:var(--ink-secondary);cursor:pointer;border-bottom:2px solid transparent;
+  transition:all 0.2s;margin-bottom:-1.5px;
+}
+.team-tab.active{color:var(--charcoal);border-bottom-color:var(--charcoal)}
+
+/* ═══ FORMATION VIEW ═══ */
+.formation-container{
+  margin:16px 20px;border-radius:14px;overflow:hidden;
+  background:linear-gradient(180deg,#1B5E20 0%,#2E7D32 40%,#388E3C 100%);
+  position:relative;padding:20px 10px;aspect-ratio:3/4;
+}
+.pitch-lines{
+  position:absolute;inset:0;
+  border:2px solid rgba(255,255,255,0.25);margin:12px;border-radius:4px;
+}
+.pitch-center{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:80px;height:80px;border-radius:50%;
+  border:2px solid rgba(255,255,255,0.25);
+}
+.pitch-center-dot{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,0.4);
+}
+.pitch-half{
+  position:absolute;top:50%;left:12px;right:12px;
+  border-top:2px solid rgba(255,255,255,0.25);
+}
+.pitch-box-top{
+  position:absolute;top:12px;left:50%;transform:translateX(-50%);
+  width:55%;height:18%;border:2px solid rgba(255,255,255,0.2);
+  border-top:none;border-radius:0 0 2px 2px;
+}
+.pitch-box-bottom{
+  position:absolute;bottom:12px;left:50%;transform:translateX(-50%);
+  width:55%;height:18%;border:2px solid rgba(255,255,255,0.2);
+  border-bottom:none;border-radius:2px 2px 0 0;
+}
+.pitch-goal-top{
+  position:absolute;top:12px;left:50%;transform:translateX(-50%);
+  width:20%;height:5%;border:2px solid rgba(255,255,255,0.15);
+  border-top:none;
+}
+.pitch-goal-bottom{
+  position:absolute;bottom:12px;left:50%;transform:translateX(-50%);
+  width:20%;height:5%;border:2px solid rgba(255,255,255,0.15);
+  border-bottom:none;
+}
+
+.player-dot{
+  position:absolute;transform:translate(-50%,-50%);
+  cursor:pointer;transition:all 0.3s cubic-bezier(0.4,0,0.2,1);
+  z-index:10;display:flex;flex-direction:column;align-items:center;gap:3px;
+}
+.player-dot:hover,.player-dot:active{transform:translate(-50%,-50%) scale(1.15)}
+.player-dot .dot{
+  width:36px;height:36px;border-radius:50%;
+  background:var(--white);color:var(--charcoal);
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:800;
+  box-shadow:0 2px 8px rgba(0,0,0,0.3);
+  transition:all 0.3s;
+}
+.player-dot.selected .dot{
+  background:var(--accent);transform:scale(1.2);
+  box-shadow:0 4px 16px rgba(255,215,0,0.4);
+}
+.player-dot .pname{
+  font-size:9px;font-weight:700;color:#fff;
+  text-shadow:0 1px 3px rgba(0,0,0,0.5);white-space:nowrap;
+  letter-spacing:0.3px;
+}
+
+/* Player card popup */
+.player-popup{
+  position:absolute;bottom:0;left:0;right:0;
+  background:var(--white);border-radius:16px 16px 0 0;
+  box-shadow:0 -4px 20px rgba(0,0,0,0.1);
+  padding:20px;transform:translateY(100%);
+  transition:transform 0.35s cubic-bezier(0.4,0,0.2,1);
+  z-index:20;
+}
+.player-popup.open{transform:translateY(0)}
+.player-popup .pp-header{display:flex;align-items:center;gap:14px;margin-bottom:14px}
+.player-popup .pp-number{
+  width:48px;height:48px;border-radius:12px;
+  background:var(--charcoal);color:var(--accent);
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;font-weight:800;
+}
+.player-popup .pp-name{font-size:18px;font-weight:700}
+.player-popup .pp-pos{font-size:13px;color:var(--ink-secondary)}
+.player-popup .pp-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.player-popup .pp-stat{
+  text-align:center;padding:10px;background:var(--gray-100);border-radius:8px;
+}
+.player-popup .pp-stat .val{font-size:18px;font-weight:800;color:var(--charcoal)}
+.player-popup .pp-stat .label{font-size:10px;color:var(--ink-secondary);text-transform:uppercase;letter-spacing:0.5px}
+.player-popup .pp-close{
+  position:absolute;top:12px;right:16px;background:none;border:none;
+  cursor:pointer;font-size:20px;color:var(--gray-400);padding:4px;
+}
+
+/* ═══ TRAVEL SCREEN ═══ */
+.travel-header-card{
+  margin:16px 20px;padding:20px;border-radius:14px;
+  background:var(--white);box-shadow:var(--shadow);
+}
+.travel-from-to{display:flex;align-items:stretch;gap:12px}
+.travel-dot-line{
+  display:flex;flex-direction:column;align-items:center;gap:0;
+  padding:4px 0;
+}
+.travel-dot-line .dot{
+  width:10px;height:10px;border-radius:50%;
+  border:2.5px solid var(--charcoal);background:var(--white);flex-shrink:0;
+}
+.travel-dot-line .dot.end{border-color:var(--accent);background:var(--accent)}
+.travel-dot-line .line{width:2px;flex:1;background:var(--gray-300);margin:2px 0}
+.travel-locations{flex:1;display:flex;flex-direction:column;justify-content:space-between;gap:20px}
+.travel-loc .loc-name{font-size:14px;font-weight:700}
+.travel-loc .loc-desc{font-size:12px;color:var(--ink-secondary)}
+
+.travel-options{margin:0 20px}
+.travel-option{
+  display:flex;align-items:center;gap:12px;padding:14px 16px;
+  background:var(--white);border-radius:var(--card-r);margin-bottom:8px;
+  box-shadow:var(--shadow);cursor:pointer;transition:all 0.2s;
+}
+.travel-option:active{transform:scale(0.98)}
+.travel-option.eco{border-left:3px solid var(--green)}
+.travel-option .to-icon{
+  width:40px;height:40px;border-radius:10px;
+  background:var(--gray-100);display:flex;align-items:center;justify-content:center;
+  font-size:18px;
+}
+.travel-option .to-info{flex:1}
+.travel-option .to-mode{font-size:14px;font-weight:600}
+.travel-option .to-desc{font-size:12px;color:var(--ink-secondary)}
+.travel-option .to-time{text-align:right}
+.travel-option .to-dur{font-size:14px;font-weight:700}
+.travel-option .to-cost{font-size:11px;color:var(--ink-secondary)}
+.eco-badge{
+  display:inline-flex;align-items:center;gap:4px;
+  font-size:10px;font-weight:600;color:var(--green);
+  background:var(--green-bg);padding:2px 8px;border-radius:4px;
+  margin-top:4px;
+}
+
+/* POI Section */
+.poi-scroll{
+  display:flex;gap:10px;overflow-x:auto;padding:0 20px 20px;
+}
+.poi-scroll::-webkit-scrollbar{display:none}
+.poi-card{
+  flex-shrink:0;width:140px;background:var(--white);border-radius:var(--card-r);
+  box-shadow:var(--shadow);overflow:hidden;cursor:pointer;
+}
+.poi-card .poi-img{
+  height:80px;background:linear-gradient(135deg,var(--gray-200),var(--gray-300));
+  display:flex;align-items:center;justify-content:center;font-size:28px;
+}
+.poi-card .poi-info{padding:10px}
+.poi-card .poi-name{font-size:12px;font-weight:700;margin-bottom:2px}
+.poi-card .poi-type{font-size:10px;color:var(--ink-secondary)}
+
+/* ═══ MY PLAN ═══ */
+.plan-day{margin:0 20px 20px}
+.plan-day-header{
+  font-size:15px;font-weight:700;margin-bottom:10px;
+  display:flex;align-items:center;gap:8px;
+}
+.plan-day-header .day-num{
+  width:28px;height:28px;border-radius:8px;
+  background:var(--charcoal);color:#fff;
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:700;
+}
+.plan-item{
+  display:flex;gap:12px;padding:14px;background:var(--white);
+  border-radius:var(--card-r);box-shadow:var(--shadow);margin-bottom:8px;
+}
+.plan-item .pi-time{
+  min-width:48px;text-align:center;
+}
+.plan-item .pi-time .t{font-size:14px;font-weight:700}
+.plan-item .pi-time .tz{font-size:10px;color:var(--ink-secondary)}
+.plan-item .pi-content{flex:1}
+.plan-item .pi-title{font-size:14px;font-weight:700;margin-bottom:2px}
+.plan-item .pi-subtitle{font-size:12px;color:var(--ink-secondary)}
+.plan-item .pi-tag{
+  display:inline-flex;align-items:center;gap:4px;
+  font-size:10px;font-weight:600;padding:2px 8px;border-radius:4px;
+  margin-top:6px;
+}
+.plan-item .pi-tag.match{color:var(--charcoal);background:var(--accent-bg)}
+.plan-item .pi-tag.travel{color:var(--blue);background:var(--blue-bg)}
+
+.plan-travel-connector{
+  display:flex;align-items:center;gap:8px;padding:4px 20px;
+  margin:-4px 0;
+}
+.plan-travel-connector .ptc-line{
+  width:2px;height:20px;background:var(--gray-300);margin-left:23px;
+}
+.plan-travel-connector .ptc-info{
+  font-size:11px;color:var(--ink-secondary);font-weight:500;
+}
+
+/* ═══ SQUAD LIST ═══ */
+.squad-section{padding:16px 20px}
+.squad-pos-title{font-size:12px;font-weight:700;color:var(--ink-secondary);text-transform:uppercase;letter-spacing:0.5px;margin:12px 0 8px}
+.squad-player{
+  display:flex;align-items:center;gap:12px;padding:10px 0;
+  border-bottom:0.5px solid var(--divider);cursor:pointer;
+}
+.squad-player:last-child{border-bottom:none}
+.squad-player .sp-num{
+  width:28px;height:28px;border-radius:7px;
+  background:var(--gray-100);display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:700;color:var(--charcoal);
+}
+.squad-player .sp-name{font-size:14px;font-weight:600;flex:1}
+.squad-player .sp-club{font-size:12px;color:var(--ink-secondary)}
+
+/* ═══ GROUP TABLE ═══ */
+.group-table{
+  margin:16px 20px;background:var(--white);border-radius:var(--card-r);
+  box-shadow:var(--shadow);overflow:hidden;
+}
+.group-table .gt-header{
+  padding:10px 14px;font-size:12px;font-weight:700;
+  color:var(--ink-secondary);background:var(--gray-100);
+  display:grid;grid-template-columns:1fr 30px 30px 30px 30px 30px 30px;
+  text-align:center;
+}
+.group-table .gt-header span:first-child{text-align:left}
+.group-table .gt-row{
+  padding:10px 14px;display:grid;
+  grid-template-columns:1fr 30px 30px 30px 30px 30px 30px;
+  text-align:center;font-size:13px;border-top:0.5px solid var(--divider);
+  align-items:center;
+}
+.group-table .gt-row .gt-team{
+  display:flex;align-items:center;gap:8px;text-align:left;
+  font-weight:600;
+}
+.group-table .gt-row .gt-team .flag{font-size:16px}
+.group-table .gt-row .pts{font-weight:700;color:var(--charcoal)}
+
+/* ═══ RESPONSIVE ═══ */
+@media(max-width:420px){
+  .showcase{padding:20px 0 0}
+  .showcase-header{padding:0 20px;margin-bottom:24px}
+  .showcase-header h1{font-size:28px}
+  .phone{width:100vw;height:100vh;border-radius:0;box-shadow:none}
+  .phone-label{display:none}
+  .status-bar{padding:0 20px 8px}
+}
+
+/* ═══ LEAFLET OVERRIDES ═══ */
+.leaflet-container{font-family:'Inter',sans-serif !important;background:#E8E8E5 !important}
+.leaflet-popup-content-wrapper{border-radius:10px !important;box-shadow:var(--shadow-lg) !important;padding:0 !important}
+.leaflet-popup-content{margin:14px 16px !important;min-width:180px}
+.leaflet-popup-tip{box-shadow:none !important}
+.leaflet-control-zoom{border:none !important;box-shadow:var(--shadow-lg) !important;border-radius:10px !important;overflow:hidden}
+.leaflet-control-zoom a{width:36px !important;height:36px !important;line-height:36px !important;font-size:16px !important;color:var(--charcoal) !important;border-bottom:0.5px solid var(--divider) !important}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════ SHOWCASE ═══════════════════════ -->
+<div class="showcase">
+  <div class="showcase-header">
+    <div class="badge">⚽ EY × FIFA</div>
+    <h1>World Cup <span>2026</span><br>Companion</h1>
+    <p>High-fidelity iOS prototype — Schedule, Teams & Formations, Travel, unified by an interactive map.</p>
+  </div>
+
+  <div class="phone-container">
+    <div class="phone-wrap">
+      <div class="phone" id="mainPhone">
+        <!-- Status Bar -->
+        <div class="status-bar">
+          <span class="time">9:41</span>
+          <div class="icons">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 1l22 22M16.72 11.06A10.94 10.94 0 0 1 19 12.55M5 12.55a10.94 10.94 0 0 1 5.17-2.39M8.53 16.11a6 6 0 0 1 6.95 0M12 20h.01"/></svg>
+            <svg viewBox="0 0 24 24" fill="currentColor"><rect x="1" y="6" width="3" height="12" rx="1"/><rect x="6" y="4" width="3" height="14" rx="1"/><rect x="11" y="2" width="3" height="16" rx="1"/><rect x="16" y="0" width="3" height="18" rx="1"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="18" height="10" rx="2"/><path d="M22 11v2" stroke-linecap="round"/></svg>
+          </div>
+        </div>
+
+        <!-- ═══ HOME SCREEN ═══ -->
+        <div class="screen active" id="screen-home">
+          <div style="padding:16px 20px 8px">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+              <div>
+                <div style="font-size:13px;color:var(--ink-secondary);font-weight:500">Saturday, Jun 14</div>
+                <div class="screen-title" style="margin:0">World Cup 2026</div>
+              </div>
+              <div style="width:36px;height:36px;border-radius:50%;background:var(--charcoal);display:flex;align-items:center;justify-content:center;color:var(--accent);font-size:14px;font-weight:800">⚽</div>
+            </div>
+          </div>
+
+          <div class="home-hero" onclick="showMatchDetail(0)">
+            <div class="label"><span class="dot"></span>Next Match</div>
+            <div class="match-teams">
+              <div class="team-flag">🇺🇸</div>
+              <div><div class="team-name">United States</div></div>
+              <div class="vs">vs</div>
+              <div><div class="team-name">Brazil</div></div>
+              <div class="team-flag">🇧🇷</div>
+            </div>
+            <div class="match-meta">
+              <span>🏟️ MetLife Stadium</span>
+              <span>🕐 20:00 ET</span>
+            </div>
+            <div class="countdown">
+              <div class="unit"><div class="num">02</div><div class="lbl">Days</div></div>
+              <div class="unit"><div class="num">14</div><div class="lbl">Hours</div></div>
+              <div class="unit"><div class="num">36</div><div class="lbl">Mins</div></div>
+            </div>
+          </div>
+
+          <div class="quick-actions">
+            <button class="qa-btn" onclick="switchTab('map')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              Explore Map
+            </button>
+            <button class="qa-btn" onclick="switchTab('plan')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+              My Plan
+            </button>
+            <button class="qa-btn" onclick="switchTab('teams')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              Teams
+            </button>
+          </div>
+
+          <div class="screen-pad">
+            <div class="section-title">Today's Matches</div>
+          </div>
+          <div style="padding:0 20px 8px">
+            <div class="match-card" onclick="showMatchDetail(1)">
+              <div class="time-col"><div class="time">14:00</div><div class="period">ET</div></div>
+              <div class="teams-col">
+                <div class="team-row"><span class="flag">🇲🇽</span><span class="name">Mexico</span></div>
+                <div class="team-row"><span class="flag">🇩🇪</span><span class="name">Germany</span></div>
+              </div>
+              <div class="venue-col">Estadio Azteca, Mexico City</div>
+            </div>
+            <div class="match-card" onclick="showMatchDetail(2)">
+              <div class="time-col"><div class="time">17:00</div><div class="period">ET</div></div>
+              <div class="teams-col">
+                <div class="team-row"><span class="flag">🇫🇷</span><span class="name">France</span></div>
+                <div class="team-row"><span class="flag">🇦🇷</span><span class="name">Argentina</span></div>
+              </div>
+              <div class="venue-col">SoFi Stadium, Los Angeles</div>
+            </div>
+            <div class="match-card" onclick="showMatchDetail(3)">
+              <div class="time-col"><div class="time">20:00</div><div class="period">ET</div></div>
+              <div class="teams-col">
+                <div class="team-row"><span class="flag">🇪🇸</span><span class="name">Spain</span></div>
+                <div class="team-row"><span class="flag">🇯🇵</span><span class="name">Japan</span></div>
+              </div>
+              <div class="venue-col">AT&T Stadium, Dallas</div>
+            </div>
+          </div>
+
+          <div class="screen-pad">
+            <div class="section-title" style="margin-top:8px">Your Plan</div>
+          </div>
+          <div style="padding:0 20px 100px">
+            <div class="card" style="padding:14px 16px" onclick="switchTab('plan')">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+                <div style="font-size:14px;font-weight:700">3 matches saved</div>
+                <div style="font-size:12px;color:var(--accent-dark);font-weight:600">View all →</div>
+              </div>
+              <div style="display:flex;gap:6px">
+                <span style="font-size:20px">🇺🇸</span>
+                <span style="font-size:20px">🇧🇷</span>
+                <span style="font-size:20px">🇫🇷</span>
+                <span style="font-size:20px">🇦🇷</span>
+                <span style="font-size:20px">🇪🇸</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══ SCHEDULE SCREEN ═══ -->
+        <div class="screen" id="screen-schedule">
+          <div style="padding:16px 20px 12px">
+            <div class="screen-title">Schedule</div>
+            <div class="screen-subtitle">48 group stage matches</div>
+          </div>
+          <div class="filter-tabs">
+            <div class="filter-tab active" onclick="filterSchedule(this,'all')">All Matches</div>
+            <div class="filter-tab" onclick="filterSchedule(this,'today')">Today</div>
+            <div class="filter-tab" onclick="filterSchedule(this,'group')">Group Stage</div>
+            <div class="filter-tab" onclick="filterSchedule(this,'r16')">Round of 16</div>
+            <div class="filter-tab" onclick="filterSchedule(this,'qf')">Quarter-finals</div>
+          </div>
+
+          <div id="schedule-list">
+            <div class="date-header">June 11, 2026 <span class="day-badge">Opening Day</span></div>
+            <div style="padding:0 20px">
+              <div class="match-card" onclick="showMatchDetail(4)">
+                <div class="time-col"><div class="time">17:00</div><div class="period">ET</div></div>
+                <div class="teams-col">
+                  <div class="team-row"><span class="flag">🇲🇽</span><span class="name">Mexico</span></div>
+                  <div class="team-row"><span class="flag">🇨🇦</span><span class="name">Canada</span></div>
+                </div>
+                <div class="venue-col">Estadio Azteca</div>
+              </div>
+              <div class="match-card" onclick="showMatchDetail(5)">
+                <div class="time-col"><div class="time">20:00</div><div class="period">ET</div></div>
+                <div class="teams-col">
+                  <div class="team-row"><span class="flag">🇺🇸</span><span class="name">United States</span></div>
+                  <div class="team-row"><span class="flag">🇧🇴</span><span class="name">Bolivia</span></div>
+                </div>
+                <div class="venue-col">MetLife Stadium</div>
+              </div>
+            </div>
+
+            <div class="date-header">June 12, 2026</div>
+            <div style="padding:0 20px">
+              <div class="match-card" onclick="showMatchDetail(6)">
+                <div class="time-col"><div class="time">11:00</div><div class="period">ET</div></div>
+                <div class="teams-col">
+                  <div class="team-row"><span class="flag">🇦🇷</span><span class="name">Argentina</span></div>
+                  <div class="team-row"><span class="flag">🇳🇬</span><span class="name">Nigeria</span></div>
+                </div>
+                <div class="venue-col">Hard Rock Stadium</div>
+              </div>
+              <div class="match-card" onclick="showMatchDetail(7)">
+                <div class="time-col"><div class="time">14:00</div><div class="period">ET</div></div>
+                <div class="teams-col">
+                  <div class="team-row"><span class="flag">🇩🇪</span><span class="name">Germany</span></div>
+                  <div class="team-row"><span class="flag">🇯🇵</span><span class="name">Japan</span></div>
+                </div>
+                <div class="venue-col">Lincoln Financial</div>
+              </div>
+              <div class="match-card" onclick="showMatchDetail(8)">
+                <div class="time-col"><div class="time">17:00</div><div class="period">ET</div></div>
+                <div class="teams-col">
+                  <div class="team-row"><span class="flag">🇧🇷</span><span class="name">Brazil</span></div>
+                  <div class="team-row"><span class="flag">🇷🇸</span><span class="name">Serbia</span></div>
+                </div>
+                <div class="venue-col">Rose Bowl</div>
+              </div>
+            </div>
+
+            <div class="date-header">June 13, 2026</div>
+            <div style="padding:0 20px">
+              <div class="match-card" onclick="showMatchDetail(9)">
+                <div class="time-col"><div class="time">14:00</div><div class="period">ET</div></div>
+                <div class="teams-col">
+                  <div class="team-row"><span class="flag">🇪🇸</span><span class="name">Spain</span></div>
+                  <div class="team-row"><span class="flag">🇰🇷</span><span class="name">South Korea</span></div>
+                </div>
+                <div class="venue-col">AT&T Stadium</div>
+              </div>
+              <div class="match-card" onclick="showMatchDetail(10)">
+                <div class="time-col"><div class="time">17:00</div><div class="period">ET</div></div>
+                <div class="teams-col">
+                  <div class="team-row"><span class="flag">🇫🇷</span><span class="name">France</span></div>
+                  <div class="team-row"><span class="flag">🇦🇺</span><span class="name">Australia</span></div>
+                </div>
+                <div class="venue-col">Mercedes-Benz</div>
+              </div>
+              <div class="match-card" onclick="showMatchDetail(11)">
+                <div class="time-col"><div class="time">20:00</div><div class="period">ET</div></div>
+                <div class="teams-col">
+                  <div class="team-row"><span class="flag">🏴󠁧󠁢󠁥󠁮󠁧󠁿</span><span class="name">England</span></div>
+                  <div class="team-row"><span class="flag">🇸🇳</span><span class="name">Senegal</span></div>
+                </div>
+                <div class="venue-col">Levi's Stadium</div>
+              </div>
+            </div>
+
+            <div class="date-header">June 14, 2026 <span class="day-badge">Today</span></div>
+            <div style="padding:0 20px 100px">
+              <div class="match-card" onclick="showMatchDetail(0)">
+                <div class="time-col"><div class="time">14:00</div><div class="period">ET</div></div>
+                <div class="teams-col">
+                  <div class="team-row"><span class="flag">🇲🇽</span><span class="name">Mexico</span></div>
+                  <div class="team-row"><span class="flag">🇩🇪</span><span class="name">Germany</span></div>
+                </div>
+                <div class="venue-col">Estadio Azteca</div>
+              </div>
+              <div class="match-card" onclick="showMatchDetail(1)">
+                <div class="time-col"><div class="time">17:00</div><div class="period">ET</div></div>
+                <div class="teams-col">
+                  <div class="team-row"><span class="flag">🇫🇷</span><span class="name">France</span></div>
+                  <div class="team-row"><span class="flag">🇦🇷</span><span class="name">Argentina</span></div>
+                </div>
+                <div class="venue-col">SoFi Stadium</div>
+              </div>
+              <div class="match-card" onclick="showMatchDetail(2)">
+                <div class="time-col"><div class="time">20:00</div><div class="period">ET</div></div>
+                <div class="teams-col">
+                  <div class="team-row"><span class="flag">🇺🇸</span><span class="name">United States</span></div>
+                  <div class="team-row"><span class="flag">🇧🇷</span><span class="name">Brazil</span></div>
+                </div>
+                <div class="venue-col">MetLife Stadium</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══ MAP SCREEN ═══ -->
+        <div class="screen" id="screen-map">
+          <div id="map-container">
+            <div id="main-map"></div>
+            <div class="map-search">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+              <input type="text" placeholder="Search venues, cities…" readonly>
+            </div>
+            <div class="map-bottom-sheet" id="mapSheet">
+              <div class="handle"></div>
+              <div class="sheet-title">Host Venues</div>
+              <div class="venue-list-item" onclick="panToVenue(0)">
+                <div class="v-icon">🏟️</div>
+                <div class="v-info"><div class="v-name">MetLife Stadium</div><div class="v-city">East Rutherford, NJ</div></div>
+                <div class="v-matches">8 matches</div>
+              </div>
+              <div class="venue-list-item" onclick="panToVenue(1)">
+                <div class="v-icon">🏟️</div>
+                <div class="v-info"><div class="v-name">Rose Bowl</div><div class="v-city">Pasadena, CA</div></div>
+                <div class="v-matches">6 matches</div>
+              </div>
+              <div class="venue-list-item" onclick="panToVenue(2)">
+                <div class="v-icon">🏟️</div>
+                <div class="v-info"><div class="v-name">AT&T Stadium</div><div class="v-city">Arlington, TX</div></div>
+                <div class="v-matches">6 matches</div>
+              </div>
+              <div class="venue-list-item" onclick="panToVenue(3)">
+                <div class="v-icon">🏟️</div>
+                <div class="v-info"><div class="v-name">Hard Rock Stadium</div><div class="v-city">Miami, FL</div></div>
+                <div class="v-matches">6 matches</div>
+              </div>
+              <div class="venue-list-item" onclick="panToVenue(4)">
+                <div class="v-icon">🏟️</div>
+                <div class="v-info"><div class="v-name">Estadio Azteca</div><div class="v-city">Mexico City</div></div>
+                <div class="v-matches">6 matches</div>
+              </div>
+              <div class="venue-list-item" onclick="panToVenue(5)">
+                <div class="v-icon">🏟️</div>
+                <div class="v-info"><div class="v-name">Mercedes-Benz Stadium</div><div class="v-city">Atlanta, GA</div></div>
+                <div class="v-matches">5 matches</div>
+              </div>
+              <div class="venue-list-item" onclick="panToVenue(6)">
+                <div class="v-icon">🏟️</div>
+                <div class="v-info"><div class="v-name">Levi's Stadium</div><div class="v-city">Santa Clara, CA</div></div>
+                <div class="v-matches">5 matches</div>
+              </div>
+              <div class="venue-list-item" onclick="panToVenue(7)">
+                <div class="v-icon">🏟️</div>
+                <div class="v-info"><div class="v-name">BC Place</div><div class="v-city">Vancouver, BC</div></div>
+                <div class="v-matches">5 matches</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══ TEAMS SCREEN ═══ -->
+        <div class="screen" id="screen-teams">
+          <div style="padding:16px 20px 12px">
+            <div class="screen-title">Teams</div>
+            <div class="screen-subtitle">48 nations competing</div>
+          </div>
+          <div class="filter-tabs">
+            <div class="filter-tab active">All Teams</div>
+            <div class="filter-tab">Group A</div>
+            <div class="filter-tab">Group B</div>
+            <div class="filter-tab">Group C</div>
+            <div class="filter-tab">Group D</div>
+          </div>
+          <div class="team-grid" id="teamGrid">
+            <!-- Filled by JS -->
+          </div>
+        </div>
+
+        <!-- ═══ MY PLAN SCREEN ═══ -->
+        <div class="screen" id="screen-plan">
+          <div style="padding:16px 20px 12px">
+            <div class="screen-title">My Plan</div>
+            <div class="screen-subtitle">Your tournament itinerary</div>
+          </div>
+
+          <div class="plan-day">
+            <div class="plan-day-header">
+              <div class="day-num">1</div>
+              <div>Thursday, June 11</div>
+            </div>
+            <div class="plan-item">
+              <div class="pi-time"><div class="t">09:00</div><div class="tz">ET</div></div>
+              <div class="pi-content">
+                <div class="pi-title">✈️ Arrive in New York</div>
+                <div class="pi-subtitle">JFK International → Hotel Manhattan</div>
+                <div class="pi-tag travel">🚕 Transfer 45 min</div>
+              </div>
+            </div>
+            <div class="plan-item" onclick="showMatchDetail(5)">
+              <div class="pi-time"><div class="t">20:00</div><div class="tz">ET</div></div>
+              <div class="pi-content">
+                <div class="pi-title">🇺🇸 United States vs Bolivia 🇧🇴</div>
+                <div class="pi-subtitle">MetLife Stadium, East Rutherford</div>
+                <div class="pi-tag match">⚽ Opening Match</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="plan-day">
+            <div class="plan-day-header">
+              <div class="day-num">2</div>
+              <div>Saturday, June 13</div>
+            </div>
+            <div class="plan-item">
+              <div class="pi-time"><div class="t">10:00</div><div class="tz">ET</div></div>
+              <div class="pi-content">
+                <div class="pi-title">🗽 Fan Zone NYC</div>
+                <div class="pi-subtitle">Times Square Fan Village</div>
+                <div class="pi-tag travel">🚇 Subway 20 min</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="plan-day">
+            <div class="plan-day-header">
+              <div class="day-num">3</div>
+              <div>Sunday, June 14</div>
+            </div>
+            <div class="plan-item" onclick="showMatchDetail(0)">
+              <div class="pi-time"><div class="t">20:00</div><div class="tz">ET</div></div>
+              <div class="pi-content">
+                <div class="pi-title">🇺🇸 United States vs Brazil 🇧🇷</div>
+                <div class="pi-subtitle">MetLife Stadium, East Rutherford</div>
+                <div class="pi-tag match">⚽ Group Stage</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="plan-day">
+            <div class="plan-day-header">
+              <div class="day-num">4</div>
+              <div>Wednesday, June 17</div>
+            </div>
+            <div class="plan-item">
+              <div class="pi-time"><div class="t">08:00</div><div class="tz">ET</div></div>
+              <div class="pi-content">
+                <div class="pi-title">✈️ New York → Los Angeles</div>
+                <div class="pi-subtitle">JFK → LAX — 5h 30m flight</div>
+                <div class="pi-tag travel">✈️ Flight</div>
+              </div>
+            </div>
+            <div class="plan-item" onclick="showMatchDetail(2)">
+              <div class="pi-time"><div class="t">20:00</div><div class="tz">PT</div></div>
+              <div class="pi-content">
+                <div class="pi-title">🇫🇷 France vs Argentina 🇦🇷</div>
+                <div class="pi-subtitle">SoFi Stadium, Inglewood</div>
+                <div class="pi-tag match">⚽ Group Stage</div>
+              </div>
+            </div>
+          </div>
+          <div style="height:100px"></div>
+        </div>
+
+        <!-- ═══ TRAVEL SCREEN ═══ -->
+        <div class="screen" id="screen-travel">
+          <div style="padding:16px 20px 12px">
+            <div class="screen-title">Travel</div>
+            <div class="screen-subtitle">Getting to your next match</div>
+          </div>
+
+          <div class="travel-header-card">
+            <div style="font-size:12px;font-weight:700;color:var(--ink-secondary);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px">Your Next Journey</div>
+            <div class="travel-from-to">
+              <div class="travel-dot-line">
+                <div class="dot"></div>
+                <div class="line"></div>
+                <div class="dot end"></div>
+              </div>
+              <div class="travel-locations">
+                <div class="travel-loc">
+                  <div class="loc-name">Hotel Manhattan</div>
+                  <div class="loc-desc">Midtown, New York</div>
+                </div>
+                <div class="travel-loc">
+                  <div class="loc-name">MetLife Stadium</div>
+                  <div class="loc-desc">East Rutherford, NJ</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="screen-pad"><div class="section-title">Route Options</div></div>
+          <div class="travel-options">
+            <div class="travel-option eco">
+              <div class="to-icon">🚌</div>
+              <div class="to-info">
+                <div class="to-mode">FIFA Shuttle Bus</div>
+                <div class="to-desc">Express from Times Square</div>
+                <div class="eco-badge">🌱 Lowest carbon</div>
+              </div>
+              <div class="to-time"><div class="to-dur">35 min</div><div class="to-cost">Free</div></div>
+            </div>
+            <div class="travel-option">
+              <div class="to-icon">🚇</div>
+              <div class="to-info">
+                <div class="to-mode">NJ Transit + Bus</div>
+                <div class="to-desc">Penn Station → Meadowlands</div>
+              </div>
+              <div class="to-time"><div class="to-dur">55 min</div><div class="to-cost">$5.50</div></div>
+            </div>
+            <div class="travel-option">
+              <div class="to-icon">🚗</div>
+              <div class="to-info">
+                <div class="to-mode">Drive / Rideshare</div>
+                <div class="to-desc">via Lincoln Tunnel</div>
+              </div>
+              <div class="to-time"><div class="to-dur">25 min</div><div class="to-cost">~$35</div></div>
+            </div>
+          </div>
+
+          <div class="screen-pad" style="margin-top:20px"><div class="section-title">Near the Stadium</div></div>
+          <div class="poi-scroll">
+            <div class="poi-card">
+              <div class="poi-img">🎪</div>
+              <div class="poi-info"><div class="poi-name">FIFA Fan Village</div><div class="poi-type">Fan Zone • 0.2 mi</div></div>
+            </div>
+            <div class="poi-card">
+              <div class="poi-img">🛍️</div>
+              <div class="poi-info"><div class="poi-name">Official Store</div><div class="poi-type">Merch • 0.1 mi</div></div>
+            </div>
+            <div class="poi-card">
+              <div class="poi-img">🍔</div>
+              <div class="poi-info"><div class="poi-name">Food Court</div><div class="poi-type">Dining • 0.3 mi</div></div>
+            </div>
+            <div class="poi-card">
+              <div class="poi-img">🚉</div>
+              <div class="poi-info"><div class="poi-name">Meadowlands Station</div><div class="poi-type">Transit • 0.4 mi</div></div>
+            </div>
+          </div>
+
+          <div class="screen-pad" style="margin-top:8px"><div class="section-title">Inter-City Travel</div></div>
+          <div style="padding:0 20px 100px">
+            <div class="card" style="padding:16px">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+                <div style="font-size:14px;font-weight:700">New York → Los Angeles</div>
+                <div style="font-size:11px;color:var(--accent-dark);font-weight:600">Jun 17</div>
+              </div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <div style="padding:6px 12px;background:var(--gray-100);border-radius:6px;font-size:12px;font-weight:600">✈️ 5h 30m · from $189</div>
+                <div style="padding:6px 12px;background:var(--green-bg);border-radius:6px;font-size:12px;font-weight:600;color:var(--green)">🚆 18h · from $99 · 🌱</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══ TEAM DETAIL OVERLAY ═══ -->
+        <div class="overlay" id="teamOverlay">
+          <div class="overlay-header">
+            <button class="overlay-back" onclick="closeTeamDetail()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
+              Teams
+            </button>
+          </div>
+          <div class="team-detail-header">
+            <span class="flag" id="tdFlag"></span>
+            <div class="name" id="tdName"></div>
+            <div class="meta" id="tdMeta"></div>
+          </div>
+          <div class="team-tabs">
+            <div class="team-tab active" onclick="switchTeamTab(this,'formation')">Formation</div>
+            <div class="team-tab" onclick="switchTeamTab(this,'squad')">Squad</div>
+            <div class="team-tab" onclick="switchTeamTab(this,'group')">Group</div>
+          </div>
+          <div id="teamTabContent">
+            <!-- Formation view -->
+            <div id="team-formation" style="display:block">
+              <div class="formation-container" id="pitchContainer">
+                <div class="pitch-lines"></div>
+                <div class="pitch-half"></div>
+                <div class="pitch-center"></div>
+                <div class="pitch-center-dot"></div>
+                <div class="pitch-box-top"></div>
+                <div class="pitch-box-bottom"></div>
+                <div class="pitch-goal-top"></div>
+                <div class="pitch-goal-bottom"></div>
+                <!-- Players filled by JS -->
+              </div>
+              <div style="text-align:center;padding:8px 20px;font-size:12px;color:var(--ink-secondary)">Tap a player to view details</div>
+              <div class="player-popup" id="playerPopup">
+                <button class="pp-close" onclick="closePlayerPopup()">✕</button>
+                <div class="pp-header">
+                  <div class="pp-number" id="ppNum"></div>
+                  <div>
+                    <div class="pp-name" id="ppName"></div>
+                    <div class="pp-pos" id="ppPos"></div>
+                  </div>
+                </div>
+                <div class="pp-stats">
+                  <div class="pp-stat"><div class="val" id="ppAge"></div><div class="label">Age</div></div>
+                  <div class="pp-stat"><div class="val" id="ppCaps"></div><div class="label">Caps</div></div>
+                  <div class="pp-stat"><div class="val" id="ppGoals"></div><div class="label">Goals</div></div>
+                </div>
+                <div style="margin-top:12px;font-size:12px;color:var(--ink-secondary);text-align:center" id="ppClub"></div>
+              </div>
+            </div>
+            <!-- Squad list -->
+            <div id="team-squad" style="display:none">
+              <div class="squad-section" id="squadList"></div>
+            </div>
+            <!-- Group table -->
+            <div id="team-group" style="display:none">
+              <div class="group-table" id="groupTable"></div>
+            </div>
+          </div>
+          <div style="height:100px"></div>
+        </div>
+
+        <!-- ═══ MATCH DETAIL OVERLAY ═══ -->
+        <div class="overlay" id="matchOverlay">
+          <div class="overlay-header">
+            <button class="overlay-back" onclick="closeMatchDetail()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
+              Back
+            </button>
+          </div>
+          <div class="detail-hero">
+            <div class="detail-stage" id="mdStage">Group Stage · Matchday 2</div>
+            <div class="detail-teams">
+              <div class="detail-team">
+                <span class="flag" id="mdFlag1"></span>
+                <div class="name" id="mdTeam1"></div>
+              </div>
+              <div class="detail-vs">vs</div>
+              <div class="detail-team">
+                <span class="flag" id="mdFlag2"></span>
+                <div class="name" id="mdTeam2"></div>
+              </div>
+            </div>
+            <div class="detail-info">
+              <div class="row">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                <span id="mdTime">Saturday, Jun 14 · 20:00 ET</span>
+              </div>
+              <div class="row">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                <span id="mdVenue">MetLife Stadium, East Rutherford</span>
+              </div>
+            </div>
+          </div>
+          <div class="detail-actions">
+            <button class="btn-primary" id="mdAddPlan" onclick="togglePlan(this)">+ Add to My Plan</button>
+            <button class="btn-secondary" onclick="switchTab('travel');closeMatchDetail()">Get Directions</button>
+          </div>
+          <div class="detail-section">
+            <h3>Venue</h3>
+            <div class="venue-card">
+              <div class="venue-img">🏟️</div>
+              <div class="venue-info">
+                <div class="venue-name" id="mdVenueName">MetLife Stadium</div>
+                <div class="venue-loc" id="mdVenueLoc">East Rutherford, New Jersey</div>
+                <div class="venue-cap" id="mdVenueCap">Capacity: 82,500</div>
+              </div>
+            </div>
+          </div>
+          <div class="detail-section">
+            <h3>Head to Head</h3>
+            <div style="display:flex;justify-content:space-around;text-align:center;padding:8px 0">
+              <div><div style="font-size:24px;font-weight:800;color:var(--charcoal)">12</div><div style="font-size:11px;color:var(--ink-secondary)">Wins</div></div>
+              <div><div style="font-size:24px;font-weight:800;color:var(--gray-400)">5</div><div style="font-size:11px;color:var(--ink-secondary)">Draws</div></div>
+              <div><div style="font-size:24px;font-weight:800;color:var(--charcoal)">8</div><div style="font-size:11px;color:var(--ink-secondary)">Wins</div></div>
+            </div>
+          </div>
+          <div style="height:80px"></div>
+        </div>
+
+        <!-- ═══ TAB BAR ═══ -->
+        <div class="tab-bar">
+          <button class="tab-item active" onclick="switchTab('home')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>
+            <span>Home</span>
+          </button>
+          <button class="tab-item" onclick="switchTab('schedule')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+            <span>Schedule</span>
+          </button>
+          <button class="tab-item" onclick="switchTab('map')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            <span>Map</span>
+          </button>
+          <button class="tab-item" onclick="switchTab('teams')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><path d="M20 8v6M23 11h-6"/></svg>
+            <span>Teams</span>
+          </button>
+          <button class="tab-item" onclick="switchTab('plan')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+            <span>My Plan</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══ DATA ═══
+const venues = [
+  {name:'MetLife Stadium',city:'East Rutherford, NJ',lat:40.8135,lng:-74.0745,cap:'82,500',matches:8},
+  {name:'Rose Bowl',city:'Pasadena, CA',lat:34.1613,lng:-118.1676,cap:'90,888',matches:6},
+  {name:'AT&T Stadium',city:'Arlington, TX',lat:32.7473,lng:-97.0945,cap:'80,000',matches:6},
+  {name:'Hard Rock Stadium',city:'Miami, FL',lat:25.958,lng:-80.2389,cap:'65,326',matches:6},
+  {name:'Estadio Azteca',city:'Mexico City',lat:19.3029,lng:-99.1505,cap:'87,523',matches:6},
+  {name:'Mercedes-Benz Stadium',city:'Atlanta, GA',lat:33.7554,lng:-84.401,cap:'71,000',matches:5},
+  {name:"Levi's Stadium",city:'Santa Clara, CA',lat:37.4033,lng:-121.9695,cap:'68,500',matches:5},
+  {name:'BC Place',city:'Vancouver, BC',lat:49.2768,lng:-123.1118,cap:'54,500',matches:5},
+  {name:'NRG Stadium',city:'Houston, TX',lat:29.6847,lng:-95.4107,cap:'72,220',matches:5},
+  {name:'Lincoln Financial Field',city:'Philadelphia, PA',lat:39.9008,lng:-75.1675,cap:'69,176',matches:5},
+  {name:'Gillette Stadium',city:'Foxborough, MA',lat:42.0909,lng:-71.2643,cap:'65,878',matches:5},
+  {name:'BMO Field',city:'Toronto, ON',lat:43.6335,lng:-79.4186,cap:'30,000',matches:5},
+  {name:'Estadio BBVA',city:'Monterrey',lat:25.6697,lng:-100.2441,cap:'53,500',matches:5},
+  {name:'Estadio Akron',city:'Guadalajara',lat:20.6823,lng:-103.4628,cap:'49,850',matches:5},
+  {name:'CenturyLink Field',city:'Seattle, WA',lat:47.5952,lng:-122.3316,cap:'69,000',matches:5},
+  {name:'Arrowhead Stadium',city:'Kansas City, MO',lat:39.0489,lng:-94.484,cap:'76,416',matches:5},
+];
+
+const teams = [
+  {name:'United States',flag:'🇺🇸',group:'A',rank:11,
+   formation:'4-3-3',
+   players:[
+     {name:'Turner',num:1,pos:'GK',x:50,y:92,age:26,caps:35,goals:0,club:'Nottingham Forest'},
+     {name:'Dest',num:2,pos:'RB',x:80,y:75,age:25,caps:34,goals:2,club:'PSV'},
+     {name:'Richards',num:4,pos:'CB',x:60,y:78,age:25,caps:18,goals:1,club:'Crystal Palace'},
+     {name:'Ream',num:5,pos:'CB',x:40,y:78,age:39,caps:55,goals:1,club:'Charlotte FC'},
+     {name:'Robinson',num:3,pos:'LB',x:20,y:75,age:27,caps:40,goals:1,club:'Fulham'},
+     {name:'Adams',num:6,pos:'CM',x:50,y:58,age:27,caps:42,goals:1,club:'Bournemouth'},
+     {name:'McKennie',num:8,pos:'CM',x:68,y:52,age:27,caps:52,goals:10,club:'Juventus'},
+     {name:'Musah',num:14,pos:'CM',x:32,y:52,age:23,caps:38,goals:0,club:'AC Milan'},
+     {name:'Weah',num:11,pos:'RW',x:78,y:32,age:26,caps:38,goals:6,club:'Juventus'},
+     {name:'Pulisic',num:10,pos:'LW',x:22,y:32,age:27,caps:72,goals:30,club:'AC Milan'},
+     {name:'Balogun',num:9,pos:'ST',x:50,y:20,age:25,caps:14,goals:3,club:'Monaco'},
+   ]},
+  {name:'Brazil',flag:'🇧🇷',group:'A',rank:5,
+   formation:'4-2-3-1',
+   players:[
+     {name:'Alisson',num:1,pos:'GK',x:50,y:92,age:33,caps:70,goals:0,club:'Liverpool'},
+     {name:'Danilo',num:2,pos:'RB',x:80,y:75,age:35,caps:58,goals:3,club:'Vasco'},
+     {name:'Marquinhos',num:4,pos:'CB',x:60,y:78,age:32,caps:82,goals:7,club:'PSG'},
+     {name:'Militão',num:3,pos:'CB',x:40,y:78,age:28,caps:32,goals:2,club:'Real Madrid'},
+     {name:'Wendell',num:6,pos:'LB',x:20,y:75,age:33,caps:15,goals:0,club:'Porto'},
+     {name:'Casemiro',num:5,pos:'CDM',x:42,y:60,age:34,caps:75,goals:7,club:'Man Utd'},
+     {name:'Bruno G.',num:8,pos:'CDM',x:58,y:60,age:28,caps:30,goals:3,club:'Newcastle'},
+     {name:'Raphinha',num:11,pos:'RW',x:78,y:38,age:29,caps:40,goals:12,club:'Barcelona'},
+     {name:'Paquetá',num:10,pos:'CAM',x:50,y:42,age:28,caps:50,goals:10,club:'West Ham'},
+     {name:'Vinícius',num:7,pos:'LW',x:22,y:38,age:26,caps:38,goals:6,club:'Real Madrid'},
+     {name:'Endrick',num:9,pos:'ST',x:50,y:22,age:20,caps:12,goals:4,club:'Real Madrid'},
+   ]},
+  {name:'France',flag:'🇫🇷',group:'B',rank:2,
+   formation:'4-3-3',
+   players:[
+     {name:'Maignan',num:1,pos:'GK',x:50,y:92,age:31,caps:20,goals:0,club:'AC Milan'},
+     {name:'Koundé',num:5,pos:'RB',x:80,y:75,age:27,caps:30,goals:2,club:'Barcelona'},
+     {name:'Upamecano',num:4,pos:'CB',x:60,y:78,age:27,caps:25,goals:1,club:'Bayern Munich'},
+     {name:'Saliba',num:2,pos:'CB',x:40,y:78,age:25,caps:18,goals:0,club:'Arsenal'},
+     {name:'T. Hernández',num:22,pos:'LB',x:20,y:75,age:28,caps:40,goals:4,club:'AC Milan'},
+     {name:'Tchouaméni',num:8,pos:'CDM',x:50,y:60,age:26,caps:38,goals:3,club:'Real Madrid'},
+     {name:'Camavinga',num:6,pos:'CM',x:32,y:52,age:23,caps:30,goals:1,club:'Real Madrid'},
+     {name:'Griezmann',num:7,pos:'CM',x:68,y:48,age:35,caps:132,goals:46,club:'Atlético Madrid'},
+     {name:'Dembélé',num:11,pos:'RW',x:78,y:30,age:29,caps:48,goals:7,club:'PSG'},
+     {name:'Mbappé',num:10,pos:'ST',x:50,y:22,age:27,caps:82,goals:48,club:'Real Madrid'},
+     {name:'Thuram',num:9,pos:'LW',x:22,y:30,age:28,caps:22,goals:5,club:'Inter Milan'},
+   ]},
+  {name:'Argentina',flag:'🇦🇷',group:'B',rank:1,
+   formation:'4-3-3',
+   players:[
+     {name:'E. Martínez',num:23,pos:'GK',x:50,y:92,age:33,caps:45,goals:0,club:'Aston Villa'},
+     {name:'Molina',num:26,pos:'RB',x:80,y:75,age:28,caps:25,goals:2,club:'Atlético Madrid'},
+     {name:'Romero',num:13,pos:'CB',x:60,y:78,age:28,caps:22,goals:0,club:'Tottenham'},
+     {name:'Otamendi',num:19,pos:'CB',x:40,y:78,age:38,caps:110,goals:9,club:'Benfica'},
+     {name:'Acuña',num:8,pos:'LB',x:20,y:75,age:34,caps:32,goals:1,club:'Sevilla'},
+     {name:'De Paul',num:7,pos:'CM',x:65,y:55,age:32,caps:58,goals:3,club:'Atlético Madrid'},
+     {name:'E. Fernández',num:24,pos:'CM',x:50,y:60,age:25,caps:28,goals:2,club:'Liverpool'},
+     {name:'Mac Allister',num:20,pos:'CM',x:35,y:55,age:27,caps:40,goals:5,club:'Liverpool'},
+     {name:'Messi',num:10,pos:'RW',x:75,y:32,age:39,caps:185,goals:109,club:'Inter Miami'},
+     {name:'Álvarez',num:9,pos:'ST',x:50,y:22,age:26,caps:35,goals:10,club:'Atlético Madrid'},
+     {name:'Garnacho',num:11,pos:'LW',x:25,y:32,age:22,caps:12,goals:3,club:'Napoli'},
+   ]},
+  {name:'Germany',flag:'🇩🇪',group:'C',rank:14,formation:'4-2-3-1',players:[]},
+  {name:'Spain',flag:'🇪🇸',group:'C',rank:3,formation:'4-3-3',players:[]},
+  {name:'England',flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',group:'D',rank:4,formation:'4-3-3',players:[]},
+  {name:'Mexico',flag:'🇲🇽',group:'A',rank:15,formation:'4-3-3',players:[]},
+  {name:'Japan',flag:'🇯🇵',group:'C',rank:18,formation:'4-2-3-1',players:[]},
+  {name:'Canada',flag:'🇨🇦',group:'A',rank:33,formation:'4-4-2',players:[]},
+  {name:'South Korea',flag:'🇰🇷',group:'D',rank:22,formation:'4-2-3-1',players:[]},
+  {name:'Nigeria',flag:'🇳🇬',group:'B',rank:28,formation:'4-3-3',players:[]},
+];
+
+const matchData = [
+  {team1:0,team2:1,time:'20:00 ET',date:'Sat, Jun 14',venue:0,stage:'Group A · Matchday 2'},
+  {team1:7,team2:4,time:'14:00 ET',date:'Sat, Jun 14',venue:4,stage:'Group C · Matchday 2'},
+  {team1:2,team2:3,time:'17:00 ET',date:'Sat, Jun 14',venue:1,stage:'Group B · Matchday 2'},
+  {team1:5,team2:8,time:'20:00 ET',date:'Sat, Jun 14',venue:2,stage:'Group C · Matchday 2'},
+  {team1:7,team2:9,time:'17:00 ET',date:'Wed, Jun 11',venue:4,stage:'Group A · Matchday 1'},
+  {team1:0,team2:10,time:'20:00 ET',date:'Wed, Jun 11',venue:0,stage:'Group A · Matchday 1'},
+  {team1:3,team2:11,time:'11:00 ET',date:'Thu, Jun 12',venue:3,stage:'Group B · Matchday 1'},
+  {team1:4,team2:8,time:'14:00 ET',date:'Thu, Jun 12',venue:9,stage:'Group C · Matchday 1'},
+  {team1:1,team2:10,time:'17:00 ET',date:'Thu, Jun 12',venue:1,stage:'Group A · Matchday 1'},
+  {team1:5,team2:10,time:'14:00 ET',date:'Fri, Jun 13',venue:2,stage:'Group C · Matchday 1'},
+  {team1:2,team2:10,time:'17:00 ET',date:'Fri, Jun 13',venue:5,stage:'Group B · Matchday 1'},
+  {team1:6,team2:10,time:'20:00 ET',date:'Fri, Jun 13',venue:6,stage:'Group D · Matchday 1'},
+];
+
+// ═══ NAVIGATION ═══
+const tabMap = {home:'screen-home',schedule:'screen-schedule',map:'screen-map',teams:'screen-teams',plan:'screen-plan'};
+let currentTab = 'home';
+let mapInitialized = false;
+let mainMap;
+
+function switchTab(tab) {
+  if (tab === 'travel') tab = 'plan'; // Travel shown via plan for now
+  currentTab = tab;
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tab-item').forEach(t=>t.classList.remove('active'));
+  
+  const screenId = tabMap[tab];
+  if (screenId) document.getElementById(screenId).classList.add('active');
+  
+  const tabs = document.querySelectorAll('.tab-item');
+  const tabIndex = {home:0,schedule:1,map:2,teams:3,plan:4};
+  if (tabIndex[tab] !== undefined) tabs[tabIndex[tab]].classList.add('active');
+  
+  if (tab === 'map' && !mapInitialized) initMap();
+  
+  // Show travel screen if needed
+  if (tab === 'travel') {
+    document.getElementById('screen-travel').classList.add('active');
+  }
+}
+
+// ═══ MATCH DETAIL ═══
+function showMatchDetail(idx) {
+  const m = matchData[idx];
+  if (!m) return;
+  const t1 = teams[m.team1], t2 = teams[m.team2], v = venues[m.venue];
+  document.getElementById('mdStage').textContent = m.stage;
+  document.getElementById('mdFlag1').textContent = t1.flag;
+  document.getElementById('mdTeam1').textContent = t1.name;
+  document.getElementById('mdFlag2').textContent = t2.flag;
+  document.getElementById('mdTeam2').textContent = t2.name;
+  document.getElementById('mdTime').textContent = m.date + ' · ' + m.time;
+  document.getElementById('mdVenue').textContent = v.name + ', ' + v.city;
+  document.getElementById('mdVenueName').textContent = v.name;
+  document.getElementById('mdVenueLoc').textContent = v.city;
+  document.getElementById('mdVenueCap').textContent = 'Capacity: ' + v.cap;
+  document.getElementById('matchOverlay').classList.add('open');
+}
+function closeMatchDetail() {
+  document.getElementById('matchOverlay').classList.remove('open');
+}
+
+function togglePlan(btn) {
+  if (btn.textContent.includes('Add')) {
+    btn.textContent = '✓ Added to Plan';
+    btn.style.background = 'var(--green)';
+  } else {
+    btn.textContent = '+ Add to My Plan';
+    btn.style.background = 'var(--charcoal)';
+  }
+}
+
+// ═══ SCHEDULE FILTER ═══
+function filterSchedule(el, filter) {
+  document.querySelectorAll('.filter-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+}
+
+// ═══ MAP ═══
+function initMap() {
+  mapInitialized = true;
+  mainMap = L.map('main-map',{
+    center:[37,-98], zoom:4, zoomControl:true,
+    attributionControl:false
+  });
+  
+  // Monochrome tiles
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png',{
+    maxZoom:18
+  }).addTo(mainMap);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png',{
+    maxZoom:18, opacity:0.6
+  }).addTo(mainMap);
+
+  venues.forEach((v,i) => {
+    const icon = L.divIcon({
+      className:'',
+      html:`<div class="custom-marker" onclick="event.stopPropagation()">${i+1}</div>`,
+      iconSize:[32,32],iconAnchor:[16,16]
+    });
+    const marker = L.marker([v.lat,v.lng],{icon}).addTo(mainMap);
+    marker.bindPopup(`<div class="map-popup"><h4>${v.name}</h4><p>${v.city}</p><p style="color:var(--accent-dark);font-weight:600">${v.matches} matches</p></div>`,{closeButton:false,offset:[0,-10]});
+  });
+
+  // Fan zones
+  const fanZones = [
+    {name:'Times Square Fan Village',lat:40.758,lng:-73.9855},
+    {name:'Hollywood Fan Fest',lat:34.1016,lng:-118.3267},
+    {name:'Zócalo Fan Park',lat:19.4326,lng:-99.1332},
+  ];
+  fanZones.forEach(fz => {
+    const icon = L.divIcon({
+      className:'',
+      html:`<div class="custom-marker fan-zone">★</div>`,
+      iconSize:[32,32],iconAnchor:[16,16]
+    });
+    L.marker([fz.lat,fz.lng],{icon}).addTo(mainMap)
+      .bindPopup(`<div class="map-popup"><h4>${fz.name}</h4><p>Fan Zone</p></div>`,{closeButton:false});
+  });
+
+  setTimeout(()=>mainMap.invalidateSize(),100);
+}
+
+function panToVenue(idx) {
+  const v = venues[idx];
+  if (mainMap) mainMap.flyTo([v.lat,v.lng],12,{duration:1.2});
+}
+
+// ═══ TEAMS ═══
+function buildTeamGrid() {
+  const grid = document.getElementById('teamGrid');
+  grid.innerHTML = teams.map((t,i)=>`
+    <div class="team-card" onclick="showTeamDetail(${i})">
+      <div class="t-flag">${t.flag}</div>
+      <div class="t-name">${t.name}</div>
+      <div class="t-group">Group ${t.group} · #${t.rank}</div>
+    </div>
+  `).join('');
+}
+
+function showTeamDetail(idx) {
+  const t = teams[idx];
+  document.getElementById('tdFlag').textContent = t.flag;
+  document.getElementById('tdName').textContent = t.name;
+  document.getElementById('tdMeta').textContent = `Group ${t.group} · FIFA Ranking #${t.rank} · ${t.formation}`;
+  
+  buildFormation(t);
+  buildSquadList(t);
+  buildGroupTable(t);
+  
+  document.getElementById('teamOverlay').classList.add('open');
+  switchTeamTab(document.querySelector('.team-tab'),  'formation');
+}
+
+function closeTeamDetail() {
+  document.getElementById('teamOverlay').classList.remove('open');
+  closePlayerPopup();
+}
+
+function switchTeamTab(el, tab) {
+  document.querySelectorAll('.team-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('team-formation').style.display = tab==='formation'?'block':'none';
+  document.getElementById('team-squad').style.display = tab==='squad'?'block':'none';
+  document.getElementById('team-group').style.display = tab==='group'?'block':'none';
+}
+
+// ═══ FORMATION ═══
+function buildFormation(team) {
+  const container = document.getElementById('pitchContainer');
+  container.querySelectorAll('.player-dot').forEach(d=>d.remove());
+  closePlayerPopup();
+  
+  if (!team.players || team.players.length === 0) {
+    // Generate placeholder formation
+    const defaultPositions = [
+      {x:50,y:92},{x:20,y:75},{x:40,y:78},{x:60,y:78},{x:80,y:75},
+      {x:35,y:55},{x:50,y:58},{x:65,y:55},
+      {x:22,y:32},{x:50,y:22},{x:78,y:32}
+    ];
+    defaultPositions.forEach((pos,i)=>{
+      const dot = document.createElement('div');
+      dot.className = 'player-dot';
+      dot.style.left = pos.x+'%';
+      dot.style.top = pos.y+'%';
+      dot.innerHTML = `<div class="dot">${i+1}</div><div class="pname">Player ${i+1}</div>`;
+      container.appendChild(dot);
+    });
+    return;
+  }
+  
+  team.players.forEach((p,i) => {
+    const dot = document.createElement('div');
+    dot.className = 'player-dot';
+    dot.style.left = p.x+'%';
+    dot.style.top = p.y+'%';
+    dot.innerHTML = `<div class="dot">${p.num}</div><div class="pname">${p.name}</div>`;
+    dot.onclick = () => showPlayerPopup(p, dot);
+    container.appendChild(dot);
+  });
+}
+
+function showPlayerPopup(p, dotEl) {
+  document.querySelectorAll('.player-dot').forEach(d=>d.classList.remove('selected'));
+  dotEl.classList.add('selected');
+  
+  document.getElementById('ppNum').textContent = p.num;
+  document.getElementById('ppName').textContent = p.name;
+  document.getElementById('ppPos').textContent = p.pos;
+  document.getElementById('ppAge').textContent = p.age;
+  document.getElementById('ppCaps').textContent = p.caps;
+  document.getElementById('ppGoals').textContent = p.goals;
+  document.getElementById('ppClub').textContent = p.club;
+  document.getElementById('playerPopup').classList.add('open');
+}
+
+function closePlayerPopup() {
+  document.getElementById('playerPopup').classList.remove('open');
+  document.querySelectorAll('.player-dot').forEach(d=>d.classList.remove('selected'));
+}
+
+function buildSquadList(team) {
+  const list = document.getElementById('squadList');
+  if (!team.players || team.players.length === 0) {
+    list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--ink-secondary)">Squad data coming soon</div>';
+    return;
+  }
+  const positions = {GK:'Goalkeepers',RB:'Defenders',CB:'Defenders',LB:'Defenders',CDM:'Midfielders',CM:'Midfielders',CAM:'Midfielders',RW:'Forwards',LW:'Forwards',ST:'Forwards'};
+  const grouped = {};
+  team.players.forEach(p => {
+    const grp = positions[p.pos]||'Other';
+    if(!grouped[grp])grouped[grp]=[];
+    grouped[grp].push(p);
+  });
+  list.innerHTML = Object.entries(grouped).map(([pos,players])=>`
+    <div class="squad-pos-title">${pos}</div>
+    ${players.map(p=>`
+      <div class="squad-player">
+        <div class="sp-num">${p.num}</div>
+        <div class="sp-name">${p.name}</div>
+        <div class="sp-club">${p.club}</div>
+      </div>
+    `).join('')}
+  `).join('');
+}
+
+function buildGroupTable(team) {
+  const groupTeams = teams.filter(t=>t.group===team.group).slice(0,4);
+  if (groupTeams.length < 2) {
+    // Pad with placeholders
+    while(groupTeams.length < 4) groupTeams.push({name:'TBD',flag:'🏳️',rank:99});
+  }
+  const table = document.getElementById('groupTable');
+  const fakeStats = [[3,2,1,0,5,1],[3,1,1,1,3,2],[3,1,0,2,2,4],[3,0,2,1,1,3]];
+  table.innerHTML = `
+    <div class="gt-header"><span>Team</span><span>P</span><span>W</span><span>D</span><span>L</span><span>GD</span><span class="pts">Pts</span></div>
+    ${groupTeams.map((t,i)=>{
+      const s=fakeStats[i];
+      return `<div class="gt-row"><div class="gt-team"><span class="flag">${t.flag}</span>${t.name}</div><span>${s[0]}</span><span>${s[1]}</span><span>${s[2]}</span><span>${s[3]}</span><span>${s[4]-s[5]>0?'+':''}${s[4]-s[5]}</span><span class="pts">${s[1]*3+s[2]}</span></div>`;
+    }).join('')}
+  `;
+}
+
+// ═══ TRAVEL TAB INTEGRATION ═══
+// Add travel as a sub-tab accessible from plan
+document.addEventListener('DOMContentLoaded', () => {
+  buildTeamGrid();
+});
+
+// Initialize
+buildTeamGrid();
+</script>
+</body>
+</html>
