@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>TrainGo — Train Times & Routes</title>
+<style>
+:root {
+  --bg: #f2f2f7;
+  --card: #ffffff;
+  --text: #1c1c1e;
+  --text2: #8e8e93;
+  --text3: #aeaeb2;
+  --blue: #007aff;
+  --green: #34c759;
+  --orange: #ff9500;
+  --red: #ff3b30;
+  --yellow: #ffcc00;
+  --separator: #c6c6c8;
+  --tint: #007aff;
+  --nav-bg: rgba(249,249,249,0.94);
+  --tab-bg: rgba(249,249,249,0.94);
+  --shadow: 0 2px 12px rgba(0,0,0,0.08);
+}
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+body { font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','SF Pro Display','Helvetica Neue',sans-serif; background:#1a1a2e; display:flex; justify-content:center; align-items:center; min-height:100vh; padding:20px; }
+
+/* iPhone frame */
+.phone { width:393px; height:852px; background:var(--bg); border-radius:47px; overflow:hidden; position:relative; box-shadow:0 0 0 3px #1a1a1a, 0 0 0 7px #2a2a2a, 0 20px 60px rgba(0,0,0,0.4); }
+.status-bar { height:54px; display:flex; align-items:flex-end; justify-content:space-between; padding:0 32px 8px; font-size:15px; font-weight:600; color:var(--text); position:relative; z-index:100; background:var(--nav-bg); backdrop-filter:blur(20px); }
+.status-bar .time { font-variant-numeric: tabular-nums; }
+.status-icons { display:flex; gap:5px; align-items:center; }
+.status-icons svg { width:17px; height:12px; }
+.notch { width:126px; height:34px; background:#000; border-radius:0 0 20px 20px; position:absolute; top:0; left:50%; transform:translateX(-50%); z-index:200; }
+
+/* Navigation bar */
+.nav-bar { height:52px; display:flex; align-items:center; justify-content:center; padding:0 16px; background:var(--nav-bg); backdrop-filter:blur(20px); border-bottom:0.5px solid var(--separator); position:relative; }
+.nav-bar .title { font-size:17px; font-weight:600; color:var(--text); }
+.nav-bar .back { position:absolute; left:8px; display:flex; align-items:center; gap:2px; color:var(--blue); font-size:17px; cursor:pointer; background:none; border:none; font-family:inherit; }
+.nav-bar .back svg { width:12px; height:20px; }
+.nav-bar .action { position:absolute; right:16px; color:var(--blue); font-size:15px; font-weight:500; cursor:pointer; background:none; border:none; font-family:inherit; }
+
+/* Screen container */
+.screen { position:absolute; top:0; left:0; width:100%; height:100%; display:none; flex-direction:column; }
+.screen.active { display:flex; }
+.screen-content { flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; padding-bottom:83px; }
+
+/* Tab bar */
+.tab-bar { position:absolute; bottom:0; left:0; right:0; height:83px; background:var(--tab-bg); backdrop-filter:blur(20px); border-top:0.5px solid var(--separator); display:flex; align-items:flex-start; padding-top:6px; z-index:50; }
+.tab-item { flex:1; display:flex; flex-direction:column; align-items:center; gap:2px; cursor:pointer; border:none; background:none; }
+.tab-item svg { width:25px; height:25px; color:var(--text3); }
+.tab-item span { font-size:10px; color:var(--text3); font-family:inherit; }
+.tab-item.active svg { color:var(--blue); }
+.tab-item.active span { color:var(--blue); }
+
+/* ===== SEARCH SCREEN ===== */
+.search-hero { padding:16px 16px 0; }
+.search-hero h1 { font-size:34px; font-weight:700; color:var(--text); line-height:1.1; }
+.search-hero p { font-size:15px; color:var(--text2); margin-top:4px; }
+
+.search-card { margin:16px; background:var(--card); border-radius:12px; box-shadow:var(--shadow); overflow:hidden; }
+.search-field { display:flex; align-items:center; padding:14px 16px; border-bottom:0.5px solid #e5e5ea; cursor:pointer; }
+.search-field:last-child { border-bottom:none; }
+.search-field .icon { width:32px; height:32px; border-radius:8px; display:flex; align-items:center; justify-content:center; margin-right:12px; flex-shrink:0; }
+.search-field .icon.from { background:#e8f5e9; }
+.search-field .icon.from svg { color:var(--green); }
+.search-field .icon.to { background:#fce4ec; }
+.search-field .icon.to svg { color:var(--red); }
+.search-field .icon.time { background:#e3f2fd; }
+.search-field .icon.time svg { color:var(--blue); }
+.search-field .label { font-size:13px; color:var(--text2); }
+.search-field .value { font-size:17px; color:var(--text); font-weight:500; margin-top:1px; }
+.search-field .swap-btn { margin-left:auto; width:32px; height:32px; border-radius:16px; background:var(--bg); display:flex; align-items:center; justify-content:center; cursor:pointer; border:none; }
+.search-field .swap-btn svg { width:16px; height:16px; color:var(--text2); }
+
+.search-btn { margin:0 16px 16px; height:50px; background:var(--blue); color:#fff; border:none; border-radius:12px; font-size:17px; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; font-family:inherit; transition:transform 0.1s; }
+.search-btn:active { transform:scale(0.97); }
+.search-btn svg { width:20px; height:20px; }
+
+.recent-section { padding:8px 16px; }
+.recent-section h3 { font-size:13px; font-weight:600; color:var(--text2); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px; }
+.recent-item { display:flex; align-items:center; padding:12px 16px; background:var(--card); border-radius:10px; margin-bottom:6px; cursor:pointer; }
+.recent-item svg { width:18px; height:18px; color:var(--text3); margin-right:12px; flex-shrink:0; }
+.recent-item .route-text { font-size:15px; color:var(--text); flex:1; }
+.recent-item .route-text span { color:var(--text2); }
+.recent-item .chevron { color:var(--text3); }
+
+/* Quick departures */
+.quick-departures { margin:8px 16px 16px; background:var(--card); border-radius:12px; box-shadow:var(--shadow); padding:16px; }
+.quick-departures h3 { font-size:15px; font-weight:600; color:var(--text); margin-bottom:12px; display:flex; align-items:center; gap:6px; }
+.quick-departures h3 svg { width:16px; height:16px; color:var(--orange); }
+.departure-row { display:flex; align-items:center; padding:8px 0; border-bottom:0.5px solid #e5e5ea; }
+.departure-row:last-child { border-bottom:none; }
+.dep-time { font-size:17px; font-weight:600; color:var(--text); width:56px; font-variant-numeric:tabular-nums; }
+.dep-dest { flex:1; font-size:15px; color:var(--text); }
+.dep-plat { font-size:13px; color:var(--text2); margin-right:8px; }
+.dep-status { font-size:13px; font-weight:500; padding:2px 8px; border-radius:4px; }
+.dep-status.on-time { background:#e8f5e9; color:#2e7d32; }
+.dep-status.delayed { background:#fff3e0; color:#e65100; }
+.dep-status.cancelled { background:#fce4ec; color:#c62828; }
+
+/* ===== RESULTS SCREEN ===== */
+.results-header { padding:12px 16px 4px; }
+.results-header .route-summary { font-size:13px; color:var(--text2); }
+.results-header .result-count { font-size:22px; font-weight:700; color:var(--text); margin-top:2px; }
+
+.filter-bar { display:flex; gap:8px; padding:8px 16px 12px; overflow-x:auto; }
+.filter-chip { height:32px; padding:0 14px; border-radius:16px; border:1px solid #d1d1d6; background:var(--card); font-size:13px; font-weight:500; color:var(--text); display:flex; align-items:center; gap:4px; white-space:nowrap; cursor:pointer; font-family:inherit; }
+.filter-chip.active { background:var(--blue); color:#fff; border-color:var(--blue); }
+.filter-chip svg { width:14px; height:14px; }
+
+.result-card { margin:0 16px 10px; background:var(--card); border-radius:12px; box-shadow:var(--shadow); padding:14px 16px; cursor:pointer; transition:transform 0.1s; position:relative; overflow:hidden; }
+.result-card:active { transform:scale(0.98); }
+.result-card.disrupted { border-left:3px solid var(--orange); }
+.result-times { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
+.result-time { font-size:20px; font-weight:700; color:var(--text); font-variant-numeric:tabular-nums; }
+.result-arrow { color:var(--text3); display:flex; align-items:center; }
+.result-arrow svg { width:20px; height:20px; }
+.result-duration { margin-left:auto; font-size:15px; color:var(--text2); font-weight:500; }
+.result-meta { display:flex; gap:12px; flex-wrap:wrap; }
+.result-tag { font-size:13px; color:var(--text2); display:flex; align-items:center; gap:4px; }
+.result-tag svg { width:14px; height:14px; }
+.result-tag.on-time { color:var(--green); }
+.result-tag.delayed { color:var(--orange); }
+.result-badge { font-size:11px; font-weight:600; padding:2px 6px; border-radius:4px; }
+.result-badge.fastest { background:#e3f2fd; color:#1565c0; }
+.result-badge.cheapest { background:#e8f5e9; color:#2e7d32; }
+.result-operator { font-size:12px; color:var(--text3); margin-top:6px; }
+
+/* ===== JOURNEY DETAIL SCREEN ===== */
+.journey-header { padding:12px 16px; background:var(--card); border-bottom:0.5px solid #e5e5ea; }
+.journey-route { font-size:13px; color:var(--text2); margin-bottom:2px; }
+.journey-times { display:flex; align-items:center; gap:8px; }
+.journey-times .time { font-size:28px; font-weight:700; color:var(--text); }
+.journey-times .arrow { color:var(--text3); font-size:20px; }
+.journey-stats { display:flex; gap:16px; margin-top:8px; }
+.journey-stat { font-size:13px; color:var(--text2); display:flex; align-items:center; gap:4px; }
+.journey-stat svg { width:14px; height:14px; }
+
+.follow-bar { display:flex; gap:8px; padding:12px 16px; }
+.follow-btn { flex:1; height:44px; border-radius:10px; font-size:15px; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; font-family:inherit; border:none; transition:all 0.2s; }
+.follow-btn.primary { background:var(--blue); color:#fff; }
+.follow-btn.primary.following { background:var(--green); }
+.follow-btn.secondary { background:var(--bg); color:var(--blue); border:1px solid #d1d1d6; }
+.follow-btn svg { width:18px; height:18px; }
+
+.journey-alert { margin:0 16px 12px; padding:12px 14px; background:#fff3e0; border-radius:10px; display:flex; align-items:flex-start; gap:10px; }
+.journey-alert svg { width:20px; height:20px; color:var(--orange); flex-shrink:0; margin-top:1px; }
+.journey-alert .alert-text { font-size:14px; color:#e65100; line-height:1.4; }
+.journey-alert .alert-text strong { font-weight:600; }
+
+.stops-section { padding:0 16px; }
+.stops-section h3 { font-size:13px; font-weight:600; color:var(--text2); text-transform:uppercase; letter-spacing:0.5px; padding:12px 0 8px; }
+
+.stop-item { display:flex; padding:10px 0; position:relative; }
+.stop-timeline { width:32px; display:flex; flex-direction:column; align-items:center; position:relative; }
+.stop-dot { width:12px; height:12px; border-radius:6px; border:2.5px solid var(--blue); background:#fff; z-index:2; flex-shrink:0; }
+.stop-dot.start { background:var(--green); border-color:var(--green); }
+.stop-dot.end { background:var(--red); border-color:var(--red); }
+.stop-dot.transfer { background:var(--orange); border-color:var(--orange); }
+.stop-line { width:2px; background:#d1d1d6; flex:1; min-height:8px; }
+.stop-info { flex:1; padding-left:8px; }
+.stop-name { font-size:15px; font-weight:600; color:var(--text); }
+.stop-name.dim { font-weight:400; color:var(--text2); }
+.stop-detail { font-size:13px; color:var(--text2); margin-top:1px; }
+.stop-time { font-size:15px; font-weight:600; color:var(--text); font-variant-numeric:tabular-nums; width:50px; flex-shrink:0; text-align:right; padding-top:1px; }
+
+.transfer-block { margin:4px 0 4px 40px; padding:8px 12px; background:#fff8e1; border-radius:8px; display:flex; align-items:center; gap:8px; }
+.transfer-block svg { width:16px; height:16px; color:var(--orange); flex-shrink:0; }
+.transfer-block span { font-size:13px; color:#f57f17; font-weight:500; }
+
+/* ===== MAP SCREEN ===== */
+.map-container { flex:1; background:#e8eef5; position:relative; overflow:hidden; }
+.map-placeholder { width:100%; height:100%; position:relative; }
+.map-svg { width:100%; height:100%; }
+.map-overlay { position:absolute; bottom:100px; left:16px; right:16px; background:var(--card); border-radius:16px; box-shadow:0 4px 24px rgba(0,0,0,0.12); padding:16px; }
+.map-overlay .route-label { font-size:13px; color:var(--text2); margin-bottom:4px; }
+.map-overlay .route-name { font-size:17px; font-weight:600; color:var(--text); margin-bottom:8px; }
+.map-stops { display:flex; align-items:center; gap:4px; flex-wrap:wrap; }
+.map-stop-pip { width:8px; height:8px; border-radius:4px; background:var(--blue); }
+.map-stop-pip.start { background:var(--green); width:10px; height:10px; border-radius:5px; }
+.map-stop-pip.end { background:var(--red); width:10px; height:10px; border-radius:5px; }
+.map-stop-line { width:20px; height:2px; background:#d1d1d6; }
+.map-toggle { position:absolute; top:114px; right:16px; background:var(--card); border-radius:10px; box-shadow:var(--shadow); overflow:hidden; }
+.map-toggle-btn { width:44px; height:40px; display:flex; align-items:center; justify-content:center; cursor:pointer; border:none; background:none; border-bottom:0.5px solid #e5e5ea; }
+.map-toggle-btn:last-child { border-bottom:none; }
+.map-toggle-btn svg { width:20px; height:20px; color:var(--text2); }
+
+/* ===== ALERTS SCREEN ===== */
+.alerts-list { padding:8px 16px; }
+.alert-card { background:var(--card); border-radius:12px; box-shadow:var(--shadow); padding:14px 16px; margin-bottom:10px; }
+.alert-card .alert-header { display:flex; align-items:center; gap:8px; margin-bottom:6px; }
+.alert-card .alert-icon { width:28px; height:28px; border-radius:7px; display:flex; align-items:center; justify-content:center; }
+.alert-card .alert-icon.warn { background:#fff3e0; }
+.alert-card .alert-icon.warn svg { color:var(--orange); }
+.alert-card .alert-icon.danger { background:#fce4ec; }
+.alert-card .alert-icon.danger svg { color:var(--red); }
+.alert-card .alert-icon.info { background:#e3f2fd; }
+.alert-card .alert-icon.info svg { color:var(--blue); }
+.alert-card .alert-title { font-size:15px; font-weight:600; color:var(--text); flex:1; }
+.alert-card .alert-time { font-size:12px; color:var(--text3); }
+.alert-card .alert-body { font-size:14px; color:var(--text2); line-height:1.4; }
+.alert-card .alert-route { font-size:12px; color:var(--blue); font-weight:500; margin-top:6px; }
+
+/* Segmented control */
+.segment-control { display:flex; margin:12px 16px; background:var(--bg); border-radius:8px; padding:2px; }
+.segment-btn { flex:1; height:32px; border:none; background:none; font-size:13px; font-weight:500; color:var(--text2); cursor:pointer; border-radius:6px; font-family:inherit; transition:all 0.2s; }
+.segment-btn.active { background:var(--card); color:var(--text); box-shadow:0 1px 4px rgba(0,0,0,0.08); }
+
+/* Animations */
+@keyframes slideIn { from { transform:translateX(100%); } to { transform:translateX(0); } }
+@keyframes slideOut { from { transform:translateX(0); } to { transform:translateX(-30%); opacity:0.5; } }
+.slide-in { animation: slideIn 0.3s ease-out; }
+
+/* Responsive */
+@media (max-width:420px) {
+  body { padding:0; }
+  .phone { width:100%; height:100vh; border-radius:0; box-shadow:none; }
+}
+
+/* Home indicator */
+.home-indicator { position:absolute; bottom:8px; left:50%; transform:translateX(-50%); width:134px; height:5px; background:rgba(0,0,0,0.18); border-radius:3px; z-index:200; }
+
+/* Pulse animation for live indicator */
+@keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.4; } }
+.live-dot { width:6px; height:6px; border-radius:3px; background:var(--green); animation:pulse 2s infinite; display:inline-block; margin-right:4px; }
+
+/* Loading skeleton */
+@keyframes shimmer { 0% { background-position:-200px 0; } 100% { background-position:200px 0; } }
+.skeleton { background:linear-gradient(90deg,#e5e5ea 25%,#f2f2f7 50%,#e5e5ea 75%); background-size:200px 100%; animation:shimmer 1.5s infinite; border-radius:6px; }
+</style>
+</head>
+<body>
+
+<div class="phone">
+  <div class="notch"></div>
+  <div class="home-indicator"></div>
+
+  <!-- ===== SEARCH SCREEN ===== -->
+  <div class="screen active" id="screen-search">
+    <div class="status-bar">
+      <span class="time">16:42</span>
+      <div class="status-icons">
+        <svg viewBox="0 0 17 12" fill="currentColor"><path d="M1 4.5C1 3.67 1.67 3 2.5 3h1C4.33 3 5 3.67 5 4.5V11c0 .83-.67 1.5-1.5 1.5h-1C1.67 12.5 1 11.83 1 11V4.5zm5-2C6 1.67 6.67 1 7.5 1h1C9.33 1 10 1.67 10 2.5V11c0 .83-.67 1.5-1.5 1.5h-1C6.67 12.5 6 11.83 6 11V2.5zm5-1.5C11 .17 11.67-.5 12.5-.5h1c.83 0 1.5.67 1.5 1.5V11c0 .83-.67 1.5-1.5 1.5h-1c-.83 0-1.5-.67-1.5-1.5V1z"/></svg>
+        <svg viewBox="0 0 16 12" fill="currentColor"><path d="M8 1.6C5 1.6 2.4 2.9.6 5l1.2 1C3.3 4.2 5.5 3.2 8 3.2s4.7 1 6.2 2.8l1.2-1C13.6 2.9 11 1.6 8 1.6zM8 5.4c-2 0-3.8.8-5.1 2.1l1.2 1C5.2 7.4 6.5 7 8 7s2.8.4 3.9 1.5l1.2-1C11.8 6.2 10 5.4 8 5.4zm0 3.8c-1 0-1.9.4-2.6 1.1L8 13l2.6-2.7C9.9 9.6 9 9.2 8 9.2z"/></svg>
+        <svg viewBox="0 0 25 12" fill="currentColor"><rect x="0" y="1" width="21" height="10" rx="2" stroke="currentColor" stroke-width="1" fill="none"/><rect x="2" y="3" width="15" height="6" rx="1" fill="currentColor"/><path d="M23 4.5v3c.8-.4 1.3-1 1.3-1.5s-.5-1.1-1.3-1.5z"/></svg>
+      </div>
+    </div>
+    <div class="nav-bar">
+      <span class="title">TrainGo</span>
+      <button class="action" onclick="showScreen('alerts')">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/><circle cx="18" cy="4" r="3" fill="#ff3b30" stroke="none"/></svg>
+      </button>
+    </div>
+    <div class="screen-content">
+      <div class="search-hero">
+        <h1>Where to?</h1>
+        <p>Find trains across the UK</p>
+      </div>
+
+      <div class="search-card">
+        <div class="search-field" onclick="setFrom()">
+          <div class="icon from">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="8" stroke-dasharray="4 3"/></svg>
+          </div>
+          <div>
+            <div class="label">From</div>
+            <div class="value" id="from-value">London Paddington</div>
+          </div>
+          <button class="swap-btn" onclick="event.stopPropagation(); swapStations()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4"/></svg>
+          </button>
+        </div>
+        <div class="search-field" onclick="setTo()">
+          <div class="icon to">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          </div>
+          <div>
+            <div class="label">To</div>
+            <div class="value" id="to-value">Bristol Temple Meads</div>
+          </div>
+        </div>
+        <div class="search-field">
+          <div class="icon time">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          </div>
+          <div>
+            <div class="label">Depart</div>
+            <div class="value">Now · Sun 14 Jun</div>
+          </div>
+        </div>
+      </div>
+
+      <button class="search-btn" onclick="showScreen('results')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        Search trains
+      </button>
+
+      <div class="recent-section">
+        <h3>Recent searches</h3>
+        <div class="recent-item" onclick="loadRecent('London Kings Cross','Edinburgh Waverley'); showScreen('results')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          <div class="route-text">London Kings Cross <span>→</span> Edinburgh Waverley</div>
+          <svg class="chevron" width="8" height="14" viewBox="0 0 8 14" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 1l6 6-6 6"/></svg>
+        </div>
+        <div class="recent-item" onclick="loadRecent('Manchester Piccadilly','London Euston'); showScreen('results')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          <div class="route-text">Manchester Piccadilly <span>→</span> London Euston</div>
+          <svg class="chevron" width="8" height="14" viewBox="0 0 8 14" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 1l6 6-6 6"/></svg>
+        </div>
+        <div class="recent-item" onclick="loadRecent('Birmingham New St','London Euston'); showScreen('results')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          <div class="route-text">Birmingham New St <span>→</span> London Euston</div>
+          <svg class="chevron" width="8" height="14" viewBox="0 0 8 14" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 1l6 6-6 6"/></svg>
+        </div>
+      </div>
+
+      <div class="quick-departures">
+        <h3>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          Live from Paddington
+          <span class="live-dot"></span>
+        </h3>
+        <div class="departure-row">
+          <div class="dep-time">16:48</div>
+          <div class="dep-dest">Bristol Temple Meads</div>
+          <div class="dep-plat">Plat 4</div>
+          <div class="dep-status on-time">On time</div>
+        </div>
+        <div class="departure-row">
+          <div class="dep-time">17:00</div>
+          <div class="dep-dest">Cardiff Central</div>
+          <div class="dep-plat">Plat 1</div>
+          <div class="dep-status delayed">+5 min</div>
+        </div>
+        <div class="departure-row">
+          <div class="dep-time">17:03</div>
+          <div class="dep-dest">Oxford</div>
+          <div class="dep-plat">Plat 9</div>
+          <div class="dep-status on-time">On time</div>
+        </div>
+        <div class="departure-row">
+          <div class="dep-time">17:15</div>
+          <div class="dep-dest">Swansea</div>
+          <div class="dep-plat">—</div>
+          <div class="dep-status cancelled">Cancelled</div>
+        </div>
+        <div class="departure-row">
+          <div class="dep-time">17:30</div>
+          <div class="dep-dest">Exeter St Davids</div>
+          <div class="dep-plat">Plat 6</div>
+          <div class="dep-status on-time">On time</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-bar">
+      <button class="tab-item active" onclick="showScreen('search')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <span>Search</span>
+      </button>
+      <button class="tab-item" onclick="showScreen('journey')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg>
+        <span>Trips</span>
+      </button>
+      <button class="tab-item" onclick="showScreen('map')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 6v16l7-4 8 4 7-4V2l-7 4-8-4-7 4z"/><path d="M8 2v16"/><path d="M16 6v16"/></svg>
+        <span>Map</span>
+      </button>
+      <button class="tab-item" onclick="showScreen('alerts')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span>Alerts</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ===== RESULTS SCREEN ===== -->
+  <div class="screen" id="screen-results">
+    <div class="status-bar">
+      <span class="time">16:42</span>
+      <div class="status-icons">
+        <svg viewBox="0 0 17 12" fill="currentColor"><path d="M1 4.5C1 3.67 1.67 3 2.5 3h1C4.33 3 5 3.67 5 4.5V11c0 .83-.67 1.5-1.5 1.5h-1C1.67 12.5 1 11.83 1 11V4.5zm5-2C6 1.67 6.67 1 7.5 1h1C9.33 1 10 1.67 10 2.5V11c0 .83-.67 1.5-1.5 1.5h-1C6.67 12.5 6 11.83 6 11V2.5zm5-1.5C11 .17 11.67-.5 12.5-.5h1c.83 0 1.5.67 1.5 1.5V11c0 .83-.67 1.5-1.5 1.5h-1c-.83 0-1.5-.67-1.5-1.5V1z"/></svg>
+        <svg viewBox="0 0 16 12" fill="currentColor"><path d="M8 1.6C5 1.6 2.4 2.9.6 5l1.2 1C3.3 4.2 5.5 3.2 8 3.2s4.7 1 6.2 2.8l1.2-1C13.6 2.9 11 1.6 8 1.6zM8 5.4c-2 0-3.8.8-5.1 2.1l1.2 1C5.2 7.4 6.5 7 8 7s2.8.4 3.9 1.5l1.2-1C11.8 6.2 10 5.4 8 5.4zm0 3.8c-1 0-1.9.4-2.6 1.1L8 13l2.6-2.7C9.9 9.6 9 9.2 8 9.2z"/></svg>
+        <svg viewBox="0 0 25 12" fill="currentColor"><rect x="0" y="1" width="21" height="10" rx="2" stroke="currentColor" stroke-width="1" fill="none"/><rect x="2" y="3" width="15" height="6" rx="1" fill="currentColor"/><path d="M23 4.5v3c.8-.4 1.3-1 1.3-1.5s-.5-1.1-1.3-1.5z"/></svg>
+      </div>
+    </div>
+    <div class="nav-bar">
+      <button class="back" onclick="showScreen('search')">
+        <svg viewBox="0 0 12 20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M10 2L2 10l8 8"/></svg>
+        Search
+      </button>
+      <span class="title">Results</span>
+    </div>
+    <div class="screen-content">
+      <div class="results-header">
+        <div class="route-summary" id="results-route">London Paddington → Bristol Temple Meads</div>
+        <div class="result-count">5 trains found</div>
+      </div>
+
+      <div class="filter-bar">
+        <button class="filter-chip active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          Fastest
+        </button>
+        <button class="filter-chip" onclick="this.classList.toggle('active')">Direct only</button>
+        <button class="filter-chip" onclick="this.classList.toggle('active')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+          Fewest changes
+        </button>
+      </div>
+
+      <!-- Result 1 - Fastest -->
+      <div class="result-card" onclick="showScreen('journey')">
+        <div style="display:flex; gap:6px; margin-bottom:8px;">
+          <span class="result-badge fastest">⚡ Fastest</span>
+        </div>
+        <div class="result-times">
+          <span class="result-time">16:48</span>
+          <span class="result-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+          <span class="result-time">18:20</span>
+          <span class="result-duration">1h 32m</span>
+        </div>
+        <div class="result-meta">
+          <span class="result-tag on-time"><span class="live-dot"></span>On time</span>
+          <span class="result-tag">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/></svg>
+            Direct
+          </span>
+          <span class="result-tag">Plat 4</span>
+        </div>
+        <div class="result-operator">GWR · 1st class available</div>
+      </div>
+
+      <!-- Result 2 -->
+      <div class="result-card" onclick="showScreen('journey')">
+        <div class="result-times">
+          <span class="result-time">17:00</span>
+          <span class="result-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+          <span class="result-time">18:49</span>
+          <span class="result-duration">1h 49m</span>
+        </div>
+        <div class="result-meta">
+          <span class="result-tag on-time"><span class="live-dot"></span>On time</span>
+          <span class="result-tag">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 3h5v5"/><path d="M4 20L21 3"/><path d="M21 16v5h-5"/><path d="M15 15l6 6"/></svg>
+            1 change
+          </span>
+        </div>
+        <div class="result-operator">GWR · via Didcot Parkway</div>
+      </div>
+
+      <!-- Result 3 - Disrupted -->
+      <div class="result-card disrupted" onclick="showScreen('journey')">
+        <div class="result-times">
+          <span class="result-time">17:15</span>
+          <span class="result-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+          <span class="result-time">19:02</span>
+          <span class="result-duration">1h 47m</span>
+        </div>
+        <div class="result-meta">
+          <span class="result-tag delayed">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+            Exp. +8 min
+          </span>
+          <span class="result-tag">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/></svg>
+            Direct
+          </span>
+        </div>
+        <div class="result-operator">GWR · ⚠️ Minor delays expected</div>
+      </div>
+
+      <!-- Result 4 -->
+      <div class="result-card" onclick="showScreen('journey')">
+        <div class="result-times">
+          <span class="result-time">17:30</span>
+          <span class="result-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+          <span class="result-time">19:05</span>
+          <span class="result-duration">1h 35m</span>
+        </div>
+        <div class="result-meta">
+          <span class="result-tag on-time"><span class="live-dot"></span>On time</span>
+          <span class="result-tag">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/></svg>
+            Direct
+          </span>
+          <span class="result-tag">Plat 6</span>
+        </div>
+        <div class="result-operator">GWR · Quiet coach available</div>
+      </div>
+
+      <!-- Result 5 -->
+      <div class="result-card" onclick="showScreen('journey')">
+        <div class="result-times">
+          <span class="result-time">18:00</span>
+          <span class="result-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+          <span class="result-time">19:31</span>
+          <span class="result-duration">1h 31m</span>
+        </div>
+        <div class="result-meta">
+          <span class="result-tag on-time"><span class="live-dot"></span>On time</span>
+          <span class="result-tag">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/></svg>
+            Direct
+          </span>
+        </div>
+        <div class="result-operator">GWR · 1st class available</div>
+      </div>
+    </div>
+
+    <div class="tab-bar">
+      <button class="tab-item" onclick="showScreen('search')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <span>Search</span>
+      </button>
+      <button class="tab-item" onclick="showScreen('journey')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg>
+        <span>Trips</span>
+      </button>
+      <button class="tab-item" onclick="showScreen('map')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 6v16l7-4 8 4 7-4V2l-7 4-8-4-7 4z"/><path d="M8 2v16"/><path d="M16 6v16"/></svg>
+        <span>Map</span>
+      </button>
+      <button class="tab-item" onclick="showScreen('alerts')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span>Alerts</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ===== JOURNEY DETAIL SCREEN ===== -->
+  <div class="screen" id="screen-journey">
+    <div class="status-bar">
+      <span class="time">16:42</span>
+      <div class="status-icons">
+        <svg viewBox="0 0 17 12" fill="currentColor"><path d="M1 4.5C1 3.67 1.67 3 2.5 3h1C4.33 3 5 3.67 5 4.5V11c0 .83-.67 1.5-1.5 1.5h-1C1.67 12.5 1 11.83 1 11V4.5zm5-2C6 1.67 6.67 1 7.5 1h1C9.33 1 10 1.67 10 2.5V11c0 .83-.67 1.5-1.5 1.5h-1C6.67 12.5 6 11.83 6 11V2.5zm5-1.5C11 .17 11.67-.5 12.5-.5h1c.83 0 1.5.67 1.5 1.5V11c0 .83-.67 1.5-1.5 1.5h-1c-.83 0-1.5-.67-1.5-1.5V1z"/></svg>
+        <svg viewBox="0 0 16 12" fill="currentColor"><path d="M8 1.6C5 1.6 2.4 2.9.6 5l1.2 1C3.3 4.2 5.5 3.2 8 3.2s4.7 1 6.2 2.8l1.2-1C13.6 2.9 11 1.6 8 1.6zM8 5.4c-2 0-3.8.8-5.1 2.1l1.2 1C5.2 7.4 6.5 7 8 7s2.8.4 3.9 1.5l1.2-1C11.8 6.2 10 5.4 8 5.4zm0 3.8c-1 0-1.9.4-2.6 1.1L8 13l2.6-2.7C9.9 9.6 9 9.2 8 9.2z"/></svg>
+        <svg viewBox="0 0 25 12" fill="currentColor"><rect x="0" y="1" width="21" height="10" rx="2" stroke="currentColor" stroke-width="1" fill="none"/><rect x="2" y="3" width="15" height="6" rx="1" fill="currentColor"/><path d="M23 4.5v3c.8-.4 1.3-1 1.3-1.5s-.5-1.1-1.3-1.5z"/></svg>
+      </div>
+    </div>
+    <div class="nav-bar">
+      <button class="back" onclick="showScreen('results')">
+        <svg viewBox="0 0 12 20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M10 2L2 10l8 8"/></svg>
+        Results
+      </button>
+      <span class="title">Journey</span>
+      <button class="action" onclick="showScreen('map')">Map</button>
+    </div>
+    <div class="screen-content">
+      <div class="journey-header">
+        <div class="journey-route">London Paddington → Bristol Temple Meads</div>
+        <div class="journey-times">
+          <span class="time">16:48</span>
+          <span class="arrow">→</span>
+          <span class="time">18:20</span>
+        </div>
+        <div class="journey-stats">
+          <span class="journey-stat">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+            1h 32m
+          </span>
+          <span class="journey-stat">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/></svg>
+            Direct
+          </span>
+          <span class="journey-stat" style="color:var(--green)">
+            <span class="live-dot"></span>
+            On time
+          </span>
+          <span class="journey-stat">Plat 4</span>
+        </div>
+      </div>
+
+      <div class="follow-bar">
+        <button class="follow-btn primary" id="follow-btn" onclick="toggleFollow()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          Follow this trip
+        </button>
+        <button class="follow-btn secondary">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><path d="M18 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path d="M3 21v-2a4 4 0 0 1 4-4h5"/><circle cx="9" cy="7" r="4"/></svg>
+          Share
+        </button>
+      </div>
+
+      <div class="segment-control">
+        <button class="segment-btn active" onclick="toggleJourneyView(this, 'stops')">Stops</button>
+        <button class="segment-btn" onclick="toggleJourneyView(this, 'info')">Info</button>
+      </div>
+
+      <div id="journey-stops-view">
+        <div class="stops-section">
+          <h3>Calling points</h3>
+
+          <div class="stop-item">
+            <div class="stop-timeline">
+              <div class="stop-dot start"></div>
+              <div class="stop-line"></div>
+            </div>
+            <div class="stop-info">
+              <div class="stop-name">London Paddington</div>
+              <div class="stop-detail">Platform 4 · Departs</div>
+            </div>
+            <div class="stop-time">16:48</div>
+          </div>
+
+          <div class="stop-item">
+            <div class="stop-timeline">
+              <div class="stop-line"></div>
+              <div class="stop-dot"></div>
+              <div class="stop-line"></div>
+            </div>
+            <div class="stop-info">
+              <div class="stop-name dim">Reading</div>
+              <div class="stop-detail">Platform 11</div>
+            </div>
+            <div class="stop-time">17:14</div>
+          </div>
+
+          <div class="stop-item">
+            <div class="stop-timeline">
+              <div class="stop-line"></div>
+              <div class="stop-dot"></div>
+              <div class="stop-line"></div>
+            </div>
+            <div class="stop-info">
+              <div class="stop-name dim">Didcot Parkway</div>
+              <div class="stop-detail">Platform 2</div>
+            </div>
+            <div class="stop-time">17:27</div>
+          </div>
+
+          <div class="stop-item">
+            <div class="stop-timeline">
+              <div class="stop-line"></div>
+              <div class="stop-dot"></div>
+              <div class="stop-line"></div>
+            </div>
+            <div class="stop-info">
+              <div class="stop-name dim">Swindon</div>
+              <div class="stop-detail">Platform 1</div>
+            </div>
+            <div class="stop-time">17:44</div>
+          </div>
+
+          <div class="stop-item">
+            <div class="stop-timeline">
+              <div class="stop-line"></div>
+              <div class="stop-dot"></div>
+              <div class="stop-line"></div>
+            </div>
+            <div class="stop-info">
+              <div class="stop-name dim">Chippenham</div>
+              <div class="stop-detail">Platform 1</div>
+            </div>
+            <div class="stop-time">17:55</div>
+          </div>
+
+          <div class="stop-item">
+            <div class="stop-timeline">
+              <div class="stop-line"></div>
+              <div class="stop-dot"></div>
+              <div class="stop-line"></div>
+            </div>
+            <div class="stop-info">
+              <div class="stop-name dim">Bath Spa</div>
+              <div class="stop-detail">Platform 2</div>
+            </div>
+            <div class="stop-time">18:08</div>
+          </div>
+
+          <div class="stop-item">
+            <div class="stop-timeline">
+              <div class="stop-line"></div>
+              <div class="stop-dot end"></div>
+            </div>
+            <div class="stop-info">
+              <div class="stop-name">Bristol Temple Meads</div>
+              <div class="stop-detail">Platform 3 · Arrives</div>
+            </div>
+            <div class="stop-time">18:20</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="journey-info-view" style="display:none; padding:0 16px 16px;">
+        <div style="background:var(--card); border-radius:12px; overflow:hidden; box-shadow:var(--shadow);">
+          <div style="padding:14px 16px; border-bottom:0.5px solid #e5e5ea;">
+            <div style="font-size:13px; color:var(--text2);">Operator</div>
+            <div style="font-size:15px; font-weight:500; color:var(--text);">Great Western Railway (GWR)</div>
+          </div>
+          <div style="padding:14px 16px; border-bottom:0.5px solid #e5e5ea;">
+            <div style="font-size:13px; color:var(--text2);">Service</div>
+            <div style="font-size:15px; font-weight:500; color:var(--text);">IET 800 — 1B48</div>
+          </div>
+          <div style="padding:14px 16px; border-bottom:0.5px solid #e5e5ea;">
+            <div style="font-size:13px; color:var(--text2);">Coaches</div>
+            <div style="font-size:15px; font-weight:500; color:var(--text);">9 coaches · Standard & First Class</div>
+          </div>
+          <div style="padding:14px 16px; border-bottom:0.5px solid #e5e5ea;">
+            <div style="font-size:13px; color:var(--text2);">Facilities</div>
+            <div style="font-size:15px; font-weight:500; color:var(--text);">Wi-Fi · Power sockets · Quiet coach · Café</div>
+          </div>
+          <div style="padding:14px 16px; border-bottom:0.5px solid #e5e5ea;">
+            <div style="font-size:13px; color:var(--text2);">Loading</div>
+            <div style="font-size:15px; font-weight:500; color:var(--text);">🟡 Moderately busy</div>
+          </div>
+          <div style="padding:14px 16px;">
+            <div style="font-size:13px; color:var(--text2);">Reliability (30-day)</div>
+            <div style="font-size:15px; font-weight:500; color:var(--green);">94% on time</div>
+          </div>
+        </div>
+        <div style="text-align:center; margin-top:12px;">
+          <a href="#" style="font-size:15px; color:var(--blue); font-weight:500; text-decoration:none;">Buy tickets on GWR.com →</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-bar">
+      <button class="tab-item" onclick="showScreen('search')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <span>Search</span>
+      </button>
+      <button class="tab-item active" onclick="showScreen('journey')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg>
+        <span>Trips</span>
+      </button>
+      <button class="tab-item" onclick="showScreen('map')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 6v16l7-4 8 4 7-4V2l-7 4-8-4-7 4z"/><path d="M8 2v16"/><path d="M16 6v16"/></svg>
+        <span>Map</span>
+      </button>
+      <button class="tab-item" onclick="showScreen('alerts')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span>Alerts</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ===== MAP SCREEN ===== -->
+  <div class="screen" id="screen-map">
+    <div class="status-bar">
+      <span class="time">16:42</span>
+      <div class="status-icons">
+        <svg viewBox="0 0 17 12" fill="currentColor"><path d="M1 4.5C1 3.67 1.67 3 2.5 3h1C4.33 3 5 3.67 5 4.5V11c0 .83-.67 1.5-1.5 1.5h-1C1.67 12.5 1 11.83 1 11V4.5zm5-2C6 1.67 6.67 1 7.5 1h1C9.33 1 10 1.67 10 2.5V11c0 .83-.67 1.5-1.5 1.5h-1C6.67 12.5 6 11.83 6 11V2.5zm5-1.5C11 .17 11.67-.5 12.5-.5h1c.83 0 1.5.67 1.5 1.5V11c0 .83-.67 1.5-1.5 1.5h-1c-.83 0-1.5-.67-1.5-1.5V1z"/></svg>
+        <svg viewBox="0 0 16 12" fill="currentColor"><path d="M8 1.6C5 1.6 2.4 2.9.6 5l1.2 1C3.3 4.2 5.5 3.2 8 3.2s4.7 1 6.2 2.8l1.2-1C13.6 2.9 11 1.6 8 1.6zM8 5.4c-2 0-3.8.8-5.1 2.1l1.2 1C5.2 7.4 6.5 7 8 7s2.8.4 3.9 1.5l1.2-1C11.8 6.2 10 5.4 8 5.4zm0 3.8c-1 0-1.9.4-2.6 1.1L8 13l2.6-2.7C9.9 9.6 9 9.2 8 9.2z"/></svg>
+        <svg viewBox="0 0 25 12" fill="currentColor"><rect x="0" y="1" width="21" height="10" rx="2" stroke="currentColor" stroke-width="1" fill="none"/><rect x="2" y="3" width="15" height="6" rx="1" fill="currentColor"/><path d="M23 4.5v3c.8-.4 1.3-1 1.3-1.5s-.5-1.1-1.3-1.5z"/></svg>
+      </div>
+    </div>
+    <div class="nav-bar">
+      <button class="back" onclick="showScreen('journey')">
+        <svg viewBox="0 0 12 20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M10 2L2 10l8 8"/></svg>
+        Journey
+      </button>
+      <span class="title">Route Map</span>
+    </div>
+    <div class="map-container">
+      <div class="map-placeholder">
+        <svg class="map-svg" viewBox="0 0 393 700" preserveAspectRatio="xMidYMid slice">
+          <!-- Map background -->
+          <defs>
+            <linearGradient id="mapGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#dce8f4"/>
+              <stop offset="100%" stop-color="#c8dae8"/>
+            </linearGradient>
+            <filter id="glow">
+              <feGaussianBlur stdDeviation="3" result="blur"/>
+              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+          <rect width="393" height="700" fill="url(#mapGrad)"/>
+
+          <!-- Grid lines (subtle) -->
+          <g stroke="#b8c8d8" stroke-width="0.5" opacity="0.3">
+            <line x1="0" y1="100" x2="393" y2="100"/>
+            <line x1="0" y1="200" x2="393" y2="200"/>
+            <line x1="0" y1="300" x2="393" y2="300"/>
+            <line x1="0" y1="400" x2="393" y2="400"/>
+            <line x1="0" y1="500" x2="393" y2="500"/>
+            <line x1="100" y1="0" x2="100" y2="700"/>
+            <line x1="200" y1="0" x2="200" y2="700"/>
+            <line x1="300" y1="0" x2="300" y2="700"/>
+          </g>
+
+          <!-- Other rail lines (faint) -->
+          <path d="M350 0 L330 100 L300 200 L280 350" stroke="#9cb3c9" stroke-width="2" fill="none" opacity="0.4"/>
+          <path d="M50 300 L150 280 L250 260" stroke="#9cb3c9" stroke-width="2" fill="none" opacity="0.4"/>
+
+          <!-- Main route line -->
+          <path d="M310 80 C290 120, 280 160, 260 200 C240 240, 200 270, 190 310 C175 360, 155 400, 140 440 C125 480, 115 510, 105 540 C95 570, 80 600, 65 640"
+                stroke="#007aff" stroke-width="4" fill="none" stroke-linecap="round" filter="url(#glow)" opacity="0.8"/>
+          <path d="M310 80 C290 120, 280 160, 260 200 C240 240, 200 270, 190 310 C175 360, 155 400, 140 440 C125 480, 115 510, 105 540 C95 570, 80 600, 65 640"
+                stroke="#007aff" stroke-width="3" fill="none" stroke-linecap="round"/>
+
+          <!-- Train position (animated) -->
+          <circle r="8" fill="#007aff" opacity="0.3">
+            <animateMotion dur="8s" repeatCount="indefinite"
+              path="M310 80 C290 120, 280 160, 260 200 C240 240, 200 270, 190 310 C175 360, 155 400, 140 440 C125 480, 115 510, 105 540 C95 570, 80 600, 65 640"/>
+          </circle>
+          <circle r="5" fill="#007aff">
+            <animateMotion dur="8s" repeatCount="indefinite"
+              path="M310 80 C290 120, 280 160, 260 200 C240 240, 200 270, 190 310 C175 360, 155 400, 140 440 C125 480, 115 510, 105 540 C95 570, 80 600, 65 640"/>
+          </circle>
+
+          <!-- Station dots & labels -->
+          <!-- London Paddington -->
+          <circle cx="310" cy="80" r="7" fill="#34c759" stroke="#fff" stroke-width="2.5"/>
+          <rect x="205" y="60" width="100" height="22" rx="4" fill="rgba(255,255,255,0.9)"/>
+          <text x="255" y="75" text-anchor="middle" font-size="11" font-weight="600" fill="#1c1c1e" font-family="-apple-system,sans-serif">Paddington</text>
+
+          <!-- Reading -->
+          <circle cx="260" cy="200" r="5" fill="#007aff" stroke="#fff" stroke-width="2"/>
+          <rect x="270" y="190" width="65" height="20" rx="4" fill="rgba(255,255,255,0.9)"/>
+          <text x="302" y="204" text-anchor="middle" font-size="10" font-weight="500" fill="#1c1c1e" font-family="-apple-system,sans-serif">Reading</text>
+
+          <!-- Didcot -->
+          <circle cx="190" cy="310" r="5" fill="#007aff" stroke="#fff" stroke-width="2"/>
+          <rect x="200" y="300" width="52" height="20" rx="4" fill="rgba(255,255,255,0.9)"/>
+          <text x="226" y="314" text-anchor="middle" font-size="10" font-weight="500" fill="#1c1c1e" font-family="-apple-system,sans-serif">Didcot</text>
+
+          <!-- Swindon -->
+          <circle cx="140" cy="440" r="5" fill="#007aff" stroke="#fff" stroke-width="2"/>
+          <rect x="150" y="430" width="60" height="20" rx="4" fill="rgba(255,255,255,0.9)"/>
+          <text x="180" y="444" text-anchor="middle" font-size="10" font-weight="500" fill="#1c1c1e" font-family="-apple-system,sans-serif">Swindon</text>
+
+          <!-- Chippenham -->
+          <circle cx="105" cy="540" r="4" fill="#007aff" stroke="#fff" stroke-width="2"/>
+          <rect x="115" y="530" width="80" height="20" rx="4" fill="rgba(255,255,255,0.9)"/>
+          <text x="155" y="544" text-anchor="middle" font-size="10" font-weight="500" fill="#1c1c1e" font-family="-apple-system,sans-serif">Chippenham</text>
+
+          <!-- Bath Spa -->
+          <circle cx="80" cy="600" r="5" fill="#007aff" stroke="#fff" stroke-width="2"/>
+          <rect x="90" y="590" width="65" height="20" rx="4" fill="rgba(255,255,255,0.9)"/>
+          <text x="122" y="604" text-anchor="middle" font-size="10" font-weight="500" fill="#1c1c1e" font-family="-apple-system,sans-serif">Bath Spa</text>
+
+          <!-- Bristol Temple Meads -->
+          <circle cx="65" cy="640" r="7" fill="#ff3b30" stroke="#fff" stroke-width="2.5"/>
+          <rect x="75" y="632" width="130" height="22" rx="4" fill="rgba(255,255,255,0.9)"/>
+          <text x="140" y="647" text-anchor="middle" font-size="11" font-weight="600" fill="#1c1c1e" font-family="-apple-system,sans-serif">Bristol Temple Meads</text>
+
+          <!-- Compass -->
+          <g transform="translate(350,160)">
+            <circle r="16" fill="rgba(255,255,255,0.9)" stroke="#d1d1d6" stroke-width="0.5"/>
+            <text y="5" text-anchor="middle" font-size="12" font-weight="700" fill="#ff3b30" font-family="-apple-system,sans-serif">N</text>
+          </g>
+        </svg>
+      </div>
+
+      <div class="map-toggle">
+        <button class="map-toggle-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg>
+        </button>
+        <button class="map-toggle-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14"/><path d="M19 12l-7 7-7-7"/></svg>
+        </button>
+      </div>
+
+      <div class="map-overlay">
+        <div class="route-label"><span class="live-dot"></span> Live tracking · Updated just now</div>
+        <div class="route-name">16:48 Paddington → Bristol Temple Meads</div>
+        <div class="map-stops">
+          <div class="map-stop-pip start"></div>
+          <div class="map-stop-line"></div>
+          <div class="map-stop-pip"></div>
+          <div class="map-stop-line"></div>
+          <div class="map-stop-pip"></div>
+          <div class="map-stop-line"></div>
+          <div class="map-stop-pip"></div>
+          <div class="map-stop-line"></div>
+          <div class="map-stop-pip"></div>
+          <div class="map-stop-line"></div>
+          <div class="map-stop-pip"></div>
+          <div class="map-stop-line"></div>
+          <div class="map-stop-pip end"></div>
+        </div>
+        <div style="display:flex; justify-content:space-between; margin-top:6px; font-size:11px; color:var(--text2);">
+          <span>PAD</span>
+          <span>RDG</span>
+          <span>DID</span>
+          <span>SWI</span>
+          <span>CPM</span>
+          <span>BTH</span>
+          <span>BRI</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-bar">
+      <button class="tab-item" onclick="showScreen('search')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <span>Search</span>
+      </button>
+      <button class="tab-item" onclick="showScreen('journey')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg>
+        <span>Trips</span>
+      </button>
+      <button class="tab-item active" onclick="showScreen('map')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 6v16l7-4 8 4 7-4V2l-7 4-8-4-7 4z"/><path d="M8 2v16"/><path d="M16 6v16"/></svg>
+        <span>Map</span>
+      </button>
+      <button class="tab-item" onclick="showScreen('alerts')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span>Alerts</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ===== ALERTS SCREEN ===== -->
+  <div class="screen" id="screen-alerts">
+    <div class="status-bar">
+      <span class="time">16:42</span>
+      <div class="status-icons">
+        <svg viewBox="0 0 17 12" fill="currentColor"><path d="M1 4.5C1 3.67 1.67 3 2.5 3h1C4.33 3 5 3.67 5 4.5V11c0 .83-.67 1.5-1.5 1.5h-1C1.67 12.5 1 11.83 1 11V4.5zm5-2C6 1.67 6.67 1 7.5 1h1C9.33 1 10 1.67 10 2.5V11c0 .83-.67 1.5-1.5 1.5h-1C6.67 12.5 6 11.83 6 11V2.5zm5-1.5C11 .17 11.67-.5 12.5-.5h1c.83 0 1.5.67 1.5 1.5V11c0 .83-.67 1.5-1.5 1.5h-1c-.83 0-1.5-.67-1.5-1.5V1z"/></svg>
+        <svg viewBox="0 0 16 12" fill="currentColor"><path d="M8 1.6C5 1.6 2.4 2.9.6 5l1.2 1C3.3 4.2 5.5 3.2 8 3.2s4.7 1 6.2 2.8l1.2-1C13.6 2.9 11 1.6 8 1.6zM8 5.4c-2 0-3.8.8-5.1 2.1l1.2 1C5.2 7.4 6.5 7 8 7s2.8.4 3.9 1.5l1.2-1C11.8 6.2 10 5.4 8 5.4zm0 3.8c-1 0-1.9.4-2.6 1.1L8 13l2.6-2.7C9.9 9.6 9 9.2 8 9.2z"/></svg>
+        <svg viewBox="0 0 25 12" fill="currentColor"><rect x="0" y="1" width="21" height="10" rx="2" stroke="currentColor" stroke-width="1" fill="none"/><rect x="2" y="3" width="15" height="6" rx="1" fill="currentColor"/><path d="M23 4.5v3c.8-.4 1.3-1 1.3-1.5s-.5-1.1-1.3-1.5z"/></svg>
+      </div>
+    </div>
+    <div class="nav-bar">
+      <button class="back" onclick="showScreen('search')">
+        <svg viewBox="0 0 12 20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M10 2L2 10l8 8"/></svg>
+        Back
+      </button>
+      <span class="title">Alerts</span>
+    </div>
+    <div class="screen-content">
+      <div class="segment-control">
+        <button class="segment-btn active">My trips</button>
+        <button class="segment-btn">Network</button>
+      </div>
+
+      <div class="alerts-list">
+        <div class="alert-card">
+          <div class="alert-header">
+            <div class="alert-icon danger">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6"/><path d="M9 9l6 6"/></svg>
+            </div>
+            <div class="alert-title">Service cancelled</div>
+            <div class="alert-time">3 min ago</div>
+          </div>
+          <div class="alert-body">The 17:15 London Paddington to Swansea has been cancelled due to a points failure at Bristol Parkway. Next available: 17:30.</div>
+          <div class="alert-route">GWR · Paddington → Swansea</div>
+        </div>
+
+        <div class="alert-card">
+          <div class="alert-header">
+            <div class="alert-icon warn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+            </div>
+            <div class="alert-title">Delays expected</div>
+            <div class="alert-time">12 min ago</div>
+          </div>
+          <div class="alert-body">Trains between Reading and Didcot Parkway may be delayed by up to 10 minutes due to earlier signal failure. Engineers on site.</div>
+          <div class="alert-route">GWR · Great Western Main Line</div>
+        </div>
+
+        <div class="alert-card">
+          <div class="alert-header">
+            <div class="alert-icon warn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+            </div>
+            <div class="alert-title">Platform change</div>
+            <div class="alert-time">18 min ago</div>
+          </div>
+          <div class="alert-body">The 17:00 to Cardiff Central will now depart from Platform 3 (was Platform 1).</div>
+          <div class="alert-route">GWR · Paddington → Cardiff Central</div>
+        </div>
+
+        <div class="alert-card">
+          <div class="alert-header">
+            <div class="alert-icon info">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+            </div>
+            <div class="alert-title">Weekend engineering works</div>
+            <div class="alert-time">2h ago</div>
+          </div>
+          <div class="alert-body">Buses replace trains between Bath Spa and Bristol Temple Meads on Sat 21 – Sun 22 Jun. Allow extra 25 minutes journey time.</div>
+          <div class="alert-route">Network Rail · Great Western</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-bar">
+      <button class="tab-item" onclick="showScreen('search')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <span>Search</span>
+      </button>
+      <button class="tab-item" onclick="showScreen('journey')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg>
+        <span>Trips</span>
+      </button>
+      <button class="tab-item" onclick="showScreen('map')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 6v16l7-4 8 4 7-4V2l-7 4-8-4-7 4z"/><path d="M8 2v16"/><path d="M16 6v16"/></svg>
+        <span>Map</span>
+      </button>
+      <button class="tab-item active" onclick="showScreen('alerts')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span>Alerts</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const screen = document.getElementById('screen-' + id);
+  screen.classList.add('active');
+  screen.classList.add('slide-in');
+  setTimeout(() => screen.classList.remove('slide-in'), 300);
+
+  // Update tab bar active states on all screens
+  screen.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+  const tabMap = { search: 0, results: 0, journey: 1, map: 2, alerts: 3 };
+  const idx = tabMap[id];
+  if (idx !== undefined) {
+    screen.querySelectorAll('.tab-item')[idx]?.classList.add('active');
+  }
+}
+
+function swapStations() {
+  const from = document.getElementById('from-value');
+  const to = document.getElementById('to-value');
+  const temp = from.textContent;
+  from.textContent = to.textContent;
+  to.textContent = temp;
+}
+
+function loadRecent(from, to) {
+  document.getElementById('from-value').textContent = from;
+  document.getElementById('to-value').textContent = to;
+  document.getElementById('results-route').textContent = from + ' → ' + to;
+}
+
+function setFrom() {}
+function setTo() {}
+
+let isFollowing = false;
+function toggleFollow() {
+  const btn = document.getElementById('follow-btn');
+  isFollowing = !isFollowing;
+  if (isFollowing) {
+    btn.classList.add('following');
+    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg> Following';
+  } else {
+    btn.classList.remove('following');
+    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg> Follow this trip';
+  }
+}
+
+function toggleJourneyView(btn, view) {
+  btn.parentElement.querySelectorAll('.segment-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('journey-stops-view').style.display = view === 'stops' ? 'block' : 'none';
+  document.getElementById('journey-info-view').style.display = view === 'info' ? 'block' : 'none';
+}
+</script>
+</body>
+</html>
