@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>FIFA World Cup 2026 — Companion App</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+:root {
+  --base: #F7F7F5;
+  --surface: #FFFFFF;
+  --ink: #1A1A1A;
+  --secondary: #6A6A6A;
+  --tertiary: #9A9A9A;
+  --hairline: #E2E2DF;
+  --accent: #FFD700;
+  --accent-dark: #E6C200;
+  --accent-bg: #FFFDE7;
+  --live: #34C759;
+  --live-bg: #E8F9ED;
+  --finished: #8E8E93;
+  --upcoming: #007AFF;
+  --card-radius: 12px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --font: -apple-system, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', system-ui, sans-serif;
+  --safe-top: 54px;
+  --safe-bottom: 34px;
+  --tab-height: 82px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; -webkit-font-smoothing: antialiased; }
+body { font-family: var(--font); background: #111; display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow: hidden; }
+.phone-frame {
+  width: 393px; height: 852px; background: var(--base); border-radius: 44px;
+  overflow: hidden; position: relative;
+  box-shadow: 0 0 0 3px #222, 0 0 0 6px #111, 0 40px 80px rgba(0,0,0,.5);
+}
+.status-bar {
+  position: absolute; top: 0; left: 0; right: 0; z-index: 100;
+  height: var(--safe-top); padding: 14px 32px 0;
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 14px; font-weight: 600; color: var(--ink);
+  pointer-events: none;
+}
+.status-bar .time { font-weight: 700; font-size: 15px; }
+.status-bar .icons { display: flex; gap: 5px; font-size: 13px; }
+.dynamic-island {
+  position: absolute; top: 11px; left: 50%; transform: translateX(-50%); z-index: 101;
+  width: 126px; height: 36px; background: #000; border-radius: 20px;
+}
+.screen {
+  position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  background: var(--base); overflow-y: auto; overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  padding-top: var(--safe-top); padding-bottom: var(--tab-height);
+  transition: transform .35s cubic-bezier(.25,.1,.25,1), opacity .3s ease;
+}
+.screen.hidden { display: none; }
+.detail-screen {
+  z-index: 50; transform: translateX(100%);
+  transition: transform .4s cubic-bezier(.25,.1,.25,1);
+}
+.detail-screen.active { transform: translateX(0); }
+.tab-bar {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  height: var(--tab-height);
+  background: rgba(255,255,255,.92);
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  border-top: 0.5px solid var(--hairline);
+  display: flex; justify-content: space-around; align-items: flex-start;
+  padding-top: 8px; z-index: 90;
+}
+.tab-item {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  font-size: 10px; color: var(--tertiary); cursor: pointer;
+  transition: color .2s; -webkit-tap-highlight-color: transparent;
+}
+.tab-item.active { color: var(--ink); }
+.tab-item svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.tab-item.active svg { stroke-width: 2.2; }
+.page-header { padding: var(--spacing-md) var(--spacing-lg) var(--spacing-sm); }
+.page-title { font-size: 32px; font-weight: 700; letter-spacing: -0.5px; color: var(--ink); line-height: 1.15; }
+.page-subtitle { font-size: 14px; color: var(--secondary); margin-top: 4px; }
+.section-title {
+  font-size: 20px; font-weight: 700; color: var(--ink); letter-spacing: -0.3px;
+  padding: var(--spacing-lg) var(--spacing-lg) var(--spacing-sm);
+}
+.card {
+  background: var(--surface); border-radius: var(--card-radius);
+  border: 0.5px solid var(--hairline); margin: 0 var(--spacing-lg) var(--spacing-md);
+  overflow: hidden; cursor: pointer; transition: transform .15s ease;
+}
+.card:active { transform: scale(.98); }
+.filter-bar {
+  display: flex; gap: 8px; padding: var(--spacing-sm) var(--spacing-lg);
+  overflow-x: auto; scrollbar-width: none;
+}
+.filter-bar::-webkit-scrollbar { display: none; }
+.chip {
+  flex-shrink: 0; padding: 8px 16px; border-radius: 100px; font-size: 13px; font-weight: 600;
+  background: var(--surface); color: var(--secondary);
+  border: 1px solid var(--hairline); cursor: pointer; transition: all .2s; white-space: nowrap;
+}
+.chip.active { background: var(--ink); color: #fff; border-color: var(--ink); }
+.badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 8px; border-radius: 6px;
+  font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .5px;
+}
+.badge.live { background: var(--live-bg); color: var(--live); }
+.badge.live::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--live); animation: pulse 1.5s infinite; }
+.badge.upcoming { background: #EBF4FF; color: var(--upcoming); }
+.badge.finished { background: #F2F2F7; color: var(--finished); }
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .4; } }
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 14px 24px; border-radius: 12px; font-size: 15px; font-weight: 600;
+  border: none; cursor: pointer; transition: all .15s ease;
+}
+.btn-primary { background: var(--ink); color: #fff; }
+.btn-primary:active { background: #333; transform: scale(.97); }
+.btn-secondary { background: var(--surface); color: var(--ink); border: 1px solid var(--hairline); }
+.back-btn {
+  display: flex; align-items: center; gap: 4px;
+  padding: var(--spacing-md) var(--spacing-lg) 0;
+  color: var(--ink); font-size: 16px; cursor: pointer;
+  background: none; border: none; font-family: var(--font);
+}
+.back-btn svg { width: 20px; height: 20px; stroke: var(--ink); fill: none; stroke-width: 2; }
+.divider { height: .5px; background: var(--hairline); margin: 0 var(--spacing-lg); }
+
+/* HOME */
+.home-hero {
+  margin: var(--spacing-md) var(--spacing-lg); background: linear-gradient(135deg, var(--ink) 0%, #2a2a2a 100%);
+  border-radius: var(--card-radius); padding: var(--spacing-lg); color: #fff; position: relative; overflow: hidden; cursor: pointer;
+}
+.home-hero::after { content: ''; position: absolute; top: -30%; right: -20%; width: 200px; height: 200px; border-radius: 50%; background: rgba(255,215,0,.12); }
+.home-hero .label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; color: var(--accent); margin-bottom: 12px; }
+.home-hero .countdown { font-size: 42px; font-weight: 700; letter-spacing: -1px; line-height: 1; }
+.home-hero .countdown-unit { font-size: 14px; font-weight: 400; color: rgba(255,255,255,.6); }
+.home-hero .match-info { margin-top: 16px; display: flex; align-items: center; gap: 12px; }
+.home-hero .team-vs { font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+.home-hero .team-vs .flag { font-size: 28px; }
+.home-hero .venue-time { font-size: 12px; color: rgba(255,255,255,.55); margin-top: 8px; }
+.quick-actions { display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-md); padding: 0 var(--spacing-lg); margin-bottom: var(--spacing-md); }
+.quick-action {
+  background: var(--surface); border-radius: var(--card-radius); border: .5px solid var(--hairline);
+  padding: var(--spacing-md); cursor: pointer; transition: transform .15s;
+}
+.quick-action:active { transform: scale(.97); }
+.quick-action .qa-icon { font-size: 24px; margin-bottom: 8px; }
+.quick-action .qa-label { font-size: 14px; font-weight: 600; color: var(--ink); }
+.quick-action .qa-sub { font-size: 12px; color: var(--secondary); margin-top: 2px; }
+.match-row { display: flex; align-items: center; padding: 14px var(--spacing-lg); cursor: pointer; transition: background .15s; }
+.match-row:active { background: rgba(0,0,0,.03); }
+.match-row .match-time-col { width: 52px; text-align: center; flex-shrink: 0; }
+.match-row .match-time-col .time { font-size: 15px; font-weight: 600; color: var(--ink); }
+.match-row .match-time-col .stage { font-size: 10px; color: var(--secondary); margin-top: 2px; }
+.match-row .match-teams { flex: 1; margin-left: 14px; }
+.match-row .team-line { display: flex; align-items: center; gap: 8px; font-size: 15px; color: var(--ink); line-height: 1.6; }
+.match-row .team-line .flag { font-size: 18px; }
+.match-row .team-line .name { font-weight: 500; }
+.match-row .team-line .score { font-weight: 700; margin-left: auto; }
+.match-row .match-venue { font-size: 11px; color: var(--tertiary); margin-top: 2px; }
+
+/* SCHEDULE */
+.schedule-date-header {
+  padding: var(--spacing-md) var(--spacing-lg) var(--spacing-sm);
+  font-size: 13px; font-weight: 600; color: var(--secondary);
+  text-transform: uppercase; letter-spacing: .8px;
+  position: sticky; top: 0; background: var(--base); z-index: 5;
+}
+
+/* MATCH DETAIL */
+.match-detail-header { text-align: center; padding: var(--spacing-xl) var(--spacing-lg) var(--spacing-lg); background: var(--surface); }
+.match-detail-header .stage-label { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: var(--secondary); margin-bottom: 20px; }
+.match-detail-header .teams-row { display: flex; align-items: center; justify-content: center; gap: 20px; }
+.match-detail-header .team-block { text-align: center; width: 100px; }
+.match-detail-header .team-block .flag { font-size: 48px; display: block; margin-bottom: 8px; }
+.match-detail-header .team-block .name { font-size: 14px; font-weight: 600; }
+.match-detail-header .vs { font-size: 24px; font-weight: 300; color: var(--tertiary); }
+.match-detail-header .kickoff { margin-top: 20px; font-size: 28px; font-weight: 700; color: var(--ink); }
+.match-detail-header .venue-info { font-size: 13px; color: var(--secondary); margin-top: 6px; }
+.detail-actions { display: flex; gap: 12px; padding: var(--spacing-lg); }
+.detail-actions .btn { flex: 1; }
+.detail-section { padding: 0 var(--spacing-lg) var(--spacing-lg); }
+.detail-section h3 { font-size: 16px; font-weight: 700; color: var(--ink); margin-bottom: 12px; }
+.info-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: .5px solid var(--hairline); }
+.info-row:last-child { border-bottom: none; }
+.info-row .label { font-size: 14px; color: var(--secondary); }
+.info-row .value { font-size: 14px; font-weight: 600; color: var(--ink); }
+
+/* TEAMS */
+.group-table {
+  margin: 0 var(--spacing-lg) var(--spacing-lg); background: var(--surface);
+  border-radius: var(--card-radius); border: .5px solid var(--hairline); overflow: hidden;
+}
+.group-table .group-name { padding: 12px 16px; font-size: 13px; font-weight: 700; color: var(--secondary); text-transform: uppercase; letter-spacing: .5px; border-bottom: .5px solid var(--hairline); }
+.group-table table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.group-table th { text-align: left; padding: 8px 12px; font-weight: 600; color: var(--tertiary); font-size: 11px; text-transform: uppercase; letter-spacing: .5px; }
+.group-table td { padding: 10px 12px; border-top: .5px solid var(--hairline); color: var(--ink); }
+.group-table td:first-child { font-weight: 600; }
+.group-table td .flag { margin-right: 6px; }
+.group-table .num { text-align: center; color: var(--secondary); }
+
+/* TEAM PROFILE */
+.team-profile-hero { text-align: center; padding: var(--spacing-xl) var(--spacing-lg); background: var(--surface); }
+.team-profile-hero .big-flag { font-size: 72px; }
+.team-profile-hero .team-name { font-size: 26px; font-weight: 700; margin-top: 8px; }
+.team-profile-hero .team-meta { font-size: 14px; color: var(--secondary); margin-top: 4px; }
+.profile-tabs { display: flex; border-bottom: .5px solid var(--hairline); padding: 0 var(--spacing-lg); background: var(--surface); position: sticky; top: 0; z-index: 5; }
+.profile-tab { padding: 12px 0; margin-right: 24px; font-size: 14px; font-weight: 600; color: var(--tertiary); cursor: pointer; border-bottom: 2px solid transparent; transition: all .2s; }
+.profile-tab.active { color: var(--ink); border-bottom-color: var(--ink); }
+.squad-player { display: flex; align-items: center; gap: 12px; padding: 12px var(--spacing-lg); cursor: pointer; transition: background .15s; }
+.squad-player:active { background: rgba(0,0,0,.03); }
+.squad-player .number { width: 32px; height: 32px; border-radius: 8px; background: var(--base); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: var(--ink); }
+.squad-player .player-info { flex: 1; }
+.squad-player .player-name { font-size: 15px; font-weight: 600; color: var(--ink); }
+.squad-player .player-pos { font-size: 12px; color: var(--secondary); margin-top: 1px; }
+.squad-player .player-club { font-size: 12px; color: var(--tertiary); }
+
+/* FORMATION */
+.formation-container {
+  position: relative; margin: var(--spacing-lg);
+  background: linear-gradient(180deg, #1B5E20 0%, #2E7D32 30%, #388E3C 60%, #2E7D32 100%);
+  border-radius: var(--card-radius); height: 480px; overflow: hidden;
+}
+.pitch-center-line { position: absolute; top: 50%; left: 10%; right: 10%; height: 1px; background: rgba(255,255,255,.25); }
+.pitch-center-circle { position: absolute; top: 50%; left: 50%; width: 80px; height: 80px; border-radius: 50%; border: 1px solid rgba(255,255,255,.25); transform: translate(-50%, -50%); }
+.pitch-center-dot { position: absolute; top: 50%; left: 50%; width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,.3); transform: translate(-50%, -50%); }
+.pitch-box { position: absolute; left: 20%; right: 20%; height: 60px; border: 1px solid rgba(255,255,255,.2); }
+.pitch-box.top { top: 0; border-top: none; }
+.pitch-box.bottom { bottom: 0; border-bottom: none; }
+.pitch-box-small { position: absolute; left: 32%; right: 32%; height: 30px; border: 1px solid rgba(255,255,255,.15); }
+.pitch-box-small.top { top: 0; border-top: none; }
+.pitch-box-small.bottom { bottom: 0; border-bottom: none; }
+.formation-player {
+  position: absolute; width: 44px; text-align: center; transform: translateX(-50%);
+  cursor: pointer; transition: all .3s cubic-bezier(.25,.1,.25,1); z-index: 2;
+}
+.formation-player:hover { transform: translateX(-50%) scale(1.1); }
+.formation-player .dot {
+  width: 38px; height: 38px; border-radius: 50%; background: rgba(255,255,255,.95);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700; color: var(--ink); margin: 0 auto;
+  box-shadow: 0 2px 8px rgba(0,0,0,.3); transition: all .3s ease;
+}
+.formation-player.selected .dot { background: var(--accent); transform: scale(1.15); box-shadow: 0 4px 16px rgba(255,215,0,.5); }
+.formation-player .player-label { font-size: 10px; font-weight: 600; color: rgba(255,255,255,.85); margin-top: 4px; white-space: nowrap; text-shadow: 0 1px 3px rgba(0,0,0,.5); }
+.player-card-popup {
+  position: absolute; bottom: 0; left: 0; right: 0; background: var(--surface);
+  border-radius: 20px 20px 0 0; padding: var(--spacing-lg);
+  transform: translateY(100%); transition: transform .35s cubic-bezier(.25,.1,.25,1);
+  z-index: 10; box-shadow: 0 -4px 20px rgba(0,0,0,.15);
+}
+.player-card-popup.visible { transform: translateY(0); }
+.player-card-popup .handle { width: 36px; height: 4px; border-radius: 2px; background: var(--hairline); margin: 0 auto 16px; }
+.player-card-popup .pc-header { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
+.player-card-popup .pc-number { width: 48px; height: 48px; border-radius: 12px; background: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 800; color: var(--ink); }
+.player-card-popup .pc-name { font-size: 20px; font-weight: 700; }
+.player-card-popup .pc-pos { font-size: 13px; color: var(--secondary); margin-top: 2px; }
+.player-card-popup .pc-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.player-card-popup .stat-box { background: var(--base); border-radius: 10px; padding: 12px; text-align: center; }
+.player-card-popup .stat-val { font-size: 20px; font-weight: 700; color: var(--ink); }
+.player-card-popup .stat-label { font-size: 11px; color: var(--secondary); margin-top: 2px; }
+
+/* MAP */
+#map-container { position: absolute; top: var(--safe-top); left: 0; right: 0; bottom: var(--tab-height); z-index: 1; }
+.map-overlay-top { position: absolute; top: var(--safe-top); left: 0; right: 0; z-index: 10; padding: var(--spacing-md) var(--spacing-lg); pointer-events: none; }
+.map-search-bar { background: var(--surface); border-radius: 12px; padding: 12px 16px; display: flex; align-items: center; gap: 10px; box-shadow: 0 2px 12px rgba(0,0,0,.1); pointer-events: auto; }
+.map-search-bar input { border: none; outline: none; font-size: 15px; color: var(--ink); background: transparent; flex: 1; font-family: var(--font); }
+.map-search-bar input::placeholder { color: var(--tertiary); }
+.map-venue-card {
+  position: absolute; bottom: calc(var(--tab-height) + 16px); left: 16px; right: 16px; z-index: 10;
+  background: var(--surface); border-radius: var(--card-radius); padding: var(--spacing-md);
+  box-shadow: 0 4px 20px rgba(0,0,0,.15); transform: translateY(120%);
+  transition: transform .35s cubic-bezier(.25,.1,.25,1);
+}
+.map-venue-card.visible { transform: translateY(0); }
+.map-venue-card .vc-title { font-size: 17px; font-weight: 700; color: var(--ink); }
+.map-venue-card .vc-sub { font-size: 13px; color: var(--secondary); margin-top: 4px; }
+.map-venue-card .vc-matches { margin-top: 12px; }
+.map-venue-card .vc-match { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-top: .5px solid var(--hairline); font-size: 13px; }
+.map-venue-card .vc-match .teams { font-weight: 600; }
+.map-venue-card .vc-match .time { color: var(--secondary); }
+.map-venue-card .vc-actions { display: flex; gap: 8px; margin-top: 12px; }
+.map-venue-card .vc-actions .btn { flex: 1; padding: 10px; font-size: 13px; }
+.leaflet-control-zoom, .leaflet-control-attribution { display: none !important; }
+.venue-marker {
+  width: 36px !important; height: 36px !important;
+  background: var(--ink); border-radius: 50% 50% 50% 0; transform: rotate(-45deg);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,.3); border: 2px solid #fff; transition: all .2s ease;
+}
+.venue-marker:hover { transform: rotate(-45deg) scale(1.15); }
+.venue-marker .marker-inner { transform: rotate(45deg); font-size: 14px; }
+.venue-marker.active { background: var(--accent); width: 44px !important; height: 44px !important; }
+
+/* TRAVEL */
+.travel-mode-bar { display: flex; background: var(--surface); margin: 0 var(--spacing-lg); border-radius: 10px; border: .5px solid var(--hairline); overflow: hidden; }
+.travel-mode { flex: 1; padding: 12px; text-align: center; font-size: 13px; font-weight: 600; color: var(--secondary); cursor: pointer; transition: all .2s; border-right: .5px solid var(--hairline); }
+.travel-mode:last-child { border-right: none; }
+.travel-mode.active { background: var(--ink); color: #fff; }
+.travel-mode .mode-icon { font-size: 18px; display: block; margin-bottom: 2px; }
+.travel-route-card { margin: var(--spacing-md) var(--spacing-lg); background: var(--surface); border-radius: var(--card-radius); border: .5px solid var(--hairline); padding: var(--spacing-md); }
+.travel-route-card .route-header { display: flex; justify-content: space-between; align-items: baseline; }
+.travel-route-card .route-duration { font-size: 22px; font-weight: 700; }
+.travel-route-card .route-distance { font-size: 14px; color: var(--secondary); }
+.travel-route-card .route-steps { margin-top: 16px; }
+.route-step { display: flex; gap: 12px; padding: 10px 0; font-size: 14px; color: var(--ink); }
+.route-step .step-icon { width: 28px; height: 28px; border-radius: 8px; background: var(--base); display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+.route-step .step-time { color: var(--secondary); font-size: 13px; margin-top: 2px; }
+.eco-nudge { margin: 0 var(--spacing-lg) var(--spacing-md); background: #F0F9F0; border-radius: var(--card-radius); padding: var(--spacing-md); display: flex; gap: 12px; align-items: center; border: .5px solid #D4EDD4; }
+.eco-nudge .eco-icon { font-size: 24px; }
+.eco-nudge .eco-text { font-size: 13px; color: #2E7D32; }
+.eco-nudge .eco-text strong { font-weight: 600; }
+
+/* MY PLAN */
+.plan-day-header { padding: var(--spacing-md) var(--spacing-lg) var(--spacing-sm); font-size: 14px; font-weight: 700; color: var(--ink); display: flex; justify-content: space-between; }
+.plan-day-header .day-label { color: var(--secondary); font-weight: 500; }
+.plan-match-card { margin: 0 var(--spacing-lg) var(--spacing-md); background: var(--surface); border-radius: var(--card-radius); border: .5px solid var(--hairline); overflow: hidden; cursor: pointer; }
+.plan-match-card .pmc-top { padding: var(--spacing-md); display: flex; align-items: center; gap: 16px; }
+.plan-match-card .pmc-teams { flex: 1; }
+.plan-match-card .pmc-team { display: flex; align-items: center; gap: 8px; font-size: 16px; font-weight: 600; line-height: 1.8; }
+.plan-match-card .pmc-team .flag { font-size: 22px; }
+.plan-match-card .pmc-time { text-align: right; }
+.plan-match-card .pmc-time .time { font-size: 18px; font-weight: 700; }
+.plan-match-card .pmc-time .date { font-size: 12px; color: var(--secondary); }
+.plan-match-card .pmc-bottom { padding: 10px var(--spacing-md); background: var(--base); border-top: .5px solid var(--hairline); display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: var(--secondary); }
+.plan-match-card .pmc-bottom .directions { color: var(--ink); font-weight: 600; cursor: pointer; }
+.plan-travel-link { margin: -4px var(--spacing-lg) var(--spacing-md) calc(var(--spacing-lg) + 20px); padding: 8px 12px; font-size: 12px; color: var(--secondary); display: flex; align-items: center; gap: 8px; border-left: 2px dashed var(--hairline); }
+.intercity-card { margin: var(--spacing-md) var(--spacing-lg); background: var(--surface); border-radius: var(--card-radius); border: .5px solid var(--hairline); overflow: hidden; }
+.intercity-card .ic-header { padding: var(--spacing-md); display: flex; align-items: center; gap: 12px; }
+.intercity-card .ic-route { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 600; }
+.intercity-card .ic-route .arrow { color: var(--tertiary); }
+.intercity-card .ic-options { padding: 0 var(--spacing-md) var(--spacing-md); }
+.ic-option { display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: 10px; margin-bottom: 8px; background: var(--base); cursor: pointer; }
+.ic-option:active { background: var(--hairline); }
+.ic-option .opt-info { flex: 1; }
+.ic-option .opt-mode { font-size: 14px; font-weight: 600; }
+.ic-option .opt-detail { font-size: 12px; color: var(--secondary); margin-top: 1px; }
+.ic-option .opt-time { font-size: 14px; font-weight: 600; color: var(--ink); text-align: right; }
+.poi-tag { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 6px; background: var(--base); font-size: 12px; color: var(--secondary); margin-right: 6px; margin-bottom: 6px; }
+.poi-item { display: flex; align-items: center; gap: 12px; padding: 12px var(--spacing-lg); cursor: pointer; }
+.poi-item:active { background: rgba(0,0,0,.03); }
+.poi-item .poi-icon-lg { width: 40px; height: 40px; border-radius: 10px; background: var(--base); display: flex; align-items: center; justify-content: center; font-size: 18px; }
+.poi-item .poi-info { flex: 1; }
+.poi-item .poi-name { font-size: 14px; font-weight: 600; color: var(--ink); }
+.poi-item .poi-desc { font-size: 12px; color: var(--secondary); margin-top: 2px; }
+.poi-item .poi-dist { font-size: 12px; color: var(--tertiary); text-align: right; }
+.toast {
+  position: absolute; top: 80px; left: 50%; transform: translateX(-50%) translateY(-20px);
+  background: var(--ink); color: #fff; padding: 12px 20px; border-radius: 12px;
+  font-size: 14px; font-weight: 600; z-index: 200; opacity: 0; pointer-events: none;
+  transition: all .3s ease; display: flex; align-items: center; gap: 8px;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+::-webkit-scrollbar { width: 0; }
+@media (max-width: 420px) { .phone-frame { width: 100vw; height: 100vh; border-radius: 0; box-shadow: none; } }
+</style>
+</head>
+<body>
+<div class="phone-frame">
+  <div class="dynamic-island"></div>
+  <div class="status-bar"><span class="time">9:41</span><div class="icons"><span>📶</span><span>🔋</span></div></div>
+  <div class="toast" id="toast"><span>✓</span><span id="toast-msg">Added to My Plan</span></div>
+
+  <!-- HOME -->
+  <div class="screen" id="screen-home">
+    <div class="page-header">
+      <div class="page-title">FIFA World Cup</div>
+      <div class="page-subtitle">USA · Mexico · Canada 2026</div>
+    </div>
+    <div class="home-hero" onclick="showMatchDetail(2)">
+      <div class="label">Your Next Match</div>
+      <div class="countdown"><span id="countdown-h">2</span><span class="countdown-unit">h </span><span id="countdown-m">47</span><span class="countdown-unit">m</span></div>
+      <div class="match-info"><div class="team-vs"><span class="flag">🇺🇸</span><span>USA</span><span style="color:rgba(255,255,255,.4)">vs</span><span>England</span><span class="flag">🏴󠁧󠁢󠁥󠁮󠁧󠁿</span></div></div>
+      <div class="venue-time">🏟 MetLife Stadium, New Jersey · 20:00 EDT</div>
+    </div>
+    <div class="quick-actions">
+      <div class="quick-action" onclick="switchTab('schedule')"><div class="qa-icon">📅</div><div class="qa-label">Schedule</div><div class="qa-sub">48 matches today</div></div>
+      <div class="quick-action" onclick="switchTab('map')"><div class="qa-icon">🗺</div><div class="qa-label">Explore Map</div><div class="qa-sub">16 venues</div></div>
+      <div class="quick-action" onclick="switchTab('teams')"><div class="qa-icon">⚽</div><div class="qa-label">Teams</div><div class="qa-sub">48 nations</div></div>
+      <div class="quick-action" onclick="switchTab('plan')"><div class="qa-icon">📋</div><div class="qa-label">My Plan</div><div class="qa-sub">3 saved matches</div></div>
+    </div>
+    <div class="section-title">Today's Matches</div>
+    <div class="match-row" onclick="showMatchDetail(0)"><div class="match-time-col"><div class="time">13:00</div><div class="stage">Group A</div></div><div class="match-teams"><div class="team-line"><span class="flag">🇲🇽</span><span class="name">Mexico</span><span class="score">2</span></div><div class="team-line"><span class="flag">🇨🇦</span><span class="name">Canada</span><span class="score">1</span></div><div class="match-venue">Estadio Azteca, Mexico City</div></div><span style="margin-left:8px"><span class="badge finished">FT</span></span></div>
+    <div class="divider"></div>
+    <div class="match-row" onclick="showMatchDetail(1)"><div class="match-time-col"><div class="time">16:00</div><div class="stage">Group B</div></div><div class="match-teams"><div class="team-line"><span class="flag">🇧🇷</span><span class="name">Brazil</span></div><div class="team-line"><span class="flag">🇯🇵</span><span class="name">Japan</span></div><div class="match-venue">SoFi Stadium, Los Angeles</div></div><span style="margin-left:8px"><span class="badge live">Live</span></span></div>
+    <div class="divider"></div>
+    <div class="match-row" onclick="showMatchDetail(2)"><div class="match-time-col"><div class="time">20:00</div><div class="stage">Group C</div></div><div class="match-teams"><div class="team-line"><span class="flag">🇺🇸</span><span class="name">USA</span></div><div class="team-line"><span class="flag">🏴󠁧󠁢󠁥󠁮󠁧󠁿</span><span class="name">England</span></div><div class="match-venue">MetLife Stadium, New Jersey</div></div><span style="margin-left:8px"><span class="badge upcoming">20:00</span></span></div>
+    <div class="divider"></div>
+    <div class="match-row" onclick="showMatchDetail(3)"><div class="match-time-col"><div class="time">20:00</div><div class="stage">Group D</div></div><div class="match-teams"><div class="team-line"><span class="flag">🇫🇷</span><span class="name">France</span></div><div class="team-line"><span class="flag">🇦🇷</span><span class="name">Argentina</span></div><div class="match-venue">AT&T Stadium, Dallas</div></div><span style="margin-left:8px"><span class="badge upcoming">20:00</span></span></div>
+    <div class="divider"></div>
+    <div class="match-row" onclick="showMatchDetail(4)"><div class="match-time-col"><div class="time">21:00</div><div class="stage">Group A</div></div><div class="match-teams"><div class="team-line"><span class="flag">🇩🇪</span><span class="name">Germany</span></div><div class="team-line"><span class="flag">🇳🇬</span><span class="name">Nigeria</span></div><div class="match-venue">NRG Stadium, Houston</div></div><span style="margin-left:8px"><span class="badge upcoming">21:00</span></span></div>
+    <div style="height:24px"></div>
+  </div>
+
+  <!-- SCHEDULE -->
+  <div class="screen hidden" id="screen-schedule">
+    <div class="page-header"><div class="page-title">Schedule</div></div>
+    <div class="filter-bar">
+      <div class="chip active" onclick="filterChip(this)">All</div>
+      <div class="chip" onclick="filterChip(this)">Today</div>
+      <div class="chip" onclick="filterChip(this)">Group Stage</div>
+      <div class="chip" onclick="filterChip(this)">Round of 32</div>
+      <div class="chip" onclick="filterChip(this)">Quarter-finals</div>
+      <div class="chip" onclick="filterChip(this)">Semi-finals</div>
+      <div class="chip" onclick="filterChip(this)">Final</div>
+    </div>
+    <div class="filter-bar" style="margin-top:-4px">
+      <div class="chip" onclick="filterChip(this)">🇺🇸 USA</div>
+      <div class="chip" onclick="filterChip(this)">🇲🇽 Mexico</div>
+      <div class="chip" onclick="filterChip(this)">🇧🇷 Brazil</div>
+      <div class="chip" onclick="filterChip(this)">🏴󠁧󠁢󠁥󠁮󠁧󠁿 England</div>
+      <div class="chip" onclick="filterChip(this)">🇫🇷 France</div>
+      <div class="chip" onclick="filterChip(this)">🇦🇷 Argentina</div>
+      <div class="chip" onclick="filterChip(this)">🇩🇪 Germany</div>
+    </div>
+    <div class="schedule-date-header">Monday, June 15 — Matchday 2</div>
+    <div class="match-row" onclick="showMatchDetail(0)"><div class="match-time-col"><div class="time">13:00</div><div class="stage">Group A</div></div><div class="match-teams"><div class="team-line"><span class="flag">🇲🇽</span><span class="name">Mexico</span><span class="score">2</span></div><div class="team-line"><span class="flag">🇨🇦</span><span class="name">Canada</span><span class="score">1</span></div></div><span class="badge finished" style="margin-left:8px">FT</span></div>
+    <div class="divider"></div>
+    <div class="match-row" onclick="showMatchDetail(1)"><div class="match-time-col"><div class="time">16:00</div><div class="stage">Group B</div></div><div class="match-teams"><div class="team-line"><span class="flag">🇧🇷</span><span class="name">Brazil</span></div><div class="team-line"><span class="flag">🇯🇵</span><span class="name">Japan</span></div></div><span class="badge live" style="margin-left:8px">65'</span></div>
+    <div class="divider"></div>
+    <div class="match-row" onclick="showMatchDetail(2)"><div class="match-time-col"><div class="time">20:00</div><div class="stage">Group C</div></div><div class="match-teams"><div class="team-line"><span class="flag">🇺🇸</span><span class="name">USA</span></div><div class="team-line"><span class="flag">🏴󠁧󠁢󠁥󠁮󠁧󠁿</span><span class="name">England</span></div></div><span class="badge upcoming" style="margin-left:8px">20:00</span></div>
+    <div class="divider"></div>
+    <div class="match-row" onclick="showMatchDetail(3)"><div class="match-time-col"><div class="time">20:00</div><div class="stage">Group D</div></div><div class="match-teams"><div class="team-line"><span class="flag">🇫🇷</span><span class="name">France</span></div><div class="team-line"><span class="flag">🇦🇷</span><span class="name">Argentina</span></div></div><span class="badge upcoming" style="margin-left:8px">20:00</span></div>
+    <div class="divider"></div>
+    <div class="match-row" onclick="showMatchDetail(4)"><div class="match-time-col"><div class="time">21:00</div><div class="stage">Group A</div></div><div class="match-teams"><div class="team-line"><span class="flag">🇩🇪</span><span class="name">Germany</span></div><div class="team-line"><span class="flag">🇳🇬</span><span class="name">Nigeria</span></div></div><span class="badge upcoming" style="margin-left:8px">21:00</span></div>
+    <div class="schedule-date-header">Tuesday, June 16 — Matchday 3</div>
+    <div class="match-row" onclick="showMatchDetail(5)"><div class="match-time-col"><div class="time">14:00</div><div class="stage">Group E</div></div><div class="match-teams"><div class="team-line"><span class="flag">🇪🇸</span><span class="name">Spain</span></div><div class="team-line"><span class="flag">🇰🇷</span><span class="name">South Korea</span></div></div><span class="badge upcoming" style="margin-left:8px">14:00</span></div>
+    <div class="divider"></div>
+    <div class="match-row" onclick="showMatchDetail(5)"><div class="match-time-col"><div class="time">17:00</div><div class="stage">Group F</div></div><div class="match-teams"><div class="team-line"><span class="flag">🇳🇱</span><span class="name">Netherlands</span></div><div class="team-line"><span class="flag">🇸🇳</span><span class="name">Senegal</span></div></div><span class="badge upcoming" style="margin-left:8px">17:00</span></div>
+    <div class="divider"></div>
+    <div class="match-row" onclick="showMatchDetail(5)"><div class="match-time-col"><div class="time">20:00</div><div class="stage">Group G</div></div><div class="match-teams"><div class="team-line"><span class="flag">🇵🇹</span><span class="name">Portugal</span></div><div class="team-line"><span class="flag">🇲🇦</span><span class="name">Morocco</span></div></div><span class="badge upcoming" style="margin-left:8px">20:00</span></div>
+    <div style="height:24px"></div>
+  </div>
+
+  <!-- TEAMS -->
+  <div class="screen hidden" id="screen-teams">
+    <div class="page-header"><div class="page-title">Teams</div></div>
+    <div class="filter-bar">
+      <div class="chip active" onclick="filterChip(this)">All Groups</div>
+      <div class="chip" onclick="filterChip(this)">Group A</div>
+      <div class="chip" onclick="filterChip(this)">Group B</div>
+      <div class="chip" onclick="filterChip(this)">Group C</div>
+      <div class="chip" onclick="filterChip(this)">Group D</div>
+    </div>
+    <div class="group-table"><div class="group-name">Group A</div><table><tr><th style="width:40%">Team</th><th class="num">P</th><th class="num">W</th><th class="num">D</th><th class="num">L</th><th class="num">GD</th><th class="num">Pts</th></tr><tr onclick="showTeamProfile('mx')" style="cursor:pointer"><td><span class="flag">🇲🇽</span>Mexico</td><td class="num">2</td><td class="num">2</td><td class="num">0</td><td class="num">0</td><td class="num">+3</td><td class="num"><b>6</b></td></tr><tr onclick="showTeamProfile('de')" style="cursor:pointer"><td><span class="flag">🇩🇪</span>Germany</td><td class="num">1</td><td class="num">1</td><td class="num">0</td><td class="num">0</td><td class="num">+2</td><td class="num"><b>3</b></td></tr><tr onclick="showTeamProfile('ca')" style="cursor:pointer"><td><span class="flag">🇨🇦</span>Canada</td><td class="num">2</td><td class="num">0</td><td class="num">1</td><td class="num">1</td><td class="num">-1</td><td class="num"><b>1</b></td></tr><tr onclick="showTeamProfile('ng')" style="cursor:pointer"><td><span class="flag">🇳🇬</span>Nigeria</td><td class="num">1</td><td class="num">0</td><td class="num">1</td><td class="num">0</td><td class="num">0</td><td class="num"><b>1</b></td></tr></table></div>
+    <div class="group-table"><div class="group-name">Group B</div><table><tr><th style="width:40%">Team</th><th class="num">P</th><th class="num">W</th><th class="num">D</th><th class="num">L</th><th class="num">GD</th><th class="num">Pts</th></tr><tr onclick="showTeamProfile('br')" style="cursor:pointer"><td><span class="flag">🇧🇷</span>Brazil</td><td class="num">1</td><td class="num">1</td><td class="num">0</td><td class="num">0</td><td class="num">+2</td><td class="num"><b>3</b></td></tr><tr style="cursor:pointer"><td><span class="flag">🇯🇵</span>Japan</td><td class="num">1</td><td class="num">0</td><td class="num">1</td><td class="num">0</td><td class="num">0</td><td class="num"><b>1</b></td></tr><tr style="cursor:pointer"><td><span class="flag">🇭🇷</span>Croatia</td><td class="num">1</td><td class="num">0</td><td class="num">1</td><td class="num">0</td><td class="num">0</td><td class="num"><b>1</b></td></tr><tr style="cursor:pointer"><td><span class="flag">🇨🇲</span>Cameroon</td><td class="num">1</td><td class="num">0</td><td class="num">0</td><td class="num">1</td><td class="num">-2</td><td class="num"><b>0</b></td></tr></table></div>
+    <div class="group-table"><div class="group-name">Group C</div><table><tr><th style="width:40%">Team</th><th class="num">P</th><th class="num">W</th><th class="num">D</th><th class="num">L</th><th class="num">GD</th><th class="num">Pts</th></tr><tr onclick="showTeamProfile('us')" style="cursor:pointer"><td><span class="flag">🇺🇸</span>USA</td><td class="num">1</td><td class="num">1</td><td class="num">0</td><td class="num">0</td><td class="num">+1</td><td class="num"><b>3</b></td></tr><tr onclick="showTeamProfile('en')" style="cursor:pointer"><td><span class="flag">🏴󠁧󠁢󠁥󠁮󠁧󠁿</span>England</td><td class="num">1</td><td class="num">1</td><td class="num">0</td><td class="num">0</td><td class="num">+1</td><td class="num"><b>3</b></td></tr><tr style="cursor:pointer"><td><span class="flag">🇮🇷</span>Iran</td><td class="num">1</td><td class="num">0</td><td class="num">0</td><td class="num">1</td><td class="num">-1</td><td class="num"><b>0</b></td></tr><tr style="cursor:pointer"><td><span class="flag">🇨🇱</span>Chile</td><td class="num">1</td><td class="num">0</td><td class="num">0</td><td class="num">1</td><td class="num">-1</td><td class="num"><b>0</b></td></tr></table></div>
+    <div class="group-table"><div class="group-name">Group D</div><table><tr><th style="width:40%">Team</th><th class="num">P</th><th class="num">W</th><th class="num">D</th><th class="num">L</th><th class="num">GD</th><th class="num">Pts</th></tr><tr onclick="showTeamProfile('fr')" style="cursor:pointer"><td><span class="flag">🇫🇷</span>France</td><td class="num">1</td><td class="num">1</td><td class="num">0</td><td class="num">0</td><td class="num">+2</td><td class="num"><b>3</b></td></tr><tr onclick="showTeamProfile('ar')" style="cursor:pointer"><td><span class="flag">🇦🇷</span>Argentina</td><td class="num">1</td><td class="num">0</td><td class="num">1</td><td class="num">0</td><td class="num">0</td><td class="num"><b>1</b></td></tr><tr style="cursor:pointer"><td><span class="flag">🇦🇺</span>Australia</td><td class="num">1</td><td class="num">0</td><td class="num">1</td><td class="num">0</td><td class="num">0</td><td class="num"><b>1</b></td></tr><tr style="cursor:pointer"><td><span class="flag">🇸🇦</span>Saudi Arabia</td><td class="num">1</td><td class="num">0</td><td class="num">0</td><td class="num">1</td><td class="num">-2</td><td class="num"><b>0</b></td></tr></table></div>
+    <div style="height:24px"></div>
+  </div>
+
+  <!-- MAP -->
+  <div class="screen hidden" id="screen-map" style="padding:0">
+    <div id="map-container"></div>
+    <div class="map-overlay-top"><div class="map-search-bar"><span>🔍</span><input type="text" placeholder="Search venues, cities…" readonly /></div></div>
+    <div class="map-venue-card" id="venue-card">
+      <div class="vc-title" id="vc-title">MetLife Stadium</div>
+      <div class="vc-sub" id="vc-sub">East Rutherford, NJ · 82,500 capacity</div>
+      <div class="vc-matches"><div class="vc-match"><span class="teams">🇺🇸 USA vs England 🏴󠁧󠁢󠁥󠁮󠁧󠁿</span><span class="time">Jun 15, 20:00</span></div><div class="vc-match"><span class="teams">🇫🇷 France vs Chile 🇨🇱</span><span class="time">Jun 19, 17:00</span></div></div>
+      <div class="vc-actions"><div class="btn btn-primary" onclick="showToast('Match added to plan')" style="font-size:13px">Add to Plan</div><div class="btn btn-secondary" onclick="showTravelScreen()" style="font-size:13px">Get Directions</div></div>
+    </div>
+  </div>
+
+  <!-- MY PLAN -->
+  <div class="screen hidden" id="screen-plan">
+    <div class="page-header"><div class="page-title">My Plan</div><div class="page-subtitle">3 matches · 2 cities</div></div>
+    <div class="plan-day-header"><span>Monday, June 15</span><span class="day-label">Matchday 2</span></div>
+    <div class="plan-match-card" onclick="showMatchDetail(2)"><div class="pmc-top"><div class="pmc-teams"><div class="pmc-team"><span class="flag">🇺🇸</span>USA</div><div class="pmc-team"><span class="flag">🏴󠁧󠁢󠁥󠁮󠁧󠁿</span>England</div></div><div class="pmc-time"><div class="time">20:00</div><div class="date">EDT</div></div></div><div class="pmc-bottom"><span>📍 MetLife Stadium, NJ</span><span class="directions" onclick="event.stopPropagation();showTravelScreen()">Directions →</span></div></div>
+    <div class="plan-travel-link"><span>✈️</span><span>Flight to Dallas · 3h 45m · Depart Jun 17</span></div>
+    <div class="plan-day-header"><span>Wednesday, June 18</span><span class="day-label">Matchday 4</span></div>
+    <div class="plan-match-card" onclick="showMatchDetail(3)"><div class="pmc-top"><div class="pmc-teams"><div class="pmc-team"><span class="flag">🇫🇷</span>France</div><div class="pmc-team"><span class="flag">🇦🇷</span>Argentina</div></div><div class="pmc-time"><div class="time">20:00</div><div class="date">CDT</div></div></div><div class="pmc-bottom"><span>📍 AT&T Stadium, Dallas</span><span class="directions" onclick="event.stopPropagation();showTravelScreen()">Directions →</span></div></div>
+    <div class="plan-travel-link"><span>🚆</span><span>Train to Houston · 4h 10m · Depart Jun 20</span></div>
+    <div class="plan-day-header"><span>Saturday, June 21</span><span class="day-label">Matchday 6</span></div>
+    <div class="plan-match-card" onclick="showMatchDetail(4)"><div class="pmc-top"><div class="pmc-teams"><div class="pmc-team"><span class="flag">🇩🇪</span>Germany</div><div class="pmc-team"><span class="flag">🇳🇬</span>Nigeria</div></div><div class="pmc-time"><div class="time">21:00</div><div class="date">CDT</div></div></div><div class="pmc-bottom"><span>📍 NRG Stadium, Houston</span><span class="directions" onclick="event.stopPropagation();showTravelScreen()">Directions →</span></div></div>
+    <div class="section-title">Getting Between Cities</div>
+    <div class="intercity-card"><div class="ic-header"><div class="ic-route"><span>📍 New Jersey</span><span class="arrow">→</span><span>📍 Dallas</span></div></div><div class="ic-options"><div class="ic-option"><span style="font-size:20px">✈️</span><div class="opt-info"><div class="opt-mode">Flight</div><div class="opt-detail">Direct · Multiple airlines</div></div><div class="opt-time">3h 45m</div></div><div class="ic-option" style="border:1px solid #D4EDD4;background:#F8FFF8"><span style="font-size:20px">🚆</span><div class="opt-info"><div class="opt-mode">Train</div><div class="opt-detail">🌿 Lower carbon · Scenic route</div></div><div class="opt-time">18h 30m</div></div></div></div>
+    <div style="height:24px"></div>
+  </div>
+
+  <!-- MATCH DETAIL -->
+  <div class="screen detail-screen" id="screen-match-detail">
+    <button class="back-btn" onclick="hideDetail('screen-match-detail')"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>Back</button>
+    <div class="match-detail-header">
+      <div class="stage-label" id="md-stage">Group C · Matchday 2</div>
+      <div class="teams-row"><div class="team-block"><span class="flag" id="md-flag1">🇺🇸</span><span class="name" id="md-team1">USA</span></div><div class="vs">vs</div><div class="team-block"><span class="flag" id="md-flag2">🏴󠁧󠁢󠁥󠁮󠁧󠁿</span><span class="name" id="md-team2">England</span></div></div>
+      <div class="kickoff" id="md-time">20:00</div>
+      <div class="venue-info" id="md-venue">MetLife Stadium, New Jersey</div>
+      <div style="margin-top:8px"><span class="badge upcoming" id="md-badge">Upcoming</span></div>
+    </div>
+    <div class="detail-actions"><div class="btn btn-primary" onclick="showToast('Added to My Plan')"><span>📋</span> Add to Plan</div><div class="btn btn-secondary" onclick="showTravelScreen()"><span>🗺</span> Directions</div></div>
+    <div class="detail-section"><h3>Match Info</h3><div class="info-row"><span class="label">Competition</span><span class="value">FIFA World Cup 2026</span></div><div class="info-row"><span class="label">Stage</span><span class="value" id="md-info-stage">Group C</span></div><div class="info-row"><span class="label">Venue</span><span class="value" id="md-info-venue">MetLife Stadium</span></div><div class="info-row"><span class="label">City</span><span class="value" id="md-info-city">East Rutherford, NJ</span></div><div class="info-row"><span class="label">Local Time</span><span class="value" id="md-info-local">20:00 EDT</span></div><div class="info-row"><span class="label">Your Time</span><span class="value" id="md-info-your">01:00 BST (+1 day)</span></div></div>
+    <div class="section-title" style="padding-top:8px">Team Formations</div>
+    <div style="display:flex;gap:12px;padding:0 24px;margin-bottom:16px"><div class="btn btn-secondary" style="flex:1;padding:10px;font-size:13px" onclick="showTeamProfile('us')">🇺🇸 USA Squad</div><div class="btn btn-secondary" style="flex:1;padding:10px;font-size:13px" onclick="showTeamProfile('en')">🏴󠁧󠁢󠁥󠁮󠁧󠁿 England Squad</div></div>
+    <div class="section-title" style="padding-top:0">Around the Venue</div>
+    <div style="padding:0 24px 24px;display:flex;flex-wrap:wrap"><span class="poi-tag">🎪 Fan Zone</span><span class="poi-tag">🚇 Meadowlands Station</span><span class="poi-tag">🏪 FIFA Store</span><span class="poi-tag">🍔 Food Court</span><span class="poi-tag">🅿️ Parking</span><span class="poi-tag">🏥 Medical</span></div>
+  </div>
+
+  <!-- TEAM PROFILE -->
+  <div class="screen detail-screen" id="screen-team-profile">
+    <button class="back-btn" onclick="hideDetail('screen-team-profile')"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>Back</button>
+    <div class="team-profile-hero"><div class="big-flag" id="tp-flag">🇺🇸</div><div class="team-name" id="tp-name">USA</div><div class="team-meta" id="tp-meta">FIFA Ranking #11 · CONCACAF</div></div>
+    <div class="profile-tabs"><div class="profile-tab active" onclick="switchProfileTab(this,'squad')">Squad</div><div class="profile-tab" onclick="switchProfileTab(this,'formation')">Formation</div><div class="profile-tab" onclick="switchProfileTab(this,'fixtures')">Fixtures</div></div>
+    <div id="tab-squad">
+      <div class="section-title" style="font-size:14px;padding-bottom:4px">Goalkeepers</div>
+      <div class="squad-player"><div class="number">1</div><div class="player-info"><div class="player-name">Matt Turner</div><div class="player-pos">Goalkeeper</div><div class="player-club">Arsenal</div></div></div>
+      <div class="section-title" style="font-size:14px;padding-bottom:4px">Defenders</div>
+      <div class="squad-player"><div class="number">2</div><div class="player-info"><div class="player-name">Sergiño Dest</div><div class="player-pos">Right Back</div><div class="player-club">PSV Eindhoven</div></div></div>
+      <div class="squad-player"><div class="number">3</div><div class="player-info"><div class="player-name">Antonee Robinson</div><div class="player-pos">Left Back</div><div class="player-club">Fulham</div></div></div>
+      <div class="squad-player"><div class="number">4</div><div class="player-info"><div class="player-name">Chris Richards</div><div class="player-pos">Centre Back</div><div class="player-club">Crystal Palace</div></div></div>
+      <div class="squad-player"><div class="number">5</div><div class="player-info"><div class="player-name">Tim Ream</div><div class="player-pos">Centre Back</div><div class="player-club">Charlotte FC</div></div></div>
+      <div class="section-title" style="font-size:14px;padding-bottom:4px">Midfielders</div>
+      <div class="squad-player"><div class="number">6</div><div class="player-info"><div class="player-name">Weston McKennie</div><div class="player-pos">Central Midfielder</div><div class="player-club">Juventus</div></div></div>
+      <div class="squad-player"><div class="number">7</div><div class="player-info"><div class="player-name">Gio Reyna</div><div class="player-pos">Attacking Midfielder</div><div class="player-club">Borussia Dortmund</div></div></div>
+      <div class="squad-player"><div class="number">8</div><div class="player-info"><div class="player-name">Tyler Adams</div><div class="player-pos">Defensive Midfielder</div><div class="player-club">Bournemouth</div></div></div>
+      <div class="squad-player"><div class="number">10</div><div class="player-info"><div class="player-name">Yunus Musah</div><div class="player-pos">Central Midfielder</div><div class="player-club">AC Milan</div></div></div>
+      <div class="section-title" style="font-size:14px;padding-bottom:4px">Forwards</div>
+      <div class="squad-player"><div class="number">11</div><div class="player-info"><div class="player-name">Christian Pulisic</div><div class="player-pos">Left Winger</div><div class="player-club">AC Milan</div></div></div>
+      <div class="squad-player"><div class="number">9</div><div class="player-info"><div class="player-name">Timothy Weah</div><div class="player-pos">Right Winger</div><div class="player-club">Juventus</div></div></div>
+      <div class="squad-player"><div class="number">12</div><div class="player-info"><div class="player-name">Folarin Balogun</div><div class="player-pos">Striker</div><div class="player-club">Monaco</div></div></div>
+    </div>
+    <div id="tab-formation" style="display:none">
+      <div style="padding:12px 24px;display:flex;justify-content:space-between;align-items:center"><span style="font-size:14px;font-weight:600">4-3-3 Formation</span><span style="font-size:12px;color:var(--secondary)">Tap a player for details</span></div>
+      <div class="formation-container" id="formation-pitch">
+        <div class="pitch-markings"><div class="pitch-center-line"></div><div class="pitch-center-circle"></div><div class="pitch-center-dot"></div><div class="pitch-box top"></div><div class="pitch-box bottom"></div><div class="pitch-box-small top"></div><div class="pitch-box-small bottom"></div></div>
+      </div>
+      <div class="player-card-popup" id="player-popup">
+        <div class="handle"></div>
+        <div class="pc-header"><div class="pc-number" id="pp-number">10</div><div><div class="pc-name" id="pp-name">Christian Pulisic</div><div class="pc-pos" id="pp-pos">Left Winger · AC Milan</div></div></div>
+        <div class="pc-stats"><div class="stat-box"><div class="stat-val" id="pp-stat1">68</div><div class="stat-label">Caps</div></div><div class="stat-box"><div class="stat-val" id="pp-stat2">24</div><div class="stat-label">Goals</div></div><div class="stat-box"><div class="stat-val" id="pp-stat3">5'8"</div><div class="stat-label">Height</div></div></div>
+      </div>
+    </div>
+    <div id="tab-fixtures" style="display:none">
+      <div class="section-title" style="font-size:14px">Group C Fixtures</div>
+      <div class="match-row" onclick="showMatchDetail(2)"><div class="match-time-col"><div class="time">Jun 14</div><div class="stage">MD 1</div></div><div class="match-teams"><div class="team-line"><span class="flag">🇺🇸</span><span class="name">USA</span><span class="score">2</span></div><div class="team-line"><span class="flag">🇮🇷</span><span class="name">Iran</span><span class="score">1</span></div></div><span class="badge finished" style="margin-left:8px">FT</span></div>
+      <div class="divider"></div>
+      <div class="match-row" onclick="showMatchDetail(2)"><div class="match-time-col"><div class="time">Jun 15</div><div class="stage">MD 2</div></div><div class="match-teams"><div class="team-line"><span class="flag">🇺🇸</span><span class="name">USA</span></div><div class="team-line"><span class="flag">🏴󠁧󠁢󠁥󠁮󠁧󠁿</span><span class="name">England</span></div></div><span class="badge upcoming" style="margin-left:8px">20:00</span></div>
+      <div class="divider"></div>
+      <div class="match-row"><div class="match-time-col"><div class="time">Jun 19</div><div class="stage">MD 3</div></div><div class="match-teams"><div class="team-line"><span class="flag">🇨🇱</span><span class="name">Chile</span></div><div class="team-line"><span class="flag">🇺🇸</span><span class="name">USA</span></div></div><span class="badge upcoming" style="margin-left:8px">17:00</span></div>
+    </div>
+    <div style="height:24px"></div>
+  </div>
+
+  <!-- TRAVEL -->
+  <div class="screen detail-screen" id="screen-travel">
+    <button class="back-btn" onclick="hideDetail('screen-travel')"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>Back</button>
+    <div class="page-header"><div class="page-title" style="font-size:24px">Get Directions</div><div class="page-subtitle">To MetLife Stadium, New Jersey</div></div>
+    <div style="margin:var(--spacing-md) var(--spacing-lg);height:200px;border-radius:var(--card-radius);overflow:hidden;background:linear-gradient(135deg,#e8e8e0,#d8d8d0);display:flex;align-items:center;justify-content:center"><div style="text-align:center;color:var(--secondary)"><div style="font-size:32px;margin-bottom:8px">🗺</div><div style="font-size:13px">Route: Manhattan → MetLife Stadium</div><div style="font-size:11px;color:var(--tertiary);margin-top:4px">12.5 km via NJ Turnpike</div></div></div>
+    <div class="travel-mode-bar"><div class="travel-mode active" onclick="selectTravelMode(this)"><span class="mode-icon">🚇</span>Transit</div><div class="travel-mode" onclick="selectTravelMode(this)"><span class="mode-icon">🚗</span>Drive</div><div class="travel-mode" onclick="selectTravelMode(this)"><span class="mode-icon">🚶</span>Walk</div><div class="travel-mode" onclick="selectTravelMode(this)"><span class="mode-icon">🚲</span>Cycle</div></div>
+    <div class="travel-route-card"><div class="route-header"><span class="route-duration">42 min</span><span class="route-distance">12.5 km</span></div><div class="route-steps"><div class="route-step"><div class="step-icon">🚶</div><div><div class="step-text">Walk to Penn Station</div><div class="step-time">8 min · 650m</div></div></div><div class="route-step"><div class="step-icon">🚆</div><div><div class="step-text">NJ Transit to Meadowlands</div><div class="step-time">22 min · Direct service on matchday</div></div></div><div class="route-step"><div class="step-icon">🚶</div><div><div class="step-text">Walk to MetLife Stadium</div><div class="step-time">12 min · Follow the crowd</div></div></div></div></div>
+    <div class="eco-nudge"><span class="eco-icon">🌿</span><div class="eco-text"><strong>Lower carbon option.</strong> Taking transit saves ~3.2 kg CO₂ compared to driving. Part of FIFA's sustainable transport initiative.</div></div>
+    <div class="section-title">Near the Stadium</div>
+    <div class="poi-item"><div class="poi-icon-lg">🎪</div><div class="poi-info"><div class="poi-name">FIFA Fan Festival</div><div class="poi-desc">Live screenings, food & entertainment</div></div><div class="poi-dist">0.3 km</div></div>
+    <div class="divider"></div>
+    <div class="poi-item"><div class="poi-icon-lg">🏪</div><div class="poi-info"><div class="poi-name">Official FIFA Store</div><div class="poi-desc">Merchandise & collectibles</div></div><div class="poi-dist">0.1 km</div></div>
+    <div class="divider"></div>
+    <div class="poi-item"><div class="poi-icon-lg">🚇</div><div class="poi-info"><div class="poi-name">Meadowlands Station</div><div class="poi-desc">NJ Transit rail station</div></div><div class="poi-dist">0.4 km</div></div>
+    <div class="divider"></div>
+    <div class="poi-item"><div class="poi-icon-lg">🍔</div><div class="poi-info"><div class="poi-name">Stadium Food Court</div><div class="poi-desc">30+ food vendors</div></div><div class="poi-dist">Inside</div></div>
+    <div style="height:24px"></div>
+  </div>
+
+  <!-- TAB BAR -->
+  <div class="tab-bar">
+    <div class="tab-item active" onclick="switchTab('home')" data-tab="home"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span>Home</span></div>
+    <div class="tab-item" onclick="switchTab('schedule')" data-tab="schedule"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>Schedule</span></div>
+    <div class="tab-item" onclick="switchTab('teams')" data-tab="teams"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg><span>Teams</span></div>
+    <div class="tab-item" onclick="switchTab('map')" data-tab="map"><svg viewBox="0 0 24 24"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg><span>Map</span></div>
+    <div class="tab-item" onclick="switchTab('plan')" data-tab="plan"><svg viewBox="0 0 24 24"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg><span>My Plan</span></div>
+  </div>
+</div>
+<script>
+const matches=[{team1:'Mexico',team2:'Canada',flag1:'🇲🇽',flag2:'🇨🇦',time:'13:00',stage:'Group A · Matchday 2',venue:'Estadio Azteca',city:'Mexico City',status:'finished',local:'13:00 CST',your:'20:00 BST'},{team1:'Brazil',team2:'Japan',flag1:'🇧🇷',flag2:'🇯🇵',time:'16:00',stage:'Group B · Matchday 2',venue:'SoFi Stadium',city:'Los Angeles, CA',status:'live',local:'16:00 PDT',your:'00:00 BST (+1)'},{team1:'USA',team2:'England',flag1:'🇺🇸',flag2:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',time:'20:00',stage:'Group C · Matchday 2',venue:'MetLife Stadium',city:'East Rutherford, NJ',status:'upcoming',local:'20:00 EDT',your:'01:00 BST (+1)'},{team1:'France',team2:'Argentina',flag1:'🇫🇷',flag2:'🇦🇷',time:'20:00',stage:'Group D · Matchday 2',venue:'AT&T Stadium',city:'Dallas, TX',status:'upcoming',local:'20:00 CDT',your:'02:00 BST (+1)'},{team1:'Germany',team2:'Nigeria',flag1:'🇩🇪',flag2:'🇳🇬',time:'21:00',stage:'Group A · Matchday 2',venue:'NRG Stadium',city:'Houston, TX',status:'upcoming',local:'21:00 CDT',your:'03:00 BST (+1)'},{team1:'Spain',team2:'South Korea',flag1:'🇪🇸',flag2:'🇰🇷',time:'14:00',stage:'Group E · Matchday 3',venue:'Hard Rock Stadium',city:'Miami, FL',status:'upcoming',local:'14:00 EDT',your:'19:00 BST'}];
+const usaFormation=[{num:1,name:'Turner',pos:'GK',club:'Arsenal',x:50,y:92,caps:15,goals:0,height:"6'3\""},{num:2,name:'Dest',pos:'RB',club:'PSV',x:85,y:72,caps:32,goals:3,height:"5'9\""},{num:4,name:'Richards',pos:'CB',club:'Crystal Palace',x:62,y:75,caps:22,goals:1,height:"6'0\""},{num:5,name:'Ream',pos:'CB',club:'Charlotte',x:38,y:75,caps:54,goals:1,height:"6'1\""},{num:3,name:'Robinson',pos:'LB',club:'Fulham',x:15,y:72,caps:40,goals:3,height:"6'0\""},{num:8,name:'Adams',pos:'CDM',club:"B'mouth",x:50,y:55,caps:42,goals:1,height:"5'9\""},{num:6,name:'McKennie',pos:'CM',club:'Juventus',x:72,y:45,caps:48,goals:10,height:"6'1\""},{num:10,name:'Musah',pos:'CM',club:'AC Milan',x:28,y:45,caps:38,goals:2,height:"5'11\""},{num:9,name:'Weah',pos:'RW',club:'Juventus',x:80,y:22,caps:36,goals:8,height:"6'0\""},{num:12,name:'Balogun',pos:'ST',club:'Monaco',x:50,y:15,caps:18,goals:7,height:"6'1\""},{num:11,name:'Pulisic',pos:'LW',club:'AC Milan',x:20,y:22,caps:68,goals:24,height:"5'8\""}];
+const venues=[{name:'MetLife Stadium',city:'East Rutherford, NJ',cap:'82,500',lat:40.8135,lng:-74.0745},{name:'SoFi Stadium',city:'Inglewood, CA',cap:'70,240',lat:33.9535,lng:-118.3392},{name:'AT&T Stadium',city:'Arlington, TX',cap:'80,000',lat:32.7473,lng:-97.0945},{name:'Hard Rock Stadium',city:'Miami Gardens, FL',cap:'65,000',lat:25.958,lng:-80.2389},{name:'NRG Stadium',city:'Houston, TX',cap:'72,220',lat:29.6847,lng:-95.4107},{name:'Lumen Field',city:'Seattle, WA',cap:'69,000',lat:47.5952,lng:-122.3316},{name:'Gillette Stadium',city:'Foxborough, MA',cap:'65,878',lat:42.0909,lng:-71.2643},{name:'Mercedes-Benz Stadium',city:'Atlanta, GA',cap:'71,000',lat:33.7553,lng:-84.4006},{name:'Lincoln Financial Field',city:'Philadelphia, PA',cap:'69,796',lat:39.9008,lng:-75.1675},{name:'Arrowhead Stadium',city:'Kansas City, MO',cap:'76,416',lat:39.0489,lng:-94.4839},{name:"Levi's Stadium",city:'Santa Clara, CA',cap:'68,500',lat:37.4033,lng:-121.9694},{name:'Estadio Azteca',city:'Mexico City',cap:'87,523',lat:19.3029,lng:-99.1505},{name:'Estadio Akron',city:'Guadalajara',cap:'49,850',lat:20.6829,lng:-103.4625},{name:'Estadio BBVA',city:'Monterrey',cap:'53,500',lat:25.6721,lng:-100.2457},{name:'BC Place',city:'Vancouver, BC',cap:'54,500',lat:49.2768,lng:-123.112},{name:'BMO Field',city:'Toronto, ON',cap:'45,736',lat:43.6332,lng:-79.4186}];
+
+let currentTab='home',mapInitialized=false,map=null,formationBuilt=false;
+
+function switchTab(tab){
+  document.querySelectorAll('.detail-screen').forEach(d=>d.classList.remove('active'));
+  const cur=document.getElementById('screen-'+currentTab);
+  if(cur)cur.classList.add('hidden');
+  const next=document.getElementById('screen-'+tab);
+  if(next)next.classList.remove('hidden');
+  document.querySelectorAll('.tab-item').forEach(t=>t.classList.remove('active'));
+  const tabEl=document.querySelector(`[data-tab="${tab}"]`);
+  if(tabEl)tabEl.classList.add('active');
+  currentTab=tab;
+  if(tab==='map'&&!mapInitialized)setTimeout(initMap,100);
+}
+function showDetail(id){document.getElementById(id).classList.add('active');document.getElementById(id).scrollTop=0;}
+function hideDetail(id){document.getElementById(id).classList.remove('active');}
+function showMatchDetail(idx){
+  const m=matches[idx]||matches[2];
+  document.getElementById('md-stage').textContent=m.stage;
+  document.getElementById('md-flag1').textContent=m.flag1;
+  document.getElementById('md-team1').textContent=m.team1;
+  document.getElementById('md-flag2').textContent=m.flag2;
+  document.getElementById('md-team2').textContent=m.team2;
+  document.getElementById('md-time').textContent=m.time;
+  document.getElementById('md-venue').textContent=m.venue+', '+m.city;
+  document.getElementById('md-info-stage').textContent=m.stage.split('·')[0].trim();
+  document.getElementById('md-info-venue').textContent=m.venue;
+  document.getElementById('md-info-city').textContent=m.city;
+  document.getElementById('md-info-local').textContent=m.local;
+  document.getElementById('md-info-your').textContent=m.your;
+  const badge=document.getElementById('md-badge');
+  badge.className='badge '+m.status;
+  badge.textContent=m.status==='finished'?'Full Time':m.status==='live'?'Live':'Upcoming';
+  showDetail('screen-match-detail');
+}
+function showTeamProfile(code){
+  const teams={us:{flag:'🇺🇸',name:'USA',meta:'FIFA Ranking #11 · CONCACAF'},en:{flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',name:'England',meta:'FIFA Ranking #4 · UEFA'},br:{flag:'🇧🇷',name:'Brazil',meta:'FIFA Ranking #3 · CONMEBOL'},fr:{flag:'🇫🇷',name:'France',meta:'FIFA Ranking #2 · UEFA'},ar:{flag:'🇦🇷',name:'Argentina',meta:'FIFA Ranking #1 · CONMEBOL'},de:{flag:'🇩🇪',name:'Germany',meta:'FIFA Ranking #12 · UEFA'},mx:{flag:'🇲🇽',name:'Mexico',meta:'FIFA Ranking #15 · CONCACAF'},ca:{flag:'🇨🇦',name:'Canada',meta:'FIFA Ranking #43 · CONCACAF'},ng:{flag:'🇳🇬',name:'Nigeria',meta:'FIFA Ranking #28 · CAF'}};
+  const t=teams[code]||teams.us;
+  document.getElementById('tp-flag').textContent=t.flag;
+  document.getElementById('tp-name').textContent=t.name;
+  document.getElementById('tp-meta').textContent=t.meta;
+  document.querySelectorAll('.profile-tab').forEach(tab=>tab.classList.remove('active'));
+  document.querySelector('.profile-tab').classList.add('active');
+  document.getElementById('tab-squad').style.display='';
+  document.getElementById('tab-formation').style.display='none';
+  document.getElementById('tab-fixtures').style.display='none';
+  showDetail('screen-team-profile');
+  if(!formationBuilt)buildFormation();
+}
+function switchProfileTab(el,tab){
+  document.querySelectorAll('.profile-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('tab-squad').style.display=tab==='squad'?'':'none';
+  document.getElementById('tab-formation').style.display=tab==='formation'?'':'none';
+  document.getElementById('tab-fixtures').style.display=tab==='fixtures'?'':'none';
+  if(tab==='formation'&&!formationBuilt)buildFormation();
+}
+function buildFormation(){
+  const pitch=document.getElementById('formation-pitch');
+  pitch.querySelectorAll('.formation-player').forEach(p=>p.remove());
+  usaFormation.forEach((p,i)=>{
+    const el=document.createElement('div');
+    el.className='formation-player';
+    el.style.left=p.x+'%';el.style.top=p.y+'%';
+    el.style.opacity='0';el.style.transform='translateX(-50%) scale(0)';
+    el.innerHTML=`<div class="dot">${p.num}</div><div class="player-label">${p.name}</div>`;
+    el.onclick=()=>selectFormationPlayer(p,el);
+    pitch.appendChild(el);
+    setTimeout(()=>{el.style.opacity='1';el.style.transform='translateX(-50%) scale(1)';},100+i*60);
+  });
+  formationBuilt=true;
+}
+function selectFormationPlayer(player,el){
+  document.querySelectorAll('.formation-player').forEach(p=>p.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('pp-number').textContent=player.num;
+  document.getElementById('pp-name').textContent=player.name;
+  document.getElementById('pp-pos').textContent=player.pos+' · '+player.club;
+  document.getElementById('pp-stat1').textContent=player.caps;
+  document.getElementById('pp-stat2').textContent=player.goals;
+  document.getElementById('pp-stat3').textContent=player.height;
+  document.getElementById('player-popup').classList.add('visible');
+}
+document.addEventListener('click',e=>{
+  if(!e.target.closest('.formation-player')&&!e.target.closest('.player-card-popup')){
+    document.getElementById('player-popup').classList.remove('visible');
+    document.querySelectorAll('.formation-player').forEach(p=>p.classList.remove('selected'));
+  }
+});
+function initMap(){
+  map=L.map('map-container',{center:[39.8283,-98.5795],zoom:4,zoomControl:false,attributionControl:false});
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png',{subdomains:'abcd',maxZoom:19}).addTo(map);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png',{subdomains:'abcd',maxZoom:19,pane:'overlayPane'}).addTo(map);
+  venues.forEach((v,i)=>{
+    const icon=L.divIcon({className:'',html:`<div class="venue-marker" id="marker-${i}"><div class="marker-inner">⚽</div></div>`,iconSize:[36,36],iconAnchor:[18,36]});
+    const marker=L.marker([v.lat,v.lng],{icon}).addTo(map);
+    marker.on('click',()=>showVenueCard(v,i));
+  });
+  mapInitialized=true;
+}
+function showVenueCard(venue,idx){
+  document.querySelectorAll('.venue-marker').forEach(m=>m.classList.remove('active'));
+  const markerEl=document.getElementById('marker-'+idx);
+  if(markerEl)markerEl.classList.add('active');
+  document.getElementById('vc-title').textContent=venue.name;
+  document.getElementById('vc-sub').textContent=venue.city+' · '+venue.cap+' capacity';
+  document.getElementById('venue-card').classList.add('visible');
+  if(map)map.flyTo([venue.lat,venue.lng],10,{duration:.8});
+}
+document.addEventListener('click',e=>{if(!e.target.closest('.map-venue-card')&&!e.target.closest('.venue-marker')&&!e.target.closest('.leaflet-marker-icon')){document.getElementById('venue-card').classList.remove('visible');}});
+function showTravelScreen(){showDetail('screen-travel');}
+function selectTravelMode(el){document.querySelectorAll('.travel-mode').forEach(m=>m.classList.remove('active'));el.classList.add('active');}
+function filterChip(el){el.parentElement.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));el.classList.add('active');}
+function showToast(msg){const t=document.getElementById('toast');document.getElementById('toast-msg').textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200);}
+setInterval(()=>{const h=document.getElementById('countdown-h'),m=document.getElementById('countdown-m');if(h&&m){let mins=parseInt(m.textContent),hrs=parseInt(h.textContent);mins--;if(mins<0){mins=59;hrs--;}if(hrs<0){hrs=23;mins=59;}h.textContent=hrs;m.textContent=mins<10?'0'+mins:mins;}},60000);
+</script>
+</body>
+</html>
