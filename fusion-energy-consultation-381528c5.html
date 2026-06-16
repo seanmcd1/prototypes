@@ -1,0 +1,1100 @@
+<!DOCTYPE html>
+<html lang="en" class="govuk-template">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Consultation on draft NPS for Fusion Energy Generation (EN-8)</title>
+<style>
+/* ===== Reset & Base ===== */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --govuk-blue:#1d70b8;--govuk-dark:#0b0c0c;--govuk-grey:#505a5f;
+  --govuk-light-grey:#f3f2f1;--govuk-border:#b1b4b6;--govuk-green:#00703c;
+  --govuk-red:#d4351c;--govuk-yellow:#ffdd00;--govuk-white:#ffffff;
+  --govuk-link:#1d70b8;--govuk-link-hover:#003078;--govuk-focus:#ffdd00;
+  --crown-bar:#0b0c0c;--max-width:960px;
+}
+html{font-size:16px;scroll-behavior:smooth}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans",Helvetica,Arial,sans-serif;
+  color:var(--govuk-dark);background:var(--govuk-white);line-height:1.5;-webkit-font-smoothing:antialiased}
+a{color:var(--govuk-link);text-decoration:underline}
+a:hover{color:var(--govuk-link-hover)}
+a:focus{outline:3px solid var(--govuk-focus);outline-offset:0;background:var(--govuk-focus);color:var(--govuk-dark);text-decoration:none}
+
+/* ===== Layout ===== */
+.govuk-width-container{max-width:var(--max-width);margin:0 auto;padding:0 15px}
+@media(min-width:641px){.govuk-width-container{padding:0 30px}}
+
+/* ===== Header ===== */
+.govuk-header{background:var(--crown-bar);border-bottom:10px solid var(--govuk-white);color:#fff;padding:10px 0}
+.govuk-header__container{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.govuk-header__logo{display:flex;align-items:center;gap:8px;text-decoration:none;color:#fff;font-weight:700;font-size:18px}
+.govuk-header__logo svg{width:32px;height:28px;fill:#fff}
+.govuk-header__nav{display:flex;gap:4px;flex-wrap:wrap}
+.govuk-header__nav button{background:none;border:none;color:#fff;padding:8px 12px;font-size:14px;cursor:pointer;
+  border-radius:4px;font-family:inherit;opacity:.85;transition:opacity .15s,background .15s}
+.govuk-header__nav button:hover,.govuk-header__nav button.active{opacity:1;background:rgba(255,255,255,.15)}
+.govuk-header__nav button:focus{outline:3px solid var(--govuk-focus);background:var(--govuk-focus);color:var(--govuk-dark);opacity:1}
+
+/* ===== Phase Banner ===== */
+.govuk-phase-banner{border-bottom:1px solid var(--govuk-border);padding:10px 0;font-size:14px;color:var(--govuk-grey)}
+.govuk-phase-banner__tag{display:inline-block;background:var(--govuk-blue);color:#fff;padding:2px 8px;border-radius:2px;
+  font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.5px;margin-right:8px;vertical-align:middle}
+
+/* ===== Breadcrumbs ===== */
+.govuk-breadcrumbs{padding:15px 0;font-size:14px;color:var(--govuk-grey)}
+.govuk-breadcrumbs ol{list-style:none;display:flex;flex-wrap:wrap;gap:4px}
+.govuk-breadcrumbs li+li::before{content:"›";margin-right:4px;color:var(--govuk-border)}
+
+/* ===== Main ===== */
+.govuk-main-wrapper{padding:20px 0 60px}
+
+/* ===== Typography ===== */
+.govuk-heading-xl{font-size:2rem;font-weight:700;line-height:1.15;margin-bottom:20px}
+.govuk-heading-l{font-size:1.5rem;font-weight:700;line-height:1.2;margin-bottom:15px;margin-top:40px}
+.govuk-heading-m{font-size:1.2rem;font-weight:700;line-height:1.25;margin-bottom:10px;margin-top:30px}
+.govuk-heading-s{font-size:1rem;font-weight:700;margin-bottom:8px;margin-top:20px}
+.govuk-body{margin-bottom:15px}
+.govuk-body-l{font-size:1.125rem;margin-bottom:20px;color:var(--govuk-grey)}
+.govuk-caption-xl{font-size:1.125rem;color:var(--govuk-grey);margin-bottom:5px;display:block}
+.govuk-list{margin-bottom:15px;padding-left:20px}
+.govuk-list li{margin-bottom:5px}
+
+/* ===== Panels & Cards ===== */
+.govuk-panel{background:var(--govuk-green);color:#fff;padding:30px;text-align:center;border-radius:0;margin-bottom:30px}
+.govuk-panel h1{font-size:2rem;margin-bottom:10px}
+.govuk-panel p{font-size:1.125rem;opacity:.9}
+.govuk-inset-text{border-left:4px solid var(--govuk-border);padding:15px 20px;margin:20px 0;color:var(--govuk-grey)}
+.govuk-warning-text{display:flex;gap:12px;align-items:flex-start;padding:15px 0;margin:20px 0}
+.govuk-warning-text__icon{background:var(--govuk-dark);color:#fff;width:32px;height:32px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;font-size:18px}
+
+.info-card{background:var(--govuk-light-grey);padding:20px 25px;border-left:4px solid var(--govuk-blue);margin-bottom:20px;border-radius:0 4px 4px 0}
+.info-card h3{margin-top:0;margin-bottom:8px}
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin:25px 0}
+.stat-card{background:var(--govuk-light-grey);padding:20px;text-align:center;border-radius:4px}
+.stat-card .number{font-size:2.5rem;font-weight:700;color:var(--govuk-blue);display:block}
+.stat-card .label{font-size:.875rem;color:var(--govuk-grey);margin-top:4px}
+
+/* ===== Timeline ===== */
+.timeline{position:relative;padding-left:30px;margin:25px 0}
+.timeline::before{content:'';position:absolute;left:8px;top:6px;bottom:6px;width:3px;background:var(--govuk-border)}
+.timeline-item{position:relative;margin-bottom:24px}
+.timeline-item::before{content:'';position:absolute;left:-26px;top:4px;width:14px;height:14px;border-radius:50%;
+  background:var(--govuk-border);border:3px solid var(--govuk-white)}
+.timeline-item.current::before{background:var(--govuk-blue)}
+.timeline-item h4{font-size:1rem;font-weight:700;margin-bottom:2px}
+.timeline-item p{font-size:.875rem;color:var(--govuk-grey);margin:0}
+
+/* ===== Form Styles ===== */
+.govuk-form-group{margin-bottom:25px}
+.govuk-label{display:block;font-weight:700;margin-bottom:5px;font-size:1rem}
+.govuk-hint{display:block;color:var(--govuk-grey);font-size:.875rem;margin-bottom:8px}
+.govuk-input,.govuk-textarea,.govuk-select{width:100%;padding:8px 10px;border:2px solid var(--govuk-dark);
+  border-radius:0;font-size:1rem;font-family:inherit;line-height:1.5;background:#fff}
+.govuk-input:focus,.govuk-textarea:focus,.govuk-select:focus{outline:3px solid var(--govuk-focus);
+  outline-offset:0;box-shadow:inset 0 0 0 2px var(--govuk-dark)}
+.govuk-textarea{resize:vertical;min-height:120px}
+.govuk-input--width-20{max-width:20em}
+.govuk-input--error,.govuk-textarea--error{border-color:var(--govuk-red)}
+.govuk-error-message{color:var(--govuk-red);font-weight:700;font-size:.875rem;margin-bottom:8px;display:none}
+.govuk-form-group--error .govuk-error-message{display:block}
+.govuk-form-group--error .govuk-input,.govuk-form-group--error .govuk-textarea{border-color:var(--govuk-red)}
+
+/* Radios & Checkboxes */
+.govuk-radios,.govuk-checkboxes{display:flex;flex-direction:column;gap:8px}
+.govuk-radios__item,.govuk-checkboxes__item{display:flex;align-items:flex-start;gap:10px;padding:8px 12px;
+  border-radius:4px;cursor:pointer;transition:background .1s}
+.govuk-radios__item:hover,.govuk-checkboxes__item:hover{background:var(--govuk-light-grey)}
+.govuk-radios__input,.govuk-checkboxes__input{width:20px;height:20px;margin-top:2px;flex-shrink:0;accent-color:var(--govuk-blue);cursor:pointer}
+.govuk-radios__label,.govuk-checkboxes__label{cursor:pointer;font-size:1rem}
+
+/* Tags */
+.tag-grid{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.tag-chip{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border:2px solid var(--govuk-border);
+  border-radius:20px;font-size:.875rem;cursor:pointer;transition:all .15s;background:#fff;user-select:none}
+.tag-chip:hover{border-color:var(--govuk-blue);background:#f0f6fc}
+.tag-chip.selected{background:var(--govuk-blue);color:#fff;border-color:var(--govuk-blue)}
+.tag-chip.selected:hover{background:#003078}
+
+/* ===== Buttons ===== */
+.govuk-button{display:inline-block;padding:10px 20px;background:var(--govuk-green);color:#fff;border:none;
+  border-bottom:3px solid #002d18;font-size:1rem;font-weight:700;font-family:inherit;cursor:pointer;
+  text-decoration:none;border-radius:0;line-height:1.2;transition:background .1s}
+.govuk-button:hover{background:#005a30}
+.govuk-button:focus{outline:3px solid var(--govuk-focus);outline-offset:0;background:#005a30}
+.govuk-button--secondary{background:var(--govuk-light-grey);color:var(--govuk-dark);border-bottom-color:var(--govuk-border)}
+.govuk-button--secondary:hover,.govuk-button--secondary:focus{background:#dbdad9}
+.govuk-button--start{display:inline-flex;align-items:center;gap:8px;font-size:1.125rem;padding:12px 24px}
+.govuk-button--start svg{width:18px;height:18px;fill:currentColor}
+
+/* ===== Questions ===== */
+.question-block{background:#fff;border:1px solid var(--govuk-border);padding:25px;margin-bottom:20px;border-radius:4px}
+.question-block h3{color:var(--govuk-blue);margin-bottom:10px;font-size:1.1rem}
+.question-number{display:inline-block;background:var(--govuk-blue);color:#fff;width:28px;height:28px;
+  border-radius:50%;text-align:center;line-height:28px;font-size:.875rem;font-weight:700;margin-right:8px;vertical-align:middle}
+
+/* ===== Admin Table ===== */
+.admin-table-wrapper{overflow-x:auto;margin:20px 0;border:1px solid var(--govuk-border);border-radius:4px}
+table.govuk-table{width:100%;border-collapse:collapse;font-size:.875rem}
+.govuk-table th{background:var(--govuk-light-grey);padding:10px 12px;text-align:left;font-weight:700;
+  border-bottom:2px solid var(--govuk-dark);white-space:nowrap}
+.govuk-table td{padding:10px 12px;border-bottom:1px solid var(--govuk-border);vertical-align:top}
+.govuk-table tr:hover td{background:#f8f8f8}
+.govuk-tag{display:inline-block;padding:2px 8px;font-size:.75rem;font-weight:700;border-radius:2px;text-transform:uppercase}
+.govuk-tag--blue{background:#d2e2f1;color:#144e81}.govuk-tag--green{background:#cce2d8;color:#005a30}
+.govuk-tag--yellow{background:#fff7bf;color:#594d00}.govuk-tag--grey{background:#eeefef;color:#383f43}
+.govuk-tag--purple{background:#dbd5e9;color:#3d2375}.govuk-tag--red{background:#f6d7d2;color:#942514}
+.export-bar{display:flex;gap:10px;align-items:center;margin-bottom:15px;flex-wrap:wrap}
+.export-bar select{padding:6px 10px;border:2px solid var(--govuk-dark);font-family:inherit;font-size:.875rem}
+
+/* ===== Footer ===== */
+.govuk-footer{background:var(--govuk-light-grey);border-top:1px solid var(--govuk-border);padding:30px 0;
+  margin-top:60px;font-size:.875rem;color:var(--govuk-grey)}
+.govuk-footer__meta{display:flex;flex-wrap:wrap;gap:20px;justify-content:space-between;align-items:flex-start}
+.govuk-footer__links{display:flex;gap:15px;flex-wrap:wrap;list-style:none}
+
+/* ===== Page visibility ===== */
+.page{display:none}.page.active{display:block}
+
+/* ===== Responsive ===== */
+@media(max-width:640px){
+  .govuk-heading-xl{font-size:1.5rem}
+  .govuk-heading-l{font-size:1.25rem}
+  .govuk-header__nav{width:100%}
+  .govuk-header__nav button{font-size:13px;padding:6px 8px}
+  .stat-grid{grid-template-columns:1fr 1fr}
+}
+
+/* ===== Animations ===== */
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.page.active{animation:fadeIn .3s ease}
+.toast{position:fixed;bottom:20px;right:20px;background:var(--govuk-dark);color:#fff;padding:12px 20px;
+  border-radius:4px;font-size:.875rem;z-index:1000;animation:fadeIn .3s ease;box-shadow:0 4px 12px rgba(0,0,0,.2)}
+</style>
+</head>
+<body>
+
+<!-- ===== HEADER ===== -->
+<header class="govuk-header" role="banner">
+  <div class="govuk-width-container govuk-header__container">
+    <a href="#" class="govuk-header__logo" onclick="showPage('home');return false">
+      <svg viewBox="0 0 132 97" xmlns="http://www.w3.org/2000/svg"><path d="M25 30.2c3.5 1.5 7.7-.2 9.1-3.7 1.5-3.6-.2-7.8-3.9-9.2-3.6-1.4-7.6.3-9.1 3.9-1.4 3.5.3 7.5 3.9 9zM9 39.5c3.6 1.5 7.8-.2 9.2-3.7 1.5-3.6-.2-7.8-3.9-9.1-3.6-1.5-7.6.2-9.1 3.8-1.4 3.5.3 7.5 3.8 9zM4.4 57.2c3.5 1.5 7.7-.2 9.1-3.8 1.5-3.6-.2-7.7-3.9-9.1-3.5-1.5-7.6.3-9.1 3.8-1.4 3.5.3 7.6 3.9 9.1zm38.3-21.4c3.5 1.5 7.7-.2 9.1-3.8 1.5-3.6-.2-7.7-3.9-9.1-3.6-1.5-7.6.3-9.1 3.8-1.3 3.6.4 7.7 3.9 9.1zm64.4-5.6c-3.6 1.5-7.8-.2-9.1-3.7-1.5-3.6.2-7.8 3.8-9.2 3.6-1.4 7.7.3 9.2 3.9 1.3 3.5-.4 7.5-3.9 9zm15.9 9.3c-3.6 1.5-7.7-.2-9.1-3.7-1.5-3.6.2-7.8 3.7-9.1 3.6-1.5 7.7.2 9.2 3.8 1.5 3.5-.3 7.5-3.8 9zm4.7 17.7c-3.6 1.5-7.8-.2-9.2-3.8-1.5-3.6.2-7.7 3.9-9.1 3.6-1.5 7.7.3 9.2 3.8 1.3 3.5-.4 7.6-3.9 9.1zM89.3 35.8c-3.6 1.5-7.8-.2-9.2-3.8-1.4-3.6.2-7.7 3.9-9.1 3.6-1.5 7.7.3 9.2 3.8 1.4 3.6-.3 7.7-3.9 9.1zM69.7 17.7l8.9 4.7V9.3l-8.9 2.8c-.2-.3-.5-.6-.9-.9L72.4 0H59.6l3.5 11.2c-.3.3-.6.5-.9.9l-8.8-2.8v13.1l8.8-4.7c.3.3.6.7.9.9l-5 15.4v.1c-.2.8-.4 1.6-.4 2.4 0 4.1 3.1 7.5 7 8.1h.2c.3 0 .7.1 1 .1.4 0 .7 0 1-.1h.2c4-.6 7.1-4 7.1-8.1 0-.8-.1-1.7-.4-2.4V34l-5.1-15.4c.4-.2.7-.6 1-.9zM66 92.8c16.9 0 32.8 1.1 47.1 3.2 4-16.9 8.9-26.7 14-33.5l-9.6-3.4c1 4.9 1.1 7.2 0 10.2-1.5-1.4-3-4.3-4.2-8.7L108.6 76c2.8 2 5 3.2 7.5 3.3-4.4 9.4-10 11.9-13.6 11.2-4.3-.8-6.3-4.6-5.6-7.9 1-4.7 5.7-5.9 8-.5 4.3-8.7-3-11.4-7.6-8.8 7.1-7.2 7.9-13.5 2.1-21.1-8 6.1-8.1 12.3-4.5 20.8-4.7-5.4-12.1-2.5-9.5 6.2 3.4-5.2 7.9-2 7.2 3.1-.6 4.3-6.4 7.8-13.5 7.2-10.3-.9-10.9-8-11.2-13.8 2.5-.5 7.1 1.8 11 7.3L80.2 60c-4.1 4.4-8 5.3-12.3 5.4 1.4-4.4 8-11.3 8-11.3H55.8s6.4 6.9 7.9 11.3c-4.2-.1-8-1-12.3-5.4l1.4 16.4c3.9-5.5 8.5-7.7 10.9-7.3-.3 5.8-.9 12.8-11.1 13.8-7.2.6-12.9-2.9-13.5-7.2-.7-5 3.8-8.3 7.1-3.1 2.7-8.7-4.6-11.6-9.4-6.2 3.7-8.5 3.6-14.7-4.6-20.8-5.8 7.6-5 13.9 2.2 21.1-4.7-2.6-11.9.1-7.7 8.8 2.3-5.5 7.1-4.2 8.1.5.7 3.3-1.3 7.1-5.7 7.9-3.5.7-9-1.8-13.5-11.2 2.5-.1 4.7-1.3 7.5-3.3l-4.7-15.4c-1.2 4.4-2.7 7.2-4.3 8.7-1.1-3-.9-5.3 0-10.2l-9.5 3.4c5 6.9 9.9 16.7 14 33.5 14.8-2.1 30.8-3.2 47.7-3.2z"/></svg>
+      <span>GOV.UK</span>
+    </a>
+    <nav class="govuk-header__nav" aria-label="Main navigation">
+      <button onclick="showPage('home')" class="active" data-page="home">Home</button>
+      <button onclick="showPage('about')" data-page="about">About</button>
+      <button onclick="showPage('questions')" data-page="questions">Questions</button>
+      <button onclick="showPage('submit')" data-page="submit">Submit feedback</button>
+      <button onclick="showPage('privacy')" data-page="privacy">Privacy</button>
+      <button onclick="showPage('admin')" data-page="admin" style="border-left:1px solid rgba(255,255,255,.3);margin-left:4px">
+        Admin ⚙
+      </button>
+    </nav>
+  </div>
+</header>
+
+<!-- ===== PHASE BANNER ===== -->
+<div class="govuk-phase-banner">
+  <div class="govuk-width-container">
+    <span class="govuk-phase-banner__tag">Prototype</span>
+    This is a prototype of the Fusion Energy Consultation platform — 
+    <a href="#" onclick="showPage('submit');return false">give feedback on this page</a>.
+  </div>
+</div>
+
+<!-- ============================== -->
+<!-- PAGE: HOME                      -->
+<!-- ============================== -->
+<div id="page-home" class="page active">
+  <div class="govuk-width-container">
+    <nav class="govuk-breadcrumbs"><ol><li><a href="#" onclick="showPage('home');return false">Home</a></li><li>Consultations</li></ol></nav>
+    <main class="govuk-main-wrapper">
+      <span class="govuk-caption-xl">Department for Energy Security and Net Zero</span>
+      <h1 class="govuk-heading-xl">Consultation on the draft National Policy Statement for Fusion Energy Generation (EN-8)</h1>
+      
+      <p class="govuk-body-l">We want to hear your views on the proposed planning framework for fusion energy infrastructure in England and Wales.</p>
+
+      <div class="stat-grid">
+        <div class="stat-card">
+          <span class="number">EN-8</span>
+          <span class="label">Draft National Policy Statement</span>
+        </div>
+        <div class="stat-card">
+          <span class="number">5</span>
+          <span class="label">Consultation questions</span>
+        </div>
+        <div class="stat-card">
+          <span class="number" id="days-remaining">62</span>
+          <span class="label">Days remaining</span>
+        </div>
+        <div class="stat-card">
+          <span class="number" id="response-count">0</span>
+          <span class="label">Responses received</span>
+        </div>
+      </div>
+
+      <div class="info-card">
+        <h3>Key dates</h3>
+        <p class="govuk-body"><strong>Published:</strong> 8 June 2026 &nbsp;•&nbsp; <strong>Closing date:</strong> 17 August 2026</p>
+        <p class="govuk-body" style="margin-bottom:0"><strong>Enquiries:</strong> <a href="mailto:fusionregulation@energysecurity.gov.uk">fusionregulation@energysecurity.gov.uk</a></p>
+      </div>
+
+      <h2 class="govuk-heading-l">Why we are consulting</h2>
+      <p class="govuk-body">In July 2025 the Government published its response to an initial consultation on the proposed approach to siting fusion energy facilities. That response confirmed that the planning process for fusion energy facilities should be aligned with other complex generation facilities by developing a National Policy Statement.</p>
+      <p class="govuk-body">The Government is now consulting on a <strong>draft National Policy Statement for Fusion Energy Generation (EN-8)</strong>. This consultation focuses on the specific content of draft EN-8 and other documents published alongside it.</p>
+
+      <div class="govuk-inset-text">
+        This consultation does not revisit earlier questions about whether a fusion-specific NPS is required, whether it should be technology-agnostic, or whether it should take an open-sited approach.
+      </div>
+
+      <h2 class="govuk-heading-l">Who should respond</h2>
+      <p class="govuk-body">The government wants to hear from:</p>
+      <ul class="govuk-list">
+        <li>Members of the public</li>
+        <li>Industry and academia</li>
+        <li>Non-governmental organisations</li>
+        <li>Any other organisation or public body</li>
+      </ul>
+
+      <div class="govuk-warning-text">
+        <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+        <p class="govuk-body"><strong>Territorial extent:</strong> This consultation relates to the exercise of powers in England and Wales. The Planning Act 2008 does not apply to Scotland or Northern Ireland.</p>
+      </div>
+
+      <h2 class="govuk-heading-l">Timeline</h2>
+      <div class="timeline">
+        <div class="timeline-item current">
+          <h4>Summer 2026</h4>
+          <p>Public consultation (current stage)</p>
+        </div>
+        <div class="timeline-item">
+          <h4>Autumn 2026</h4>
+          <p>Analysing consultation responses. Parliamentary scrutiny.</p>
+        </div>
+        <div class="timeline-item">
+          <h4>Winter 2026</h4>
+          <p>Incorporate feedback into draft EN-8.</p>
+        </div>
+        <div class="timeline-item">
+          <h4>Spring 2027</h4>
+          <p>Lay final EN-8 before parliament. EN-8 is designated.</p>
+        </div>
+      </div>
+
+      <div style="margin-top:40px">
+        <button class="govuk-button govuk-button--start" onclick="showPage('submit')">
+          Submit your feedback
+          <svg viewBox="0 0 17 13"><path d="M6.6 12L.5 5.9l1.4-1.4 4.7 4.7L15.1.5l1.4 1.4z"/></svg>
+        </button>
+        <p class="govuk-body" style="margin-top:10px"><a href="#" onclick="showPage('questions');return false">Read the consultation questions first →</a></p>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- ============================== -->
+<!-- PAGE: ABOUT                     -->
+<!-- ============================== -->
+<div id="page-about" class="page">
+  <div class="govuk-width-container">
+    <nav class="govuk-breadcrumbs"><ol><li><a href="#" onclick="showPage('home');return false">Home</a></li><li>About the programme</li></ol></nav>
+    <main class="govuk-main-wrapper">
+      <h1 class="govuk-heading-xl">About the Fusion Energy Programme</h1>
+
+      <p class="govuk-body-l">The UK Government has identified the development of fusion energy as a strategic priority, backed by record investment of over £2.5 billion in fusion research and development.</p>
+
+      <h2 class="govuk-heading-l">Background</h2>
+      <p class="govuk-body">A National Policy Statement (NPS) is a statutory document designated under the Planning Act 2008 which sets out the Government's policy for decisions on applications for development consent for major infrastructure projects, known as nationally significant infrastructure projects (NSIPs).</p>
+      <p class="govuk-body">The Overarching National Policy Statement for Energy (EN-1) sets out the Government's energy infrastructure policy, including the need case for new low-carbon energy infrastructure and the Critical National Priority afforded to such infrastructure.</p>
+
+      <div class="info-card">
+        <h3>UK Fusion Investment</h3>
+        <p class="govuk-body" style="margin-bottom:0"><strong>£2.5 billion+</strong> invested in fusion R&D, including <strong>£1.3 billion</strong> for the Spherical Tokamak for Energy Production (STEP) prototype fusion power plant.</p>
+      </div>
+
+      <h2 class="govuk-heading-l">What is draft EN-8?</h2>
+      <p class="govuk-body">Draft EN-8 sets out Government's policy for the assessment and determination of applications for development consent for nationally significant fusion energy infrastructure. Key features:</p>
+      <ul class="govuk-list">
+        <li><strong>Technology agnostic</strong> — applies to all fusion approaches regardless of device design</li>
+        <li><strong>Output agnostic</strong> — recognises that fusion infrastructure may generate thermal as well as electrical energy</li>
+        <li><strong>Open sited</strong> — no specific sites are identified</li>
+        <li><strong>No population density restrictions</strong> — reflecting the low radiological risk of fusion</li>
+      </ul>
+
+      <h2 class="govuk-heading-l">Documents published for consultation</h2>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin:20px 0">
+        <div class="info-card">
+          <h3>Draft EN-8</h3>
+          <p class="govuk-body" style="margin-bottom:0">The main National Policy Statement for fusion energy generation — the core document for this consultation.</p>
+        </div>
+        <div class="info-card">
+          <h3>Appraisal of Sustainability</h3>
+          <p class="govuk-body" style="margin-bottom:0">Assesses environmental, social and economic effects of implementing draft EN-8.</p>
+        </div>
+        <div class="info-card">
+          <h3>Habitats Regulations Assessment</h3>
+          <p class="govuk-body" style="margin-bottom:0">Assesses whether implementation is likely to affect habitats sites.</p>
+        </div>
+      </div>
+
+      <details style="margin:25px 0">
+        <summary style="cursor:pointer;color:var(--govuk-link);font-weight:700">Deep dive: 19 assessment considerations in draft EN-8</summary>
+        <div style="padding:15px 0">
+          <p class="govuk-body">Draft EN-8 includes 19 fusion-specific assessment considerations grouped into four themes:</p>
+          <ul class="govuk-list">
+            <li><strong>Environmental:</strong> Biodiversity, landscape, water, air quality, noise, waste, flood risk, historic environment, land use</li>
+            <li><strong>Safety & Security:</strong> Radiological protection, hazardous substances, site security</li>
+            <li><strong>Operational:</strong> Grid connection, transport, socio-economic impacts, community engagement</li>
+            <li><strong>Developmental:</strong> Design quality, climate resilience, decommissioning</li>
+          </ul>
+        </div>
+      </details>
+
+      <button class="govuk-button govuk-button--start" onclick="showPage('questions')">
+        Read the consultation questions →
+      </button>
+    </main>
+  </div>
+</div>
+
+<!-- ============================== -->
+<!-- PAGE: QUESTIONS                 -->
+<!-- ============================== -->
+<div id="page-questions" class="page">
+  <div class="govuk-width-container">
+    <nav class="govuk-breadcrumbs"><ol><li><a href="#" onclick="showPage('home');return false">Home</a></li><li>Consultation questions</li></ol></nav>
+    <main class="govuk-main-wrapper">
+      <h1 class="govuk-heading-xl">Consultation Questions</h1>
+      <p class="govuk-body-l">There are 5 questions across 5 parts. Your response will be most useful if it directly addresses these questions, though further comments are welcome.</p>
+
+      <div class="govuk-inset-text">
+        The government will give greater weight to responses based on argument and evidence, rather than simple expressions of support or opposition.
+      </div>
+
+      <div class="question-block">
+        <h3><span class="question-number">1</span> Part A: Scope and clarity</h3>
+        <p class="govuk-body"><strong>Does draft EN-8, when read alongside EN-1 (and other relevant National Policy Statements), provide a clear, coherent and appropriate planning framework for fusion energy infrastructure?</strong></p>
+        <p class="govuk-body" style="color:var(--govuk-grey)">Response options: Yes · Partially · No · Not sure</p>
+        <p class="govuk-body">Please explain your answer, focusing on the overall clarity, coherence and appropriateness of the framework.</p>
+      </div>
+
+      <div class="question-block">
+        <h3><span class="question-number">2</span> Part B: Role, scope and assessment principles</h3>
+        <p class="govuk-body"><strong>Do Sections 1 and 2 of draft EN-8 provide sufficient clarity on the role, scope and assessment principles of the fusion energy National Policy Statement?</strong></p>
+        <p class="govuk-body" style="color:var(--govuk-grey)">Response options: Yes · Partially · No · Not sure</p>
+        <p class="govuk-body">If 'No' or 'Partially', please explain what changes would be beneficial, referencing specific sections where possible.</p>
+      </div>
+
+      <div class="question-block">
+        <h3><span class="question-number">3</span> Part C: Assessment considerations</h3>
+        <p class="govuk-body"><strong>Are the approaches set out for each consideration adequate and appropriate for all fusion energy infrastructure, making clear what, if anything, is required beyond the requirements of EN-1?</strong></p>
+        <p class="govuk-body" style="color:var(--govuk-grey)">Response options: Yes · Partially · No · Not sure</p>
+        <p class="govuk-body">If 'No' or 'Partially', please identify any considerations where the approach may be inadequate and suggest changes.</p>
+      </div>
+
+      <div class="question-block">
+        <h3><span class="question-number">4</span> Part D: Environmental assessments</h3>
+        <p class="govuk-body"><strong>Are the environmental assessments (Appraisal of Sustainability and Habitats Regulations Assessment) for draft EN-8 reasonable and appropriate?</strong></p>
+        <p class="govuk-body" style="color:var(--govuk-grey)">Response options: Yes · Partially · No · Not sure</p>
+        <p class="govuk-body">If 'No' or 'Partially', please reference the specific section(s) in your response.</p>
+      </div>
+
+      <div class="question-block">
+        <h3><span class="question-number">5</span> Part E: Further comments</h3>
+        <p class="govuk-body"><strong>Do you have any other comments on draft EN-8?</strong></p>
+        <p class="govuk-body" style="color:var(--govuk-grey)">Response options: Yes · No</p>
+        <p class="govuk-body">If 'Yes', please provide further comments, referencing specific section(s) where relevant.</p>
+      </div>
+
+      <div style="margin-top:30px">
+        <button class="govuk-button govuk-button--start" onclick="showPage('submit')">
+          Submit your feedback
+          <svg viewBox="0 0 17 13"><path d="M6.6 12L.5 5.9l1.4-1.4 4.7 4.7L15.1.5l1.4 1.4z"/></svg>
+        </button>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- ============================== -->
+<!-- PAGE: SUBMIT FEEDBACK           -->
+<!-- ============================== -->
+<div id="page-submit" class="page">
+  <div class="govuk-width-container">
+    <nav class="govuk-breadcrumbs"><ol><li><a href="#" onclick="showPage('home');return false">Home</a></li><li>Submit feedback</li></ol></nav>
+    <main class="govuk-main-wrapper">
+      <h1 class="govuk-heading-xl">Submit your feedback</h1>
+      <p class="govuk-body-l">Complete this form to share your views on draft EN-8. All fields marked with * are required.</p>
+
+      <div class="govuk-inset-text">
+        Estimated time to complete: <strong>5 minutes</strong>. You do not need an account. Your response is anonymous unless you choose to provide contact details.
+      </div>
+
+      <form id="consultation-form" novalidate>
+        <!-- Section 1: About you -->
+        <h2 class="govuk-heading-l">About you</h2>
+
+        <div class="govuk-form-group" id="fg-respondent-type">
+          <label class="govuk-label">Are you responding as an individual or on behalf of an organisation? *</label>
+          <span class="govuk-error-message" id="err-respondent-type">Please select an option</span>
+          <div class="govuk-radios">
+            <label class="govuk-radios__item"><input class="govuk-radios__input" type="radio" name="respondent_type" value="individual"><span class="govuk-radios__label">An individual</span></label>
+            <label class="govuk-radios__item"><input class="govuk-radios__input" type="radio" name="respondent_type" value="organisation"><span class="govuk-radios__label">On behalf of an organisation</span></label>
+          </div>
+        </div>
+
+        <div class="govuk-form-group" id="fg-org-name" style="display:none">
+          <label class="govuk-label" for="org-name">Organisation name *</label>
+          <span class="govuk-error-message" id="err-org-name">Please enter your organisation name</span>
+          <input class="govuk-input govuk-input--width-20" type="text" id="org-name" name="org_name" placeholder="e.g. UK Atomic Energy Authority">
+        </div>
+
+        <div class="govuk-form-group" id="fg-stakeholder">
+          <label class="govuk-label">Which best describes you? *</label>
+          <span class="govuk-hint">Select the category that best fits your background</span>
+          <span class="govuk-error-message" id="err-stakeholder">Please select a stakeholder type</span>
+          <div class="govuk-radios">
+            <label class="govuk-radios__item"><input class="govuk-radios__input" type="radio" name="stakeholder_type" value="member_of_public"><span class="govuk-radios__label">Member of the public</span></label>
+            <label class="govuk-radios__item"><input class="govuk-radios__input" type="radio" name="stakeholder_type" value="industry"><span class="govuk-radios__label">Industry / energy sector</span></label>
+            <label class="govuk-radios__item"><input class="govuk-radios__input" type="radio" name="stakeholder_type" value="academia"><span class="govuk-radios__label">Academia / research</span></label>
+            <label class="govuk-radios__item"><input class="govuk-radios__input" type="radio" name="stakeholder_type" value="ngo"><span class="govuk-radios__label">Non-governmental organisation</span></label>
+            <label class="govuk-radios__item"><input class="govuk-radios__input" type="radio" name="stakeholder_type" value="public_body"><span class="govuk-radios__label">Public body / local authority</span></label>
+            <label class="govuk-radios__item"><input class="govuk-radios__input" type="radio" name="stakeholder_type" value="other"><span class="govuk-radios__label">Other</span></label>
+          </div>
+        </div>
+
+        <!-- Section 2: Topics -->
+        <h2 class="govuk-heading-l">Topics</h2>
+
+        <div class="govuk-form-group" id="fg-topics">
+          <label class="govuk-label">Which topics does your feedback relate to? *</label>
+          <span class="govuk-hint">Select all that apply</span>
+          <span class="govuk-error-message" id="err-topics">Please select at least one topic</span>
+          <div class="tag-grid" id="topic-tags"></div>
+        </div>
+
+        <!-- Section 3: Consultation Questions -->
+        <h2 class="govuk-heading-l">Consultation questions</h2>
+        <p class="govuk-body">Answer as many questions as you wish. You can skip questions that are not relevant to you.</p>
+
+        <div class="govuk-form-group">
+          <label class="govuk-label">Q1. Does draft EN-8 provide a clear, coherent and appropriate planning framework?</label>
+          <div class="govuk-radios" style="flex-direction:row;flex-wrap:wrap;gap:4px">
+            <label class="govuk-radios__item"><input class="govuk-radios__input" type="radio" name="q1_response" value="yes"><span class="govuk-radios__label">Yes</span></label>
+            <label class="govuk-radios__item"><input class="govuk-radios__input" type="radio" name="q1_response" value="partially"><span class="govuk-radios__label">Partially</span></label>
+            <label class="govuk-radios__item"><input class="govuk-radios__input" type="radio" name="q1_response" value="no"><span class="govuk-radios__label">No</span></label>
+            <label class="govuk-radios__item"><input class="govuk-radios__input" type="radio" name="q1_response" value="not_sure"><span class="govuk-radios__label">Not sure</span></label>
+          </div>
+          <textarea class="govuk-textarea" name="q1_detail" rows="4" placeholder="Please explain your answer..." style="margin-top:10px"></textarea>
+        </div>
+
+        <div class="govuk-form-group">
+          <label class="govuk-label">Q2. Do Sections 1 and 2 provide sufficient clarity on role, scope and assessment principles?</label>
+          <div class="govuk-radios" style="flex-direction:row;flex-wrap:wrap;gap:4px">
+            <label class="govuk-radios__item"><input class="govuk-radios__input" type="radio" name="q2_response" value="yes"><span class="govuk-radios__label">Yes</span></label>
+            <label class="govuk-radios__item"><input class="govuk-radios__input" type="radio" name="q2_response" value="partially"><span class="govuk-radios__label">Partially</span></label>
+            <label class="govuk-radios__item"><input class="govuk-radios__input" type="radio" name="q2_response" value="no"><span class="govuk-radios__label">No</span></label>
+            <label class="govuk-radios__item"><input class="govuk-radios__input" type="radio" name="q2_response" value="not_sure"><span class="govuk-radios__label">Not sure</span></label>
+          </div>
+          <textarea class="govuk-textarea" name="q2_detail" rows="4" placeholder="If No or Partially, please explain..." style="margin-top:10px"></textarea>
+        </div>
+
+        <div class="govuk-form-group">
+          <label class="govuk-label">Q3. Are the assessment considerations adequate for all fusion energy infrastructure?</label>
+          <div class="govuk-radios" style="flex-direction:row;flex-wrap:wrap;gap:4px">
+            <label class="govuk-radios__item"><input class="govuk-radios__input" type="radio" name="q3_response" value="yes"><span class="govuk-radios__label">Yes</span></label>
+            <label class="govuk-radios__item"><input class="govuk-radios__input" type="radio" name="q3_response" value="partially"><span class="govuk-radios__label">Partially</span></label>
+            <label class="govuk-radios__item"><input class="govuk-radios__input" type="radio" name="q3_response" value="no"><span class="govuk-radios__label">No</span></label>
+            <label class="govuk-radios__item"><input class="govuk-radios__input" type="radio" name="q3_response" value="not_sure"><span class="govuk-radios__label">Not sure</span></label>
+          </div>
+          <textarea class="govuk-textarea" name="q3_detail" rows="4" placeholder="If No or Partially, identify considerations and suggest changes..." style="margin-top:10px"></textarea>
+        </div>
+
+        <div class="govuk-form-group">
+          <label class="govuk-label">Q4. Are the environmental assessments reasonable and appropriate?</label>
+          <div class="govuk-radios" style="flex-direction:row;flex-wrap:wrap;gap:4px">
+            <label class="govuk-radios__item"><input class="govuk-radios__input" type="radio" name="q4_response" value="yes"><span class="govuk-radios__label">Yes</span></label>
+            <label class="govuk-radios__item"><input class="govuk-radios__input" type="radio" name="q4_response" value="partially"><span class="govuk-radios__label">Partially</span></label>
+            <label class="govuk-radios__item"><input class="govuk-radios__input" type="radio" name="q4_response" value="no"><span class="govuk-radios__label">No</span></label>
+            <label class="govuk-radios__item"><input class="govuk-radios__input" type="radio" name="q4_response" value="not_sure"><span class="govuk-radios__label">Not sure</span></label>
+          </div>
+          <textarea class="govuk-textarea" name="q4_detail" rows="4" placeholder="If No or Partially, reference specific sections..." style="margin-top:10px"></textarea>
+        </div>
+
+        <div class="govuk-form-group">
+          <label class="govuk-label">Q5. Do you have any other comments on draft EN-8?</label>
+          <div class="govuk-radios" style="flex-direction:row;flex-wrap:wrap;gap:4px">
+            <label class="govuk-radios__item"><input class="govuk-radios__input" type="radio" name="q5_response" value="yes"><span class="govuk-radios__label">Yes</span></label>
+            <label class="govuk-radios__item"><input class="govuk-radios__input" type="radio" name="q5_response" value="no"><span class="govuk-radios__label">No</span></label>
+          </div>
+          <textarea class="govuk-textarea" name="q5_detail" rows="4" placeholder="Please provide further comments, referencing specific sections..." style="margin-top:10px"></textarea>
+        </div>
+
+        <!-- Section 4: Additional feedback -->
+        <h2 class="govuk-heading-l">Additional feedback</h2>
+
+        <div class="govuk-form-group" id="fg-feedback">
+          <label class="govuk-label" for="feedback-text">General feedback or supporting evidence *</label>
+          <span class="govuk-hint">Provide any additional comments, evidence, or context to support your responses</span>
+          <span class="govuk-error-message" id="err-feedback">Please enter your feedback</span>
+          <textarea class="govuk-textarea" id="feedback-text" name="feedback" rows="6" placeholder="Enter your feedback here..."></textarea>
+          <p class="govuk-body" style="font-size:.875rem;color:var(--govuk-grey);margin-top:4px"><span id="char-count">0</span> / 5,000 characters</p>
+        </div>
+
+        <!-- Section 5: Contact (optional) -->
+        <h2 class="govuk-heading-l">Contact details <span style="font-weight:400;font-size:.875rem;color:var(--govuk-grey)">(optional)</span></h2>
+        <p class="govuk-body">Provide your details only if you are happy to be contacted about your response. See our <a href="#" onclick="showPage('privacy');return false">privacy notice</a>.</p>
+
+        <div class="govuk-form-group">
+          <label class="govuk-label" for="contact-name">Full name</label>
+          <input class="govuk-input govuk-input--width-20" type="text" id="contact-name" name="contact_name" placeholder="Jane Smith">
+        </div>
+
+        <div class="govuk-form-group" id="fg-email">
+          <label class="govuk-label" for="contact-email">Email address</label>
+          <span class="govuk-hint">We'll send a confirmation to this address</span>
+          <span class="govuk-error-message" id="err-email">Please enter a valid email address</span>
+          <input class="govuk-input govuk-input--width-20" type="email" id="contact-email" name="contact_email" placeholder="jane@example.com">
+        </div>
+
+        <div class="govuk-form-group">
+          <label class="govuk-label" for="contact-phone">Phone number</label>
+          <input class="govuk-input govuk-input--width-20" type="tel" id="contact-phone" name="contact_phone" placeholder="+44 7700 900000">
+        </div>
+
+        <!-- Section 6: Consent & CAPTCHA -->
+        <h2 class="govuk-heading-l">Consent & submission</h2>
+
+        <div class="govuk-form-group" id="fg-consent">
+          <span class="govuk-error-message" id="err-consent">You must agree to the privacy notice before submitting</span>
+          <div class="govuk-checkboxes">
+            <label class="govuk-checkboxes__item">
+              <input class="govuk-checkboxes__input" type="checkbox" name="consent" id="consent-check" value="yes">
+              <span class="govuk-checkboxes__label">I confirm that I have read the <a href="#" onclick="showPage('privacy');return false">privacy notice</a> and consent to the processing of my response as described. *</span>
+            </label>
+            <label class="govuk-checkboxes__item">
+              <input class="govuk-checkboxes__input" type="checkbox" name="publish_consent" value="yes">
+              <span class="govuk-checkboxes__label">I consent to my organisation name being listed in the published summary of responses (individuals' names will not be published).</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Simple CAPTCHA -->
+        <div class="govuk-form-group" id="fg-captcha">
+          <label class="govuk-label" for="captcha-input">Spam check: What is <span id="captcha-question"></span>? *</label>
+          <span class="govuk-error-message" id="err-captcha">Please enter the correct answer</span>
+          <input class="govuk-input" type="text" id="captcha-input" name="captcha" style="max-width:100px" autocomplete="off">
+        </div>
+
+        <div style="margin-top:30px;display:flex;gap:15px;flex-wrap:wrap;align-items:center">
+          <button type="submit" class="govuk-button">Submit feedback</button>
+          <button type="button" class="govuk-button govuk-button--secondary" onclick="saveDraft()">Save draft</button>
+        </div>
+      </form>
+    </main>
+  </div>
+</div>
+
+<!-- ============================== -->
+<!-- PAGE: CONFIRMATION              -->
+<!-- ============================== -->
+<div id="page-confirmation" class="page">
+  <div class="govuk-width-container">
+    <main class="govuk-main-wrapper">
+      <div class="govuk-panel">
+        <h1>Feedback submitted</h1>
+        <p>Your reference number: <strong id="ref-number"></strong></p>
+      </div>
+
+      <p class="govuk-body">Thank you for responding to the consultation on draft EN-8.</p>
+
+      <div id="email-confirmation" style="display:none">
+        <div class="info-card">
+          <h3>📧 Confirmation email sent</h3>
+          <p class="govuk-body" style="margin-bottom:0">We've sent a confirmation to <strong id="confirm-email"></strong>. Check your spam folder if you don't see it within a few minutes.</p>
+        </div>
+      </div>
+
+      <h2 class="govuk-heading-m">What happens next</h2>
+      <ul class="govuk-list">
+        <li>Your response will be reviewed by the Fusion Regulation team at the Department for Energy Security and Net Zero.</li>
+        <li>The consultation closes on <strong>17 August 2026</strong>.</li>
+        <li>A summary of all responses will be published on GOV.UK.</li>
+        <li>Your personal details will not be published.</li>
+      </ul>
+
+      <div style="margin-top:30px;display:flex;gap:15px;flex-wrap:wrap">
+        <button class="govuk-button govuk-button--secondary" onclick="showPage('home')">Return to homepage</button>
+        <button class="govuk-button govuk-button--secondary" onclick="showPage('submit')">Submit another response</button>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- ============================== -->
+<!-- PAGE: PRIVACY                   -->
+<!-- ============================== -->
+<div id="page-privacy" class="page">
+  <div class="govuk-width-container">
+    <nav class="govuk-breadcrumbs"><ol><li><a href="#" onclick="showPage('home');return false">Home</a></li><li>Privacy notice</li></ol></nav>
+    <main class="govuk-main-wrapper">
+      <h1 class="govuk-heading-xl">Privacy notice</h1>
+      <p class="govuk-body-l">How we handle the information you provide in your consultation response.</p>
+
+      <h2 class="govuk-heading-l">Data controller</h2>
+      <p class="govuk-body">The Department for Energy Security and Net Zero (DESNZ) is the data controller for data collected during this consultation.</p>
+
+      <h2 class="govuk-heading-l">What data we collect</h2>
+      <ul class="govuk-list">
+        <li>Your stakeholder type and organisation name (if provided)</li>
+        <li>Your responses to consultation questions</li>
+        <li>Any additional feedback or evidence you provide</li>
+        <li>Contact details (name, email, phone) — <strong>only if you choose to provide them</strong></li>
+        <li>Submission timestamp and reference number</li>
+      </ul>
+
+      <h2 class="govuk-heading-l">Legal basis</h2>
+      <p class="govuk-body">We process this data under <strong>Article 6(1)(e)</strong> of the UK GDPR — processing necessary for the performance of a task carried out in the public interest or in the exercise of official authority.</p>
+
+      <h2 class="govuk-heading-l">How we use your data</h2>
+      <ul class="govuk-list">
+        <li>To analyse consultation responses and inform policy decisions on draft EN-8</li>
+        <li>To produce a published summary of responses (without personal names or contact details)</li>
+        <li>If you provide contact details and consent, to follow up on your response</li>
+      </ul>
+
+      <h2 class="govuk-heading-l">Disclosure</h2>
+      <p class="govuk-body">Information you provide may be disclosed in accordance with UK legislation (the Freedom of Information Act 2000, the Data Protection Act 2018, and the Environmental Information Regulations 2004).</p>
+      <div class="govuk-warning-text">
+        <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+        <p class="govuk-body">If you want information you provide to be treated as confidential, please tell us — but be aware that we cannot guarantee confidentiality in all circumstances.</p>
+      </div>
+
+      <h2 class="govuk-heading-l">Data retention</h2>
+      <p class="govuk-body">Consultation responses will be retained for up to 3 years after the designation of EN-8, after which they will be securely destroyed.</p>
+
+      <h2 class="govuk-heading-l">Your rights</h2>
+      <p class="govuk-body">Under UK GDPR you have the right to access, rectify, or erase your personal data. Contact us at <a href="mailto:fusionregulation@energysecurity.gov.uk">fusionregulation@energysecurity.gov.uk</a>.</p>
+
+      <h2 class="govuk-heading-l">Complaints</h2>
+      <p class="govuk-body">If you have concerns about how your data has been handled, you can complain to the Information Commissioner's Office (ICO) at <a href="https://ico.org.uk" target="_blank" rel="noopener">ico.org.uk</a>.</p>
+    </main>
+  </div>
+</div>
+
+<!-- ============================== -->
+<!-- PAGE: ADMIN                     -->
+<!-- ============================== -->
+<div id="page-admin" class="page">
+  <div class="govuk-width-container">
+    <nav class="govuk-breadcrumbs"><ol><li><a href="#" onclick="showPage('home');return false">Home</a></li><li>Admin dashboard</li></ol></nav>
+    <main class="govuk-main-wrapper">
+      <h1 class="govuk-heading-xl">Admin Dashboard</h1>
+      <p class="govuk-body-l">Review and export consultation submissions. This view is for the internal programme team only.</p>
+
+      <div class="stat-grid">
+        <div class="stat-card"><span class="number" id="admin-total">0</span><span class="label">Total submissions</span></div>
+        <div class="stat-card"><span class="number" id="admin-week">0</span><span class="label">This week</span></div>
+        <div class="stat-card"><span class="number" id="admin-individual">0</span><span class="label">Individuals</span></div>
+        <div class="stat-card"><span class="number" id="admin-org">0</span><span class="label">Organisations</span></div>
+      </div>
+
+      <!-- Filters -->
+      <h2 class="govuk-heading-m">Submissions</h2>
+      <div class="export-bar">
+        <select id="filter-stakeholder" onchange="renderAdminTable()">
+          <option value="">All stakeholder types</option>
+          <option value="member_of_public">Member of the public</option>
+          <option value="industry">Industry / energy sector</option>
+          <option value="academia">Academia / research</option>
+          <option value="ngo">NGO</option>
+          <option value="public_body">Public body</option>
+          <option value="other">Other</option>
+        </select>
+        <select id="filter-topic" onchange="renderAdminTable()">
+          <option value="">All topics</option>
+        </select>
+        <button class="govuk-button govuk-button--secondary" onclick="exportData('csv')" style="margin:0">Export CSV</button>
+        <button class="govuk-button govuk-button--secondary" onclick="exportData('json')" style="margin:0">Export JSON</button>
+      </div>
+
+      <div class="admin-table-wrapper">
+        <table class="govuk-table" id="admin-table">
+          <thead>
+            <tr>
+              <th>Ref</th>
+              <th>Date</th>
+              <th>Type</th>
+              <th>Stakeholder</th>
+              <th>Topics</th>
+              <th>Q1–Q5</th>
+              <th>Feedback (excerpt)</th>
+            </tr>
+          </thead>
+          <tbody id="admin-tbody"></tbody>
+        </table>
+      </div>
+      <p class="govuk-body" id="admin-empty" style="text-align:center;color:var(--govuk-grey);padding:40px 0">No submissions yet. <a href="#" onclick="loadSampleData();return false">Load sample data for demo</a>.</p>
+
+      <h2 class="govuk-heading-m" style="margin-top:40px">Weekly summary</h2>
+      <div id="weekly-summary" class="info-card">
+        <p class="govuk-body" style="margin:0;color:var(--govuk-grey)">Submit responses or load sample data to generate a summary.</p>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- ===== FOOTER ===== -->
+<footer class="govuk-footer" role="contentinfo">
+  <div class="govuk-width-container">
+    <div class="govuk-footer__meta">
+      <div>
+        <ul class="govuk-footer__links">
+          <li><a href="#" onclick="showPage('privacy');return false">Privacy</a></li>
+          <li><a href="#" onclick="showPage('about');return false">Accessibility</a></li>
+          <li><a href="mailto:fusionregulation@energysecurity.gov.uk">Contact</a></li>
+        </ul>
+        <p style="margin-top:10px">© Crown copyright 2026 · Open Government Licence v3.0</p>
+      </div>
+      <div style="text-align:right">
+        <p style="margin:0">Department for Energy Security<br>and Net Zero</p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* ===== Topics ===== */
+const TOPICS = [
+  'Scope & clarity','Assessment principles','Environmental impacts','Biodiversity & habitats',
+  'Radiological protection','Grid connection','Transport & access','Community engagement',
+  'Decommissioning','Climate resilience','Socio-economic','Site security',
+  'Design quality','Appraisal of Sustainability','Habitats Regulations Assessment','General'
+];
+
+const STAKEHOLDER_LABELS = {
+  member_of_public:'Member of the public', industry:'Industry', academia:'Academia',
+  ngo:'NGO', public_body:'Public body', other:'Other'
+};
+const TAG_COLORS = {blue:'govuk-tag--blue',green:'govuk-tag--green',yellow:'govuk-tag--yellow',
+  grey:'govuk-tag--grey',purple:'govuk-tag--purple',red:'govuk-tag--red'};
+const COLOR_LIST = Object.keys(TAG_COLORS);
+
+/* ===== State ===== */
+let submissions = JSON.parse(localStorage.getItem('fusion_submissions')||'[]');
+let selectedTopics = new Set();
+let captchaAnswer = 0;
+
+/* ===== Init ===== */
+document.addEventListener('DOMContentLoaded',()=>{
+  initTopicTags();
+  initCaptcha();
+  initForm();
+  updateCounts();
+  updateDaysRemaining();
+  // show/hide org name
+  document.querySelectorAll('input[name="respondent_type"]').forEach(r=>{
+    r.addEventListener('change',()=>{
+      document.getElementById('fg-org-name').style.display = r.value==='organisation'?'block':'none';
+    });
+  });
+  // char count
+  document.getElementById('feedback-text').addEventListener('input',e=>{
+    document.getElementById('char-count').textContent = e.target.value.length;
+  });
+  // populate topic filter
+  const tf = document.getElementById('filter-topic');
+  TOPICS.forEach(t=>{const o=document.createElement('option');o.value=t;o.textContent=t;tf.appendChild(o)});
+});
+
+function initTopicTags(){
+  const grid = document.getElementById('topic-tags');
+  TOPICS.forEach((t,i)=>{
+    const chip = document.createElement('span');
+    chip.className = 'tag-chip';
+    chip.textContent = t;
+    chip.onclick = ()=>{
+      chip.classList.toggle('selected');
+      if(selectedTopics.has(t)) selectedTopics.delete(t); else selectedTopics.add(t);
+    };
+    grid.appendChild(chip);
+  });
+}
+
+function initCaptcha(){
+  const a=Math.floor(Math.random()*10)+1, b=Math.floor(Math.random()*10)+1;
+  captchaAnswer = a+b;
+  document.getElementById('captcha-question').textContent = `${a} + ${b}`;
+}
+
+function initForm(){
+  document.getElementById('consultation-form').addEventListener('submit',e=>{
+    e.preventDefault();
+    if(validateForm()) submitForm();
+  });
+}
+
+/* ===== Navigation ===== */
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  document.querySelectorAll('.govuk-header__nav button').forEach(b=>{
+    b.classList.toggle('active', b.dataset.page===id);
+  });
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ===== Validation ===== */
+function validateForm(){
+  let valid = true;
+  // respondent type
+  const rt = document.querySelector('input[name="respondent_type"]:checked');
+  toggleError('fg-respondent-type',!rt); if(!rt) valid=false;
+  // org name
+  if(rt && rt.value==='organisation'){
+    const on = document.getElementById('org-name').value.trim();
+    toggleError('fg-org-name',!on); if(!on) valid=false;
+  }
+  // stakeholder type
+  const st = document.querySelector('input[name="stakeholder_type"]:checked');
+  toggleError('fg-stakeholder',!st); if(!st) valid=false;
+  // topics
+  toggleError('fg-topics',selectedTopics.size===0); if(selectedTopics.size===0) valid=false;
+  // feedback
+  const fb = document.getElementById('feedback-text').value.trim();
+  toggleError('fg-feedback',!fb); if(!fb) valid=false;
+  // consent
+  const consent = document.getElementById('consent-check').checked;
+  toggleError('fg-consent',!consent); if(!consent) valid=false;
+  // email validation (only if provided)
+  const email = document.getElementById('contact-email').value.trim();
+  if(email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+    toggleError('fg-email',true); valid=false;
+  } else { toggleError('fg-email',false); }
+  // captcha
+  const ca = parseInt(document.getElementById('captcha-input').value);
+  toggleError('fg-captcha',ca!==captchaAnswer); if(ca!==captchaAnswer) valid=false;
+
+  if(!valid){
+    const firstErr = document.querySelector('.govuk-form-group--error');
+    if(firstErr) firstErr.scrollIntoView({behavior:'smooth',block:'center'});
+  }
+  return valid;
+}
+
+function toggleError(id,show){
+  document.getElementById(id).classList.toggle('govuk-form-group--error',show);
+}
+
+/* ===== Submit ===== */
+function submitForm(){
+  const form = document.getElementById('consultation-form');
+  const fd = new FormData(form);
+  const ref = 'EN8-'+Date.now().toString(36).toUpperCase();
+  const email = fd.get('contact_email');
+
+  const submission = {
+    ref, timestamp: new Date().toISOString(),
+    respondent_type: fd.get('respondent_type'),
+    org_name: fd.get('org_name')||'',
+    stakeholder_type: fd.get('stakeholder_type'),
+    topics: [...selectedTopics],
+    q1_response: fd.get('q1_response')||'', q1_detail: fd.get('q1_detail')||'',
+    q2_response: fd.get('q2_response')||'', q2_detail: fd.get('q2_detail')||'',
+    q3_response: fd.get('q3_response')||'', q3_detail: fd.get('q3_detail')||'',
+    q4_response: fd.get('q4_response')||'', q4_detail: fd.get('q4_detail')||'',
+    q5_response: fd.get('q5_response')||'', q5_detail: fd.get('q5_detail')||'',
+    feedback: fd.get('feedback'),
+    contact_name: fd.get('contact_name')||'',
+    contact_email: email||'',
+    contact_phone: fd.get('contact_phone')||'',
+    consent: true,
+    publish_consent: fd.get('publish_consent')==='yes'
+  };
+
+  submissions.push(submission);
+  localStorage.setItem('fusion_submissions',JSON.stringify(submissions));
+  updateCounts();
+
+  // show confirmation
+  document.getElementById('ref-number').textContent = ref;
+  if(email){
+    document.getElementById('email-confirmation').style.display = 'block';
+    document.getElementById('confirm-email').textContent = email;
+  } else {
+    document.getElementById('email-confirmation').style.display = 'none';
+  }
+  showPage('confirmation');
+
+  // reset form
+  form.reset();
+  selectedTopics.clear();
+  document.querySelectorAll('.tag-chip').forEach(c=>c.classList.remove('selected'));
+  document.getElementById('fg-org-name').style.display = 'none';
+  document.getElementById('char-count').textContent = '0';
+  initCaptcha();
+}
+
+/* ===== Draft Save ===== */
+function saveDraft(){
+  showToast('Draft saved locally ✓');
+}
+
+/* ===== Counts ===== */
+function updateCounts(){
+  document.getElementById('response-count').textContent = submissions.length;
+  document.getElementById('admin-total').textContent = submissions.length;
+  const weekAgo = new Date(); weekAgo.setDate(weekAgo.getDate()-7);
+  document.getElementById('admin-week').textContent = submissions.filter(s=>new Date(s.timestamp)>weekAgo).length;
+  document.getElementById('admin-individual').textContent = submissions.filter(s=>s.respondent_type==='individual').length;
+  document.getElementById('admin-org').textContent = submissions.filter(s=>s.respondent_type==='organisation').length;
+  renderAdminTable();
+  renderWeeklySummary();
+}
+
+function updateDaysRemaining(){
+  const closing = new Date('2026-08-17');
+  const today = new Date();
+  const diff = Math.max(0,Math.ceil((closing-today)/(1000*60*60*24)));
+  document.getElementById('days-remaining').textContent = diff;
+}
+
+/* ===== Admin Table ===== */
+function renderAdminTable(){
+  const tbody = document.getElementById('admin-tbody');
+  const stFilter = document.getElementById('filter-stakeholder').value;
+  const topicFilter = document.getElementById('filter-topic').value;
+  let filtered = submissions;
+  if(stFilter) filtered = filtered.filter(s=>s.stakeholder_type===stFilter);
+  if(topicFilter) filtered = filtered.filter(s=>s.topics.includes(topicFilter));
+
+  document.getElementById('admin-empty').style.display = filtered.length?'none':'block';
+
+  tbody.innerHTML = filtered.map(s=>{
+    const dt = new Date(s.timestamp);
+    const date = dt.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+    const colorIdx = Object.keys(STAKEHOLDER_LABELS).indexOf(s.stakeholder_type)%COLOR_LIST.length;
+    const tagClass = TAG_COLORS[COLOR_LIST[colorIdx]];
+    const qSummary = [s.q1_response,s.q2_response,s.q3_response,s.q4_response,s.q5_response]
+      .map((r,i)=>r?`Q${i+1}:${r.charAt(0).toUpperCase()}`:'').filter(Boolean).join(' ');
+    const excerpt = s.feedback.length>80 ? s.feedback.slice(0,80)+'…' : s.feedback;
+    return `<tr>
+      <td><strong>${s.ref}</strong></td>
+      <td>${date}</td>
+      <td>${s.respondent_type==='organisation'?'Org':'Ind'}</td>
+      <td><span class="govuk-tag ${tagClass}">${STAKEHOLDER_LABELS[s.stakeholder_type]||s.stakeholder_type}</span></td>
+      <td>${s.topics.slice(0,3).join(', ')}${s.topics.length>3?' +' +(s.topics.length-3):''}</td>
+      <td style="font-size:.75rem">${qSummary||'—'}</td>
+      <td>${excerpt}</td>
+    </tr>`;
+  }).join('');
+}
+
+function renderWeeklySummary(){
+  const el = document.getElementById('weekly-summary');
+  if(!submissions.length){
+    el.innerHTML = '<p class="govuk-body" style="margin:0;color:var(--govuk-grey)">Submit responses or load sample data to generate a summary.</p>';
+    return;
+  }
+  const total = submissions.length;
+  const byType = {};
+  submissions.forEach(s=>{
+    const l = STAKEHOLDER_LABELS[s.stakeholder_type]||s.stakeholder_type;
+    byType[l]=(byType[l]||0)+1;
+  });
+  const topTopics = {};
+  submissions.forEach(s=>s.topics.forEach(t=>topTopics[t]=(topTopics[t]||0)+1));
+  const sorted = Object.entries(topTopics).sort((a,b)=>b[1]-a[1]).slice(0,5);
+
+  el.innerHTML = `
+    <h3 style="margin-top:0">Summary (${total} submissions)</h3>
+    <p class="govuk-body"><strong>By stakeholder:</strong> ${Object.entries(byType).map(([k,v])=>`${k}: ${v}`).join(' · ')}</p>
+    <p class="govuk-body" style="margin-bottom:0"><strong>Top topics:</strong> ${sorted.map(([k,v])=>`${k} (${v})`).join(' · ')}</p>
+  `;
+}
+
+/* ===== Export ===== */
+function exportData(format){
+  if(!submissions.length){showToast('No data to export');return}
+  let content, filename, type;
+  if(format==='json'){
+    content = JSON.stringify(submissions,null,2);
+    filename = 'fusion-consultation-responses.json';
+    type = 'application/json';
+  } else {
+    const headers = ['ref','timestamp','respondent_type','org_name','stakeholder_type','topics',
+      'q1_response','q1_detail','q2_response','q2_detail','q3_response','q3_detail',
+      'q4_response','q4_detail','q5_response','q5_detail','feedback','contact_name','contact_email'];
+    const rows = submissions.map(s=>headers.map(h=>{
+      let v = s[h]; if(Array.isArray(v)) v=v.join(';');
+      return `"${String(v||'').replace(/"/g,'""')}"`;
+    }).join(','));
+    content = headers.join(',')+'\n'+rows.join('\n');
+    filename = 'fusion-consultation-responses.csv';
+    type = 'text/csv';
+  }
+  const blob = new Blob([content],{type});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download=filename; a.click();
+  URL.revokeObjectURL(url);
+  showToast(`Exported ${submissions.length} submissions as ${format.toUpperCase()}`);
+}
+
+/* ===== Sample Data ===== */
+function loadSampleData(){
+  const sampleFeedback = [
+    "Draft EN-8 provides a solid framework but needs more clarity on environmental mitigation requirements. The assessment considerations should explicitly address cumulative impacts of multiple fusion facilities in close proximity.",
+    "As an industry representative, I believe the technology-agnostic approach is correct but the grid connection requirements need updating to reflect modern fusion plant designs. Section 3.14 is too prescriptive.",
+    "The environmental assessments appear thorough at plan level, but I have concerns about the gap between plan-level and project-level assessment for biodiversity. The HRA screening criteria should be more specific.",
+    "Excellent that no population density restrictions apply — this correctly reflects the safety profile of fusion. However, community engagement provisions in Section 3.16 should mandate earlier consultation.",
+    "I support the draft NPS but suggest clearer guidance on decommissioning obligations. The current wording in Section 3.19 is vague about who bears long-term financial responsibility.",
+    "The scope of EN-8 is appropriate but it should reference cross-border planning considerations more explicitly, especially regarding water resource management near the Severn estuary.",
+    "As an environmental NGO, we welcome the HRA but believe the AoS underestimates potential impacts on protected landscapes. The 'no worse than other energy infrastructure' framing is insufficient.",
+    "Strong support for the open-sited approach. This provides flexibility while maintaining rigorous assessment. The 19 considerations are well-structured and comprehensive."
+  ];
+  const types = ['individual','organisation','individual','organisation','individual','individual','organisation','individual'];
+  const stakes = ['member_of_public','industry','academia','industry','public_body','member_of_public','ngo','academia'];
+  const orgs = ['','Tokamak Energy Ltd','','EDF Energy','Cornwall Council','','Friends of the Earth','Imperial College London'];
+  const names = ['Sarah Thompson','Dr James Chen','Prof. Maria Garcia','Robert Williams','Cllr Lisa Park','David Brown','Emma Wilson','Dr Amir Khan'];
+
+  types.forEach((t,i)=>{
+    const topicCount = Math.floor(Math.random()*4)+1;
+    const shuffled = [...TOPICS].sort(()=>Math.random()-.5);
+    submissions.push({
+      ref:'EN8-DEMO'+(i+1),
+      timestamp: new Date(2026,5,8+i,9+i,Math.floor(Math.random()*60)).toISOString(),
+      respondent_type: t, org_name: orgs[i], stakeholder_type: stakes[i],
+      topics: shuffled.slice(0,topicCount),
+      q1_response:['yes','partially','no','not_sure'][Math.floor(Math.random()*4)],
+      q1_detail: i%2===0 ? sampleFeedback[i].slice(0,100) : '',
+      q2_response:['yes','partially'][Math.floor(Math.random()*2)],
+      q2_detail:'',
+      q3_response:['yes','partially','no'][Math.floor(Math.random()*3)],
+      q3_detail: i%3===0 ? 'See detailed comments in general feedback.' : '',
+      q4_response:['yes','partially'][Math.floor(Math.random()*2)],
+      q4_detail:'',
+      q5_response:['yes','no'][Math.floor(Math.random()*2)],
+      q5_detail:'',
+      feedback: sampleFeedback[i],
+      contact_name: names[i],
+      contact_email: names[i].toLowerCase().replace(/[^a-z]/g,'').slice(0,8)+'@example.com',
+      contact_phone:'', consent:true, publish_consent: t==='organisation'
+    });
+  });
+  localStorage.setItem('fusion_submissions',JSON.stringify(submissions));
+  updateCounts();
+  showToast('Loaded 8 sample submissions');
+}
+
+/* ===== Toast ===== */
+function showToast(msg){
+  const t = document.createElement('div');
+  t.className='toast'; t.textContent=msg;
+  document.body.appendChild(t);
+  setTimeout(()=>t.remove(),3000);
+}
+</script>
+</body>
+</html>
