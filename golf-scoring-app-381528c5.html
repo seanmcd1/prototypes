@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Golf Scoring — Holiday Tracker</title>
+<style>
+:root {
+  --green-dark: #1B5E20;
+  --green: #2E7D32;
+  --green-light: #4CAF50;
+  --green-pale: #E8F5E9;
+  --gold: #FFD700;
+  --silver: #C0C0C0;
+  --bronze: #CD7F32;
+  --bg: #F2F2F7;
+  --card: #FFFFFF;
+  --text: #1C1C1E;
+  --text2: #8E8E93;
+  --separator: #E5E5EA;
+  --blue: #007AFF;
+  --red: #FF3B30;
+  --orange: #FF9500;
+  --radius: 12px;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+body { font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text',system-ui,sans-serif; background:#000; display:flex; justify-content:center; align-items:center; min-height:100vh; }
+
+/* iPhone frame */
+.phone-frame { width:393px; height:852px; background:var(--bg); border-radius:44px; overflow:hidden; position:relative; box-shadow:0 0 0 2px #1a1a1a, 0 20px 60px rgba(0,0,0,0.5); }
+.phone-screen { width:100%; height:100%; display:flex; flex-direction:column; overflow:hidden; }
+
+/* Status bar */
+.status-bar { height:54px; display:flex; align-items:flex-end; justify-content:space-between; padding:0 28px 6px; flex-shrink:0; background:var(--green-dark); }
+.status-bar .time { font-size:15px; font-weight:600; color:#fff; }
+.status-bar .icons { display:flex; gap:6px; align-items:center; }
+.status-bar .icons span { font-size:12px; color:#fff; }
+
+/* Navigation header */
+.nav-header { background:var(--green-dark); padding:4px 16px 14px; flex-shrink:0; }
+.nav-header h1 { font-size:28px; font-weight:700; color:#fff; }
+.nav-header .subtitle { font-size:13px; color:rgba(255,255,255,0.7); margin-top:2px; }
+.nav-back { display:flex; align-items:center; gap:4px; background:none; border:none; color:#8FD694; font-size:17px; padding:2px 0 6px; cursor:pointer; }
+.nav-back svg { width:20px; height:20px; }
+
+/* Content area */
+.content { flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; padding-bottom:90px; }
+
+/* Tab bar */
+.tab-bar { position:absolute; bottom:0; left:0; right:0; height:83px; background:rgba(255,255,255,0.95); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); border-top:0.5px solid var(--separator); display:flex; justify-content:space-around; align-items:flex-start; padding-top:6px; z-index:100; }
+.tab-item { display:flex; flex-direction:column; align-items:center; gap:2px; background:none; border:none; cursor:pointer; padding:4px 8px; min-width:60px; }
+.tab-item svg { width:24px; height:24px; fill:var(--text2); }
+.tab-item span { font-size:10px; color:var(--text2); font-weight:500; }
+.tab-item.active svg { fill:var(--green); }
+.tab-item.active span { color:var(--green); }
+
+/* Screens */
+.screen { display:none; }
+.screen.active { display:block; }
+
+/* Cards */
+.card { background:var(--card); border-radius:var(--radius); margin:12px 16px; overflow:hidden; }
+.card-header { padding:14px 16px 10px; font-size:13px; font-weight:600; color:var(--text2); text-transform:uppercase; letter-spacing:0.5px; }
+.card-row { display:flex; align-items:center; padding:12px 16px; border-top:0.5px solid var(--separator); }
+.card-row:first-child { border-top:none; }
+
+/* Section header */
+.section-header { padding:20px 16px 8px; font-size:22px; font-weight:700; color:var(--text); }
+.section-sub { padding:0 16px 12px; font-size:15px; color:var(--text2); }
+
+/* Button */
+.btn { display:flex; align-items:center; justify-content:center; padding:14px 20px; border-radius:var(--radius); border:none; font-size:17px; font-weight:600; cursor:pointer; width:100%; }
+.btn-primary { background:var(--green); color:#fff; }
+.btn-primary:active { background:var(--green-dark); }
+.btn-secondary { background:var(--green-pale); color:var(--green-dark); }
+.btn-sm { padding:8px 16px; font-size:14px; border-radius:8px; width:auto; }
+.btn-danger { background:#FFE5E5; color:var(--red); }
+
+/* Inputs */
+input[type="text"], input[type="number"], select {
+  width:100%; padding:12px 14px; border:1px solid var(--separator); border-radius:10px;
+  font-size:17px; font-family:inherit; background:var(--card); color:var(--text);
+  -webkit-appearance:none; appearance:none;
+}
+input:focus, select:focus { outline:none; border-color:var(--green); box-shadow:0 0 0 3px rgba(46,125,50,0.15); }
+
+/* Leaderboard */
+.lb-row { display:flex; align-items:center; padding:14px 16px; border-bottom:0.5px solid var(--separator); }
+.lb-row:last-child { border-bottom:none; }
+.lb-rank { width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; color:#fff; margin-right:12px; flex-shrink:0; }
+.lb-rank.r1 { background:var(--gold); color:#000; }
+.lb-rank.r2 { background:var(--silver); color:#000; }
+.lb-rank.r3 { background:var(--bronze); color:#fff; }
+.lb-rank.rn { background:var(--separator); color:var(--text2); }
+.lb-name { flex:1; font-size:17px; font-weight:500; color:var(--text); }
+.lb-score { font-size:20px; font-weight:700; color:var(--green-dark); }
+.lb-detail { font-size:13px; color:var(--text2); margin-left:4px; }
+
+/* Player avatar */
+.avatar { width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:16px; font-weight:600; color:#fff; margin-right:12px; flex-shrink:0; }
+.avatar-lg { width:48px; height:48px; font-size:20px; margin-right:14px; }
+
+/* Highlight card */
+.highlight-card { background:linear-gradient(135deg, var(--green-dark), var(--green)); border-radius:var(--radius); margin:12px 16px; padding:20px; color:#fff; }
+.highlight-card .trophy { font-size:36px; }
+.highlight-card .hl-title { font-size:13px; font-weight:600; text-transform:uppercase; letter-spacing:1px; opacity:0.8; margin-top:8px; }
+.highlight-card .hl-name { font-size:24px; font-weight:700; margin-top:4px; }
+.highlight-card .hl-score { font-size:17px; opacity:0.9; }
+
+/* Round selector */
+.round-tabs { display:flex; gap:8px; padding:12px 16px; overflow-x:auto; flex-shrink:0; }
+.round-tab { padding:8px 18px; border-radius:20px; font-size:14px; font-weight:600; background:var(--card); color:var(--text2); border:none; cursor:pointer; white-space:nowrap; flex-shrink:0; }
+.round-tab.active { background:var(--green); color:#fff; }
+
+/* Score entry grid */
+.score-grid { padding:0 16px; }
+.score-player { display:flex; align-items:center; padding:12px 0; border-bottom:0.5px solid var(--separator); }
+.score-player:last-child { border-bottom:none; }
+.score-player .avatar { margin-right:10px; }
+.score-player .name { flex:1; font-size:16px; font-weight:500; }
+.score-input { width:72px; text-align:center; font-size:20px; font-weight:600; padding:10px 8px; border-radius:10px; border:1px solid var(--separator); background:var(--green-pale); color:var(--green-dark); }
+.score-input:focus { border-color:var(--green); background:#fff; }
+.score-display { width:72px; text-align:center; font-size:20px; font-weight:700; color:var(--green-dark); }
+
+/* Comparison */
+.compare-chart { padding:12px 16px; }
+.compare-row { display:flex; align-items:center; margin-bottom:8px; }
+.compare-label { width:60px; font-size:12px; color:var(--text2); text-align:right; margin-right:10px; }
+.compare-bar-container { flex:1; height:28px; position:relative; display:flex; gap:4px; }
+.compare-bar { height:100%; border-radius:6px; display:flex; align-items:center; justify-content:flex-end; padding-right:8px; font-size:12px; font-weight:600; color:#fff; min-width:30px; transition:width 0.5s ease; }
+
+/* Course map */
+.course-map { position:relative; margin:12px 16px; border-radius:var(--radius); overflow:hidden; background:#8BC34A; height:380px; }
+.course-map svg { width:100%; height:100%; }
+.hole-marker { cursor:pointer; }
+.hole-marker circle { transition:r 0.2s; }
+.hole-marker:hover circle { r:14; }
+.hole-info { position:absolute; bottom:0; left:0; right:0; background:rgba(255,255,255,0.95); backdrop-filter:blur(10px); padding:16px; border-radius:var(--radius) var(--radius) 0 0; transform:translateY(100%); transition:transform 0.3s ease; }
+.hole-info.visible { transform:translateY(0); }
+
+/* Modal/overlay */
+.modal-overlay { position:absolute; inset:0; background:rgba(0,0,0,0.4); z-index:200; display:none; align-items:flex-end; justify-content:center; }
+.modal-overlay.show { display:flex; }
+.modal { background:var(--bg); border-radius:16px 16px 0 0; width:100%; max-height:80%; overflow-y:auto; padding:20px 16px 40px; }
+.modal-handle { width:36px; height:5px; background:var(--separator); border-radius:3px; margin:0 auto 16px; }
+
+/* Checkbox style for player selection */
+.player-check { display:flex; align-items:center; padding:12px 16px; border-bottom:0.5px solid var(--separator); cursor:pointer; }
+.player-check .check { width:24px; height:24px; border-radius:50%; border:2px solid var(--separator); margin-right:12px; display:flex; align-items:center; justify-content:center; }
+.player-check.selected .check { background:var(--green); border-color:var(--green); }
+.player-check.selected .check::after { content:'✓'; color:#fff; font-size:14px; font-weight:700; }
+
+/* Animations */
+@keyframes slideIn { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+.animate-in { animation:slideIn 0.3s ease forwards; }
+
+/* Toast */
+.toast { position:absolute; top:70px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.8); color:#fff; padding:10px 20px; border-radius:20px; font-size:14px; font-weight:500; z-index:300; opacity:0; transition:opacity 0.3s; pointer-events:none; }
+.toast.show { opacity:1; }
+
+/* Empty state */
+.empty-state { text-align:center; padding:60px 40px; }
+.empty-state .icon { font-size:48px; margin-bottom:12px; }
+.empty-state .title { font-size:20px; font-weight:600; color:var(--text); margin-bottom:6px; }
+.empty-state .desc { font-size:15px; color:var(--text2); margin-bottom:20px; }
+
+/* Hole-by-hole modal */
+.hole-grid { display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; padding:8px 0; }
+.hole-cell { text-align:center; padding:10px 4px; border-radius:10px; background:var(--green-pale); }
+.hole-cell .hole-num { font-size:11px; color:var(--text2); font-weight:600; }
+.hole-cell input { width:100%; text-align:center; font-size:18px; font-weight:600; border:none; background:transparent; color:var(--green-dark); padding:4px 0; }
+.hole-cell input:focus { outline:none; }
+.hole-cell .par { font-size:10px; color:var(--text2); }
+
+/* Segmented control */
+.segment-control { display:flex; background:rgba(255,255,255,0.2); border-radius:8px; padding:2px; margin:8px 16px; }
+.segment-btn { flex:1; padding:6px 12px; border-radius:6px; border:none; font-size:13px; font-weight:600; color:rgba(255,255,255,0.7); background:transparent; cursor:pointer; }
+.segment-btn.active { background:rgba(255,255,255,0.3); color:#fff; }
+
+/* Responsive */
+@media (max-width:420px) {
+  body { background:var(--bg); }
+  .phone-frame { width:100%; height:100vh; border-radius:0; box-shadow:none; }
+}
+</style>
+</head>
+<body>
+
+<div class="phone-frame">
+<div class="phone-screen">
+  <!-- Status Bar -->
+  <div class="status-bar">
+    <span class="time">9:41</span>
+    <div class="icons">
+      <span>●●●●○</span>
+      <span>WiFi</span>
+      <span>🔋</span>
+    </div>
+  </div>
+
+  <!-- Toast notification -->
+  <div class="toast" id="toast"></div>
+
+  <!-- ============ EVENT SCREEN ============ -->
+  <div class="screen active" id="screen-event">
+    <div class="nav-header">
+      <h1>⛳ Golf Holiday</h1>
+      <div class="subtitle">Algarve, Portugal · 4 Rounds</div>
+    </div>
+    <div class="content" id="event-content">
+      <!-- Players section -->
+      <div class="section-header">Players</div>
+      <div class="section-sub" id="player-count">6 players added</div>
+      <div class="card" id="player-list"></div>
+      <div style="padding:0 16px 12px;">
+        <button class="btn btn-secondary" onclick="showAddPlayer()">+ Add Player</button>
+      </div>
+
+      <!-- Rounds section -->
+      <div class="section-header">Rounds</div>
+      <div class="section-sub">Tap a round to enter scores</div>
+      <div id="round-cards"></div>
+    </div>
+  </div>
+
+  <!-- ============ ROUNDS / SCORE ENTRY ============ -->
+  <div class="screen" id="screen-rounds">
+    <div class="nav-header">
+      <button class="nav-back" onclick="goTab('event')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 19l-7-7 7-7"/></svg>
+        Event
+      </button>
+      <h1 id="round-title">Round 1</h1>
+      <div class="subtitle" id="round-course">Monte Rei Golf Club</div>
+    </div>
+    <div class="round-tabs" id="round-tabs"></div>
+    <div class="content">
+      <div class="card" style="margin-top:4px;">
+        <div style="padding:12px 16px; display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-size:15px; font-weight:600; color:var(--text);">Player Scores</span>
+          <button class="btn btn-sm btn-primary" id="save-scores-btn" onclick="saveScores()">Save</button>
+        </div>
+        <div class="score-grid" id="score-entry"></div>
+      </div>
+      <div style="padding:8px 16px;">
+        <button class="btn btn-secondary btn-sm" onclick="showHoleByHole()" style="width:100%;">📊 Enter Hole-by-Hole Scores</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ LEADERBOARD ============ -->
+  <div class="screen" id="screen-leaderboard">
+    <div class="nav-header">
+      <h1>🏆 Leaderboard</h1>
+      <div class="subtitle">Overall standings</div>
+      <div class="segment-control" id="lb-segment">
+        <button class="segment-btn active" onclick="switchLB('overall')">Overall</button>
+        <button class="segment-btn" onclick="switchLB(1)">R1</button>
+        <button class="segment-btn" onclick="switchLB(2)">R2</button>
+        <button class="segment-btn" onclick="switchLB(3)">R3</button>
+        <button class="segment-btn" onclick="switchLB(4)">R4</button>
+      </div>
+    </div>
+    <div class="content" id="lb-content"></div>
+  </div>
+
+  <!-- ============ COMPARE ============ -->
+  <div class="screen" id="screen-compare">
+    <div class="nav-header">
+      <h1>📊 Compare</h1>
+      <div class="subtitle">Select players to compare</div>
+    </div>
+    <div class="content">
+      <div class="card" id="compare-select"></div>
+      <div id="compare-results"></div>
+    </div>
+  </div>
+
+  <!-- ============ COURSE MAP ============ -->
+  <div class="screen" id="screen-course">
+    <div class="nav-header">
+      <h1>🗺️ Course Map</h1>
+      <div class="subtitle">Monte Rei Golf Club</div>
+    </div>
+    <div class="content">
+      <div class="course-map" id="course-map-container">
+        <svg viewBox="0 0 400 380" xmlns="http://www.w3.org/2000/svg">
+          <!-- Course background -->
+          <defs>
+            <linearGradient id="grass" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style="stop-color:#6BAF5B"/>
+              <stop offset="100%" style="stop-color:#4A8B3F"/>
+            </linearGradient>
+            <linearGradient id="fairway" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style="stop-color:#7EC870"/>
+              <stop offset="100%" style="stop-color:#5CA34E"/>
+            </linearGradient>
+          </defs>
+          <rect width="400" height="380" fill="url(#grass)" rx="12"/>
+          
+          <!-- Water features -->
+          <ellipse cx="300" cy="120" rx="45" ry="25" fill="#4FC3F7" opacity="0.7"/>
+          <ellipse cx="100" cy="300" rx="35" ry="20" fill="#4FC3F7" opacity="0.7"/>
+          
+          <!-- Fairways (simplified paths) -->
+          <path d="M50,50 Q100,80 80,140 Q60,200 120,220" stroke="#7EC870" stroke-width="22" fill="none" stroke-linecap="round"/>
+          <path d="M120,220 Q180,240 200,180 Q220,120 280,100" stroke="#7EC870" stroke-width="22" fill="none" stroke-linecap="round"/>
+          <path d="M280,100 Q340,80 350,140 Q360,200 320,240" stroke="#7EC870" stroke-width="22" fill="none" stroke-linecap="round"/>
+          <path d="M320,240 Q280,280 220,300 Q160,320 140,280" stroke="#7EC870" stroke-width="22" fill="none" stroke-linecap="round"/>
+          <path d="M140,280 Q120,240 160,200 Q200,160 180,120" stroke="#7EC870" stroke-width="20" fill="none" stroke-linecap="round"/>
+          <path d="M180,120 Q160,80 200,60 Q240,40 280,60" stroke="#7EC870" stroke-width="20" fill="none" stroke-linecap="round"/>
+          
+          <!-- Sand bunkers -->
+          <ellipse cx="90" cy="130" rx="10" ry="7" fill="#F5D89A"/>
+          <ellipse cx="270" cy="90" rx="8" ry="5" fill="#F5D89A"/>
+          <ellipse cx="340" cy="230" rx="9" ry="6" fill="#F5D89A"/>
+          <ellipse cx="170" cy="310" rx="8" ry="5" fill="#F5D89A"/>
+          <ellipse cx="190" cy="170" rx="7" ry="5" fill="#F5D89A"/>
+          
+          <!-- Greens -->
+          <circle cx="50" cy="50" r="10" fill="#4CAF50"/>
+          <circle cx="120" cy="220" r="10" fill="#4CAF50"/>
+          <circle cx="280" cy="100" r="10" fill="#4CAF50"/>
+          <circle cx="350" cy="140" r="10" fill="#4CAF50"/>
+          <circle cx="320" cy="240" r="10" fill="#4CAF50"/>
+          <circle cx="140" cy="280" r="10" fill="#4CAF50"/>
+          <circle cx="180" cy="120" r="10" fill="#4CAF50"/>
+          <circle cx="280" cy="60" r="10" fill="#4CAF50"/>
+          <circle cx="200" cy="180" r="10" fill="#4CAF50"/>
+          
+          <!-- Hole markers -->
+          <g class="hole-marker" onclick="showHoleInfo(1, 'Par 4', '380 yds', 'Straight drive, bunker right')">
+            <circle cx="50" cy="50" r="11" fill="#fff" stroke="var(--green-dark)" stroke-width="2"/>
+            <text x="50" y="54" text-anchor="middle" font-size="12" font-weight="700" fill="var(--green-dark)">1</text>
+          </g>
+          <g class="hole-marker" onclick="showHoleInfo(2, 'Par 3', '165 yds', 'Short iron over water')">
+            <circle cx="120" cy="220" r="11" fill="#fff" stroke="var(--green-dark)" stroke-width="2"/>
+            <text x="120" y="224" text-anchor="middle" font-size="12" font-weight="700" fill="var(--green-dark)">2</text>
+          </g>
+          <g class="hole-marker" onclick="showHoleInfo(3, 'Par 5', '520 yds', 'Dogleg left, risk-reward second shot')">
+            <circle cx="280" cy="100" r="11" fill="#fff" stroke="var(--green-dark)" stroke-width="2"/>
+            <text x="280" y="104" text-anchor="middle" font-size="12" font-weight="700" fill="var(--green-dark)">3</text>
+          </g>
+          <g class="hole-marker" onclick="showHoleInfo(4, 'Par 4', '410 yds', 'Uphill approach, two-tiered green')">
+            <circle cx="350" cy="140" r="11" fill="#fff" stroke="var(--green-dark)" stroke-width="2"/>
+            <text x="350" y="144" text-anchor="middle" font-size="12" font-weight="700" fill="var(--green-dark)">4</text>
+          </g>
+          <g class="hole-marker" onclick="showHoleInfo(5, 'Par 4', '395 yds', 'Water left, bunker complex right')">
+            <circle cx="320" cy="240" r="11" fill="#fff" stroke="var(--green-dark)" stroke-width="2"/>
+            <text x="320" y="244" text-anchor="middle" font-size="12" font-weight="700" fill="var(--green-dark)">5</text>
+          </g>
+          <g class="hole-marker" onclick="showHoleInfo(6, 'Par 3', '190 yds', 'Elevated tee, water short')">
+            <circle cx="140" cy="280" r="11" fill="#fff" stroke="var(--green-dark)" stroke-width="2"/>
+            <text x="140" y="284" text-anchor="middle" font-size="12" font-weight="700" fill="var(--green-dark)">6</text>
+          </g>
+          <g class="hole-marker" onclick="showHoleInfo(7, 'Par 5', '545 yds', 'Wide fairway, reachable in two')">
+            <circle cx="180" cy="120" r="11" fill="#fff" stroke="var(--green-dark)" stroke-width="2"/>
+            <text x="180" y="124" text-anchor="middle" font-size="12" font-weight="700" fill="var(--green-dark)">7</text>
+          </g>
+          <g class="hole-marker" onclick="showHoleInfo(8, 'Par 4', '430 yds', 'Tough drive, narrow landing area')">
+            <circle cx="280" cy="60" r="11" fill="#fff" stroke="var(--green-dark)" stroke-width="2"/>
+            <text x="280" y="64" text-anchor="middle" font-size="12" font-weight="700" fill="var(--green-dark)">8</text>
+          </g>
+          <g class="hole-marker" onclick="showHoleInfo(9, 'Par 4', '365 yds', 'Back to the clubhouse, slight downhill')">
+            <circle cx="200" cy="180" r="11" fill="#fff" stroke="var(--green-dark)" stroke-width="2"/>
+            <text x="200" y="184" text-anchor="middle" font-size="12" font-weight="700" fill="var(--green-dark)">9</text>
+          </g>
+          
+          <!-- Clubhouse -->
+          <rect x="10" y="340" width="60" height="30" rx="4" fill="#8D6E63"/>
+          <text x="40" y="358" text-anchor="middle" font-size="9" fill="#fff" font-weight="600">Clubhouse</text>
+          
+          <!-- Legend -->
+          <rect x="280" y="335" width="110" height="40" rx="6" fill="rgba(255,255,255,0.85)"/>
+          <circle cx="296" cy="348" r="4" fill="#4FC3F7"/><text x="306" y="352" font-size="9" fill="#333">Water</text>
+          <circle cx="348" cy="348" r="4" fill="#F5D89A"/><text x="358" y="352" font-size="9" fill="#333">Bunker</text>
+          <circle cx="296" cy="364" r="4" fill="#4CAF50"/><text x="306" y="368" font-size="9" fill="#333">Green</text>
+          <rect x="344" y="361" width="8" height="6" rx="1" fill="#8D6E63"/><text x="358" y="368" font-size="9" fill="#333">Club</text>
+        </svg>
+        <div class="hole-info" id="hole-info-panel">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <div style="font-size:20px; font-weight:700; color:var(--text);" id="hole-info-title">Hole 1</div>
+              <div style="font-size:15px; color:var(--text2);" id="hole-info-par">Par 4 · 380 yds</div>
+            </div>
+            <button onclick="hideHoleInfo()" style="background:none; border:none; font-size:24px; color:var(--text2); cursor:pointer;">✕</button>
+          </div>
+          <div style="font-size:14px; color:var(--text); margin-top:8px;" id="hole-info-desc">Straight drive, bunker right</div>
+        </div>
+      </div>
+      <div class="card">
+        <div style="padding:14px 16px;">
+          <div style="font-size:15px; font-weight:600; color:var(--text); margin-bottom:8px;">Course Info</div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+            <div><div style="font-size:12px; color:var(--text2);">Total Par</div><div style="font-size:20px; font-weight:700; color:var(--green-dark);">72</div></div>
+            <div><div style="font-size:12px; color:var(--text2);">Holes</div><div style="font-size:20px; font-weight:700; color:var(--green-dark);">18</div></div>
+            <div><div style="font-size:12px; color:var(--text2);">Total Yards</div><div style="font-size:20px; font-weight:700; color:var(--green-dark);">6,800</div></div>
+            <div><div style="font-size:12px; color:var(--text2);">Rating</div><div style="font-size:20px; font-weight:700; color:var(--green-dark);">73.2</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ ADD PLAYER MODAL ============ -->
+  <div class="modal-overlay" id="modal-add-player">
+    <div class="modal">
+      <div class="modal-handle"></div>
+      <h2 style="font-size:20px; font-weight:700; margin-bottom:16px;">Add Player</h2>
+      <div style="margin-bottom:12px;">
+        <label style="font-size:13px; font-weight:600; color:var(--text2); margin-bottom:6px; display:block;">Player Name</label>
+        <input type="text" id="new-player-name" placeholder="Enter name">
+      </div>
+      <div style="margin-bottom:20px;">
+        <label style="font-size:13px; font-weight:600; color:var(--text2); margin-bottom:6px; display:block;">Emoji Avatar</label>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button class="emoji-pick" onclick="pickEmoji('🏌️')">🏌️</button>
+          <button class="emoji-pick" onclick="pickEmoji('👨')">👨</button>
+          <button class="emoji-pick" onclick="pickEmoji('👩')">👩</button>
+          <button class="emoji-pick" onclick="pickEmoji('🧔')">🧔</button>
+          <button class="emoji-pick" onclick="pickEmoji('👴')">👴</button>
+          <button class="emoji-pick" onclick="pickEmoji('🧑')">🧑</button>
+          <button class="emoji-pick" onclick="pickEmoji('🤴')">🤴</button>
+          <button class="emoji-pick" onclick="pickEmoji('🦸')">🦸</button>
+        </div>
+        <style>.emoji-pick{font-size:28px;padding:6px 10px;border-radius:10px;border:2px solid var(--separator);background:#fff;cursor:pointer}.emoji-pick.selected{border-color:var(--green);background:var(--green-pale)}</style>
+      </div>
+      <button class="btn btn-primary" onclick="addPlayer()">Add Player</button>
+      <button class="btn btn-secondary" style="margin-top:8px;" onclick="closeModal('modal-add-player')">Cancel</button>
+    </div>
+  </div>
+
+  <!-- ============ HOLE-BY-HOLE MODAL ============ -->
+  <div class="modal-overlay" id="modal-hole-by-hole">
+    <div class="modal" style="max-height:85%;">
+      <div class="modal-handle"></div>
+      <h2 style="font-size:20px; font-weight:700; margin-bottom:4px;">Hole-by-Hole Scores</h2>
+      <div style="margin-bottom:12px;">
+        <select id="hbh-player-select" onchange="renderHBH()" style="margin-top:8px;"></select>
+      </div>
+      <div style="display:flex; gap:4px; margin-bottom:8px;">
+        <span style="flex:1; text-align:center; font-size:12px; font-weight:600; color:var(--green);">Front 9</span>
+      </div>
+      <div class="hole-grid" id="hbh-front"></div>
+      <div style="display:flex; gap:4px; margin:12px 0 8px;">
+        <span style="flex:1; text-align:center; font-size:12px; font-weight:600; color:var(--green);">Back 9</span>
+      </div>
+      <div class="hole-grid" id="hbh-back"></div>
+      <div style="display:flex; justify-content:space-between; padding:12px 0; border-top:1px solid var(--separator); margin-top:12px;">
+        <span style="font-size:16px; font-weight:600;">Total</span>
+        <span style="font-size:20px; font-weight:700; color:var(--green-dark);" id="hbh-total">—</span>
+      </div>
+      <button class="btn btn-primary" onclick="saveHBH()">Save & Update Total</button>
+      <button class="btn btn-secondary" style="margin-top:8px;" onclick="closeModal('modal-hole-by-hole')">Cancel</button>
+    </div>
+  </div>
+
+  <!-- ============ EDIT CONFIRM MODAL ============ -->
+  <div class="modal-overlay" id="modal-confirm">
+    <div class="modal">
+      <div class="modal-handle"></div>
+      <h2 style="font-size:20px; font-weight:700; margin-bottom:8px;">Confirm Score Change</h2>
+      <p id="confirm-text" style="font-size:15px; color:var(--text2); margin-bottom:20px;"></p>
+      <button class="btn btn-primary" onclick="confirmScoreChange()">Confirm</button>
+      <button class="btn btn-secondary" style="margin-top:8px;" onclick="closeModal('modal-confirm')">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Tab Bar -->
+  <div class="tab-bar">
+    <button class="tab-item active" onclick="goTab('event')" id="tab-event">
+      <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+      <span>Event</span>
+    </button>
+    <button class="tab-item" onclick="goTab('rounds')" id="tab-rounds">
+      <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+      <span>Rounds</span>
+    </button>
+    <button class="tab-item" onclick="goTab('leaderboard')" id="tab-leaderboard">
+      <svg viewBox="0 0 24 24"><path d="M7 4V2H17V4H20C20.55 4 21 4.45 21 5V8C21 9.66 19.66 11 18 11H17.82C17.4 12.84 15.86 14.22 14 14.83V17H17V19H7V17H10V14.83C8.14 14.22 6.6 12.84 6.18 11H6C4.34 11 3 9.66 3 8V5C3 4.45 3.45 4 4 4H7ZM5 6V8C5 8.55 5.45 9 6 9H6.09C6.03 8.67 6 8.34 6 8V6H5ZM18 6H17V8C17 8.34 16.97 8.67 16.91 9H17C17.55 9 18 8.55 18 8V6Z"/></svg>
+      <span>Leaderboard</span>
+    </button>
+    <button class="tab-item" onclick="goTab('compare')" id="tab-compare">
+      <svg viewBox="0 0 24 24"><path d="M9.01 14H2v2h7.01v3L13 15l-3.99-4v3zm5.98-1v-3H22V8h-7.01V5L11 9l3.99 4z"/></svg>
+      <span>Compare</span>
+    </button>
+    <button class="tab-item" onclick="goTab('course')" id="tab-course">
+      <svg viewBox="0 0 24 24"><path d="M14.65 4.98l-5-1.75-5.33 1.77c-.37.12-.62.47-.62.86V19.7c0 .65.6 1.12 1.22.91L10 18.61l5 1.75 4.67-1.55c.37-.12.63-.47.63-.86V4.15c0-.65-.6-1.12-1.22-.91l-4.43 1.74zM15 18.46l-5-1.75V5.69l5 1.75v11.02z"/></svg>
+      <span>Course</span>
+    </button>
+  </div>
+</div>
+</div>
+
+<script>
+// ===================== DATA =====================
+const COLORS = ['#1B5E20','#E65100','#1565C0','#6A1B9A','#C62828','#00695C','#F9A825','#AD1457','#283593','#2E7D32'];
+const COURSES = ['Monte Rei Golf Club','Quinta do Lago South','Vale do Lobo Royal','Dom Pedro Victoria'];
+const PAR = [4,3,5,4,4,3,5,4,4, 4,5,3,4,4,5,3,4,4]; // 18 holes, par 72
+
+let state = {
+  players: [
+    {name:'Sean', emoji:'🏌️', color:COLORS[0]},
+    {name:'Rich', emoji:'🧔', color:COLORS[1]},
+    {name:'Dave', emoji:'👨', color:COLORS[2]},
+    {name:'Mike', emoji:'🤴', color:COLORS[3]},
+    {name:'Tom', emoji:'🧑', color:COLORS[4]},
+    {name:'James', emoji:'🦸', color:COLORS[5]}
+  ],
+  scores: {
+    1: {0:78, 1:82, 2:85, 3:80, 4:76, 5:88},
+    2: {0:74, 1:79, 2:83, 3:77, 4:81, 5:86},
+    3: {0:80, 1:75, 2:79, 3:82, 4:78, 5:84},
+    4: {}
+  },
+  holeScores: {},
+  currentRound: 1,
+  selectedEmoji: '🏌️',
+  compareSelected: [0, 1],
+  pendingChange: null
+};
+
+// ===================== RENDER =====================
+function render() {
+  renderPlayerList();
+  renderRoundCards();
+  renderScoreEntry();
+  renderLeaderboard();
+  renderCompare();
+}
+
+function renderPlayerList() {
+  const el = document.getElementById('player-list');
+  el.innerHTML = state.players.map((p,i) => `
+    <div class="card-row" style="display:flex; align-items:center;">
+      <div class="avatar" style="background:${p.color};">${p.emoji}</div>
+      <div style="flex:1;">
+        <div style="font-size:16px; font-weight:500;">${p.name}</div>
+        <div style="font-size:13px; color:var(--text2);">Total: ${getOverallScore(i) || '—'}</div>
+      </div>
+      ${state.players.length > 2 ? `<button onclick="removePlayer(${i})" style="background:none;border:none;font-size:18px;color:var(--text2);cursor:pointer;">✕</button>` : ''}
+    </div>
+  `).join('');
+  document.getElementById('player-count').textContent = `${state.players.length} player${state.players.length!==1?'s':''} added`;
+}
+
+function renderRoundCards() {
+  document.getElementById('round-cards').innerHTML = [1,2,3,4].map(r => {
+    const hasScores = Object.keys(state.scores[r]||{}).length > 0;
+    const best = hasScores ? getBestForRound(r) : null;
+    return `
+    <div class="card" style="cursor:pointer;" onclick="openRound(${r})">
+      <div class="card-row" style="justify-content:space-between;">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <div style="width:40px;height:40px;border-radius:10px;background:${hasScores?'var(--green)':'var(--separator)'};display:flex;align-items:center;justify-content:center;">
+            <span style="font-size:18px;font-weight:700;color:${hasScores?'#fff':'var(--text2)'};">R${r}</span>
+          </div>
+          <div>
+            <div style="font-size:16px;font-weight:500;color:var(--text);">${COURSES[r-1]}</div>
+            <div style="font-size:13px;color:var(--text2);">${hasScores ? `${Object.keys(state.scores[r]).length} scores entered` : 'No scores yet'}</div>
+          </div>
+        </div>
+        ${best ? `<div style="text-align:right;"><div style="font-size:12px;color:var(--text2);">Best</div><div style="font-size:16px;font-weight:700;color:var(--green-dark);">${best.score}</div></div>` : '<span style="color:var(--text2);font-size:20px;">›</span>'}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderScoreEntry() {
+  const r = state.currentRound;
+  document.getElementById('round-title').textContent = `Round ${r}`;
+  document.getElementById('round-course').textContent = COURSES[r-1];
+  
+  document.getElementById('round-tabs').innerHTML = [1,2,3,4].map(i => 
+    `<button class="round-tab ${i===r?'active':''}" onclick="switchRound(${i})">Round ${i}</button>`
+  ).join('');
+
+  document.getElementById('score-entry').innerHTML = state.players.map((p,i) => {
+    const score = state.scores[r]?.[i];
+    return `
+    <div class="score-player">
+      <div class="avatar" style="background:${p.color};">${p.emoji}</div>
+      <div class="name">${p.name}</div>
+      <input type="number" class="score-input" id="score-${i}" value="${score||''}" placeholder="—" min="50" max="150"
+        onchange="onScoreChange(${i}, this.value)">
+    </div>`;
+  }).join('');
+}
+
+function renderLeaderboard(mode) {
+  mode = mode || 'overall';
+  const el = document.getElementById('lb-content');
+  let html = '';
+  
+  if (mode === 'overall') {
+    // Highlight card for leader
+    const ranked = getOverallRanking();
+    if (ranked.length > 0 && ranked[0].score > 0) {
+      const leader = ranked[0];
+      const roundsPlayed = [1,2,3,4].filter(r => state.scores[r]?.[leader.idx] !== undefined).length;
+      html += `
+      <div class="highlight-card animate-in">
+        <div class="trophy">🏆</div>
+        <div class="hl-title">Overall Leader</div>
+        <div class="hl-name">${leader.name}</div>
+        <div class="hl-score">${leader.score} total (${roundsPlayed} round${roundsPlayed!==1?'s':''})</div>
+      </div>`;
+    }
+    
+    html += '<div class="card">';
+    const rankings = getOverallRanking();
+    rankings.forEach((p, i) => {
+      const rClass = i===0?'r1':i===1?'r2':i===2?'r3':'rn';
+      html += `
+      <div class="lb-row">
+        <div class="lb-rank ${rClass}">${i+1}</div>
+        <div class="avatar" style="background:${state.players[p.idx].color};">${state.players[p.idx].emoji}</div>
+        <div class="lb-name">${p.name}</div>
+        <div class="lb-score">${p.score || '—'}</div>
+      </div>`;
+    });
+    html += '</div>';
+  } else {
+    const r = parseInt(mode);
+    const best = getBestForRound(r);
+    if (best) {
+      html += `
+      <div class="highlight-card animate-in">
+        <div class="trophy">⭐</div>
+        <div class="hl-title">Round ${r} Best</div>
+        <div class="hl-name">${best.names.join(' & ')}</div>
+        <div class="hl-score">${best.score} strokes at ${COURSES[r-1]}</div>
+      </div>`;
+    }
+    
+    html += '<div class="card">';
+    const rankings = getRoundRanking(r);
+    if (rankings.length === 0) {
+      html += '<div class="empty-state"><div class="icon">📝</div><div class="title">No scores yet</div><div class="desc">Enter scores for Round '+r+' to see rankings</div></div>';
+    }
+    rankings.forEach((p, i) => {
+      const rClass = i===0?'r1':i===1?'r2':i===2?'r3':'rn';
+      html += `
+      <div class="lb-row">
+        <div class="lb-rank ${rClass}">${i+1}</div>
+        <div class="avatar" style="background:${state.players[p.idx].color};">${state.players[p.idx].emoji}</div>
+        <div class="lb-name">${p.name}</div>
+        <div class="lb-score">${p.score}</div>
+      </div>`;
+    });
+    html += '</div>';
+  }
+  
+  el.innerHTML = html;
+}
+
+function renderCompare() {
+  // Player selection
+  document.getElementById('compare-select').innerHTML = state.players.map((p,i) => {
+    const sel = state.compareSelected.includes(i);
+    return `
+    <div class="player-check ${sel?'selected':''}" onclick="toggleCompare(${i})">
+      <div class="check"></div>
+      <div class="avatar" style="background:${p.color}; width:30px; height:30px; font-size:14px;">${p.emoji}</div>
+      <span style="font-size:16px; font-weight:500;">${p.name}</span>
+    </div>`;
+  }).join('');
+  
+  // Results
+  if (state.compareSelected.length < 2) {
+    document.getElementById('compare-results').innerHTML = '<div class="empty-state"><div class="icon">👆</div><div class="title">Select 2+ players</div><div class="desc">Choose players above to compare their performance</div></div>';
+    return;
+  }
+  
+  const selected = state.compareSelected;
+  let html = '';
+  
+  // Score comparison chart
+  html += '<div class="section-header" style="font-size:17px;">Scores by Round</div>';
+  html += '<div class="card"><div class="compare-chart">';
+  const maxScore = 100;
+  
+  [1,2,3,4].forEach(r => {
+    html += `<div style="margin-bottom:14px;">
+      <div style="font-size:13px; font-weight:600; color:var(--text2); margin-bottom:6px;">Round ${r} — ${COURSES[r-1]}</div>`;
+    selected.forEach(pi => {
+      const score = state.scores[r]?.[pi];
+      const pct = score ? (score / maxScore * 100) : 0;
+      html += `
+      <div class="compare-row">
+        <div class="compare-label">${state.players[pi].name}</div>
+        <div class="compare-bar-container">
+          <div class="compare-bar" style="width:${pct}%; background:${state.players[pi].color};">
+            ${score || '—'}
+          </div>
+        </div>
+      </div>`;
+    });
+    html += '</div>';
+  });
+  html += '</div></div>';
+  
+  // Rank trend
+  html += '<div class="section-header" style="font-size:17px;">Rank Trend</div>';
+  html += '<div class="card"><div style="padding:14px 16px;">';
+  html += '<div style="display:grid; grid-template-columns:auto repeat(4, 1fr); gap:8px; text-align:center;">';
+  html += '<div></div>';
+  [1,2,3,4].forEach(r => html += `<div style="font-size:12px; font-weight:600; color:var(--text2);">R${r}</div>`);
+  
+  selected.forEach(pi => {
+    html += `<div style="display:flex;align-items:center;gap:4px;"><div class="avatar" style="background:${state.players[pi].color};width:24px;height:24px;font-size:12px;">${state.players[pi].emoji}</div><span style="font-size:13px;">${state.players[pi].name}</span></div>`;
+    [1,2,3,4].forEach(r => {
+      const ranking = getRoundRanking(r);
+      const rank = ranking.findIndex(x => x.idx === pi) + 1;
+      const color = rank === 1 ? 'var(--gold)' : rank === 2 ? 'var(--silver)' : rank === 3 ? 'var(--bronze)' : 'var(--separator)';
+      html += `<div style="display:flex;justify-content:center;"><div style="width:28px;height:28px;border-radius:50%;background:${color};display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;">${rank || '—'}</div></div>`;
+    });
+  });
+  html += '</div></div></div>';
+  
+  // Stats table
+  html += '<div class="section-header" style="font-size:17px;">Stats Summary</div>';
+  html += '<div class="card"><div style="padding:14px 16px; overflow-x:auto;">';
+  html += '<table style="width:100%; border-collapse:collapse; font-size:14px;">';
+  html += '<tr style="border-bottom:1px solid var(--separator);"><th style="text-align:left;padding:8px 4px;color:var(--text2);font-size:12px;">Player</th><th style="padding:8px 4px;color:var(--text2);font-size:12px;">Best</th><th style="padding:8px 4px;color:var(--text2);font-size:12px;">Worst</th><th style="padding:8px 4px;color:var(--text2);font-size:12px;">Avg</th><th style="padding:8px 4px;color:var(--text2);font-size:12px;">Total</th></tr>';
+  
+  selected.forEach(pi => {
+    const scores = [1,2,3,4].map(r => state.scores[r]?.[pi]).filter(s => s !== undefined);
+    const best = scores.length ? Math.min(...scores) : '—';
+    const worst = scores.length ? Math.max(...scores) : '—';
+    const avg = scores.length ? (scores.reduce((a,b)=>a+b,0)/scores.length).toFixed(1) : '—';
+    const total = scores.length ? scores.reduce((a,b)=>a+b,0) : '—';
+    html += `<tr style="border-bottom:0.5px solid var(--separator);">
+      <td style="padding:10px 4px;font-weight:500;"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${state.players[pi].color};margin-right:6px;"></span>${state.players[pi].name}</td>
+      <td style="padding:10px 4px;text-align:center;color:var(--green);">${best}</td>
+      <td style="padding:10px 4px;text-align:center;color:var(--red);">${worst}</td>
+      <td style="padding:10px 4px;text-align:center;">${avg}</td>
+      <td style="padding:10px 4px;text-align:center;font-weight:700;">${total}</td>
+    </tr>`;
+  });
+  html += '</table></div></div>';
+  
+  document.getElementById('compare-results').innerHTML = html;
+}
+
+// ===================== DATA HELPERS =====================
+function getOverallScore(idx) {
+  let total = 0, count = 0;
+  [1,2,3,4].forEach(r => {
+    if (state.scores[r]?.[idx] !== undefined) { total += state.scores[r][idx]; count++; }
+  });
+  return count > 0 ? total : 0;
+}
+
+function getOverallRanking() {
+  return state.players.map((p,i) => ({name:p.name, idx:i, score:getOverallScore(i)}))
+    .sort((a,b) => {
+      if (a.score === 0 && b.score === 0) return 0;
+      if (a.score === 0) return 1;
+      if (b.score === 0) return -1;
+      return a.score - b.score;
+    });
+}
+
+function getRoundRanking(r) {
+  return state.players.map((p,i) => ({name:p.name, idx:i, score:state.scores[r]?.[i]}))
+    .filter(x => x.score !== undefined)
+    .sort((a,b) => a.score - b.score);
+}
+
+function getBestForRound(r) {
+  const ranking = getRoundRanking(r);
+  if (ranking.length === 0) return null;
+  const bestScore = ranking[0].score;
+  const names = ranking.filter(x => x.score === bestScore).map(x => x.name);
+  return {score: bestScore, names};
+}
+
+// ===================== ACTIONS =====================
+function goTab(tab) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+  document.getElementById('screen-'+tab).classList.add('active');
+  document.getElementById('tab-'+tab).classList.add('active');
+  if (tab === 'leaderboard') renderLeaderboard();
+  if (tab === 'compare') renderCompare();
+  if (tab === 'rounds') renderScoreEntry();
+}
+
+function openRound(r) {
+  state.currentRound = r;
+  goTab('rounds');
+}
+
+function switchRound(r) {
+  state.currentRound = r;
+  renderScoreEntry();
+}
+
+function switchLB(mode) {
+  document.querySelectorAll('#lb-segment .segment-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  renderLeaderboard(mode);
+}
+
+function onScoreChange(playerIdx, value) {
+  const r = state.currentRound;
+  const oldScore = state.scores[r]?.[playerIdx];
+  const newScore = parseInt(value);
+  
+  if (isNaN(newScore) || newScore < 50 || newScore > 150) return;
+  
+  if (oldScore !== undefined && oldScore !== newScore) {
+    state.pendingChange = {round:r, player:playerIdx, oldScore, newScore};
+    document.getElementById('confirm-text').textContent = 
+      `Change ${state.players[playerIdx].name}'s Round ${r} score from ${oldScore} to ${newScore}?`;
+    document.getElementById('modal-confirm').classList.add('show');
+  } else {
+    state.scores[r] = state.scores[r] || {};
+    state.scores[r][playerIdx] = newScore;
+  }
+}
+
+function confirmScoreChange() {
+  const c = state.pendingChange;
+  state.scores[c.round][c.player] = c.newScore;
+  state.pendingChange = null;
+  closeModal('modal-confirm');
+  showToast('Score updated');
+  render();
+}
+
+function saveScores() {
+  const r = state.currentRound;
+  state.scores[r] = state.scores[r] || {};
+  state.players.forEach((p,i) => {
+    const input = document.getElementById('score-'+i);
+    const val = parseInt(input.value);
+    if (!isNaN(val) && val >= 50 && val <= 150) {
+      state.scores[r][i] = val;
+    }
+  });
+  showToast(`Round ${r} scores saved! ✅`);
+  render();
+}
+
+function showAddPlayer() {
+  if (state.players.length >= 10) { showToast('Maximum 10 players'); return; }
+  document.getElementById('new-player-name').value = '';
+  document.querySelectorAll('.emoji-pick').forEach(e => e.classList.remove('selected'));
+  state.selectedEmoji = '🏌️';
+  document.querySelector('.emoji-pick').classList.add('selected');
+  document.getElementById('modal-add-player').classList.add('show');
+}
+
+function pickEmoji(e) {
+  state.selectedEmoji = e;
+  document.querySelectorAll('.emoji-pick').forEach(el => el.classList.remove('selected'));
+  event.target.classList.add('selected');
+}
+
+function addPlayer() {
+  const name = document.getElementById('new-player-name').value.trim();
+  if (!name) { showToast('Enter a name'); return; }
+  state.players.push({name, emoji:state.selectedEmoji, color:COLORS[state.players.length % COLORS.length]});
+  closeModal('modal-add-player');
+  showToast(`${name} added! 🏌️`);
+  render();
+}
+
+function removePlayer(idx) {
+  if (state.players.length <= 2) { showToast('Minimum 2 players'); return; }
+  const name = state.players[idx].name;
+  state.players.splice(idx, 1);
+  // Clean up scores
+  [1,2,3,4].forEach(r => {
+    const newScores = {};
+    Object.entries(state.scores[r]||{}).forEach(([k,v]) => {
+      const ki = parseInt(k);
+      if (ki < idx) newScores[ki] = v;
+      else if (ki > idx) newScores[ki-1] = v;
+    });
+    state.scores[r] = newScores;
+  });
+  state.compareSelected = state.compareSelected.filter(i => i !== idx).map(i => i > idx ? i-1 : i);
+  if (state.compareSelected.length < 2) state.compareSelected = [0, Math.min(1, state.players.length-1)];
+  showToast(`${name} removed`);
+  render();
+}
+
+function toggleCompare(idx) {
+  if (state.compareSelected.includes(idx)) {
+    if (state.compareSelected.length > 2) {
+      state.compareSelected = state.compareSelected.filter(i => i !== idx);
+    }
+  } else {
+    state.compareSelected.push(idx);
+  }
+  renderCompare();
+}
+
+function showHoleByHole() {
+  const sel = document.getElementById('hbh-player-select');
+  sel.innerHTML = state.players.map((p,i) => `<option value="${i}">${p.emoji} ${p.name}</option>`).join('');
+  renderHBH();
+  document.getElementById('modal-hole-by-hole').classList.add('show');
+}
+
+function renderHBH() {
+  const pi = parseInt(document.getElementById('hbh-player-select').value);
+  const r = state.currentRound;
+  const key = `${r}-${pi}`;
+  const scores = state.holeScores[key] || new Array(18).fill('');
+  
+  document.getElementById('hbh-front').innerHTML = Array.from({length:9}, (_,i) => `
+    <div class="hole-cell">
+      <div class="hole-num">Hole ${i+1}</div>
+      <input type="number" value="${scores[i]||''}" placeholder="—" min="1" max="12"
+        onchange="updateHBH(${i}, this.value)" id="hbh-${i}">
+      <div class="par">Par ${PAR[i]}</div>
+    </div>
+  `).join('');
+  
+  document.getElementById('hbh-back').innerHTML = Array.from({length:9}, (_,i) => `
+    <div class="hole-cell">
+      <div class="hole-num">Hole ${i+10}</div>
+      <input type="number" value="${scores[i+9]||''}" placeholder="—" min="1" max="12"
+        onchange="updateHBH(${i+9}, this.value)" id="hbh-${i+9}">
+      <div class="par">Par ${PAR[i+9]}</div>
+    </div>
+  `).join('');
+  
+  calcHBHTotal();
+}
+
+function updateHBH(hole, val) {
+  const pi = parseInt(document.getElementById('hbh-player-select').value);
+  const r = state.currentRound;
+  const key = `${r}-${pi}`;
+  if (!state.holeScores[key]) state.holeScores[key] = new Array(18).fill('');
+  state.holeScores[key][hole] = parseInt(val) || '';
+  calcHBHTotal();
+}
+
+function calcHBHTotal() {
+  const pi = parseInt(document.getElementById('hbh-player-select').value);
+  const r = state.currentRound;
+  const key = `${r}-${pi}`;
+  const scores = state.holeScores[key] || [];
+  const total = scores.reduce((a,b) => a + (parseInt(b)||0), 0);
+  document.getElementById('hbh-total').textContent = total > 0 ? total : '—';
+}
+
+function saveHBH() {
+  const pi = parseInt(document.getElementById('hbh-player-select').value);
+  const r = state.currentRound;
+  const key = `${r}-${pi}`;
+  const scores = state.holeScores[key] || [];
+  const total = scores.reduce((a,b) => a + (parseInt(b)||0), 0);
+  if (total > 0) {
+    state.scores[r] = state.scores[r] || {};
+    state.scores[r][pi] = total;
+    closeModal('modal-hole-by-hole');
+    showToast(`${state.players[pi].name}: ${total} saved`);
+    render();
+  } else {
+    showToast('Enter at least one hole score');
+  }
+}
+
+function showHoleInfo(hole, par, yds, desc) {
+  document.getElementById('hole-info-title').textContent = `Hole ${hole}`;
+  document.getElementById('hole-info-par').textContent = `${par} · ${yds}`;
+  document.getElementById('hole-info-desc').textContent = desc;
+  document.getElementById('hole-info-panel').classList.add('visible');
+}
+
+function hideHoleInfo() {
+  document.getElementById('hole-info-panel').classList.remove('visible');
+}
+
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+// Init
+render();
+</script>
+</body>
+</html>
