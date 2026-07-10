@@ -21,9 +21,7 @@
   }
 
   *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-
   html { scroll-behavior: smooth; }
-
   body {
     font-family: var(--font);
     background: var(--bg-dark);
@@ -32,6 +30,11 @@
     line-height: 1.5;
     overflow-x: hidden;
   }
+
+  /* Inline SVG icon helper */
+  .icon { width: 24px; height: 24px; flex-shrink: 0; }
+  .icon-sm { width: 20px; height: 20px; }
+  .icon-lg { width: 28px; height: 28px; }
 
   /* ===== NAV ===== */
   nav {
@@ -43,11 +46,10 @@
     border-bottom: 1px solid var(--border);
   }
   .nav-logo {
-    display: flex; align-items: center; gap: 8px;
-    font-size: 20px; font-weight: 700; letter-spacing: -0.3px;
+    display: flex; align-items: center; gap: 0;
     text-decoration: none; color: var(--text-primary);
   }
-  .nav-logo svg { width: 28px; height: 28px; }
+  .nav-logo svg { height: 24px; width: auto; }
   .nav-links { display: flex; gap: 32px; align-items: center; }
   .nav-links a {
     color: var(--text-secondary); text-decoration: none;
@@ -149,8 +151,9 @@
   }
   .phone-action-icon {
     width: 32px; height: 32px; border-radius: 50%; margin: 0 auto 8px;
-    display: flex; align-items: center; justify-content: center; font-size: 16px;
+    display: flex; align-items: center; justify-content: center;
   }
+  .phone-action-icon svg { width: 16px; height: 16px; }
   .phone-action-label { font-size: 11px; color: var(--text-secondary); }
   .phone-card {
     background: rgba(255,255,255,0.04); border-radius: 16px; padding: 16px;
@@ -160,9 +163,10 @@
   .phone-card-row + .phone-card-row { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); }
   .phone-card-icon {
     width: 36px; height: 36px; border-radius: 10px;
-    display: flex; align-items: center; justify-content: center; font-size: 18px;
+    display: flex; align-items: center; justify-content: center;
     flex-shrink: 0;
   }
+  .phone-card-icon svg { width: 18px; height: 18px; }
   .phone-card-info { flex: 1; }
   .phone-card-title { font-size: 14px; font-weight: 600; }
   .phone-card-sub { font-size: 12px; color: var(--text-secondary); }
@@ -223,8 +227,9 @@
   .benefit-icon {
     width: 48px; height: 48px; border-radius: 12px;
     display: flex; align-items: center; justify-content: center;
-    font-size: 22px; margin-bottom: 20px;
+    margin-bottom: 20px;
   }
+  .benefit-icon svg { width: 24px; height: 24px; }
   .benefit-card h3 { font-size: 18px; font-weight: 600; margin-bottom: 10px; }
   .benefit-card p { font-size: 15px; color: var(--text-secondary); line-height: 1.6; }
 
@@ -253,7 +258,7 @@
     font-size: 15px; color: var(--text-secondary); padding: 8px 0;
     display: flex; align-items: center; gap: 10px;
   }
-  .feature-list li::before { content: '✓'; color: var(--success); font-weight: 700; }
+  .feature-list li svg { width: 16px; height: 16px; color: var(--success); flex-shrink: 0; }
 
   /* Currency display */
   .currency-display { text-align: center; }
@@ -261,9 +266,11 @@
   .currency-flag {
     width: 48px; height: 48px; border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
-    font-size: 28px; background: rgba(255,255,255,0.06);
+    background: rgba(255,255,255,0.06); font-size: 16px; font-weight: 700;
+    color: var(--text-primary); border: 1px solid var(--border);
   }
-  .currency-arrow { color: var(--text-secondary); font-size: 20px; }
+  .currency-arrow { color: var(--text-secondary); display: flex; align-items: center; }
+  .currency-arrow svg { width: 20px; height: 20px; }
   .currency-rate { font-size: 28px; font-weight: 700; }
   .currency-label { font-size: 14px; color: var(--text-secondary); }
 
@@ -288,7 +295,12 @@
 
   /* Vault visual */
   .vault-visual { text-align: center; }
-  .vault-icon { font-size: 48px; margin-bottom: 20px; }
+  .vault-visual-icon {
+    width: 56px; height: 56px; border-radius: 50%;
+    background: rgba(0,196,140,0.1); margin: 0 auto 20px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .vault-visual-icon svg { width: 28px; height: 28px; color: var(--success); }
   .vault-bar {
     width: 100%; height: 8px; background: rgba(255,255,255,0.08);
     border-radius: 4px; margin: 12px 0; overflow: hidden;
@@ -312,7 +324,8 @@
     background: var(--bg-surface); border: 1px solid var(--border);
     border-radius: var(--radius); padding: 32px; text-align: left;
   }
-  .trust-card-stars { color: #FFB800; font-size: 16px; margin-bottom: 16px; letter-spacing: 2px; }
+  .trust-card-stars { display: flex; gap: 2px; margin-bottom: 16px; }
+  .trust-card-stars svg { width: 16px; height: 16px; color: #FFB800; fill: #FFB800; }
   .trust-card p { font-size: 15px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 20px; }
   .trust-card-author { font-size: 14px; font-weight: 600; }
   .trust-card-role { font-size: 13px; color: var(--text-secondary); }
@@ -328,21 +341,19 @@
   }
   .security-icon {
     width: 40px; height: 40px; border-radius: 10px;
-    background: rgba(0,196,140,0.1); color: var(--success);
+    background: rgba(0,196,140,0.1);
     display: flex; align-items: center; justify-content: center;
-    font-size: 18px; flex-shrink: 0;
+    flex-shrink: 0;
   }
+  .security-icon svg { width: 20px; height: 20px; color: var(--success); }
   .security-item h4 { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
   .security-item p { font-size: 14px; color: var(--text-secondary); line-height: 1.5; }
 
   /* ===== SIGN-UP FORM ===== */
   .signup { background: var(--bg-surface); }
-  .signup-inner {
-    max-width: 520px; margin: 0 auto; text-align: center;
-  }
+  .signup-inner { max-width: 520px; margin: 0 auto; text-align: center; }
   .signup .section-title { margin-bottom: 8px; }
   .signup .section-subtitle { margin: 0 auto 40px; }
-
   .form-wrapper {
     background: var(--bg-card); border: 1px solid var(--border);
     border-radius: 16px; padding: 36px;
@@ -367,7 +378,6 @@
   }
   .form-error.show { display: flex; }
   .form-hint { font-size: 12px; color: var(--text-secondary); margin-top: 6px; }
-
   .password-wrapper { position: relative; }
   .password-toggle {
     position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
@@ -379,14 +389,12 @@
     flex: 1; height: 3px; border-radius: 2px;
     background: rgba(255,255,255,0.08); transition: background 0.3s;
   }
-
   .form-consent {
     font-size: 13px; color: var(--text-secondary); line-height: 1.5;
     text-align: left; margin-bottom: 24px;
   }
   .form-consent a { color: var(--accent); text-decoration: none; }
   .form-consent a:hover { text-decoration: underline; }
-
   .btn-submit {
     width: 100%; padding: 16px; border-radius: 100px;
     background: var(--accent); color: #fff; border: none;
@@ -405,21 +413,18 @@
   .btn-submit.loading .spinner { display: block; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  /* Success state */
-  .form-success {
-    display: none; text-align: center; padding: 40px 20px;
-  }
+  .form-success { display: none; text-align: center; padding: 40px 20px; }
   .form-success.show { display: block; }
   .form-success-icon {
     width: 64px; height: 64px; border-radius: 50%;
-    background: rgba(0,196,140,0.12); color: var(--success);
+    background: rgba(0,196,140,0.12);
     display: flex; align-items: center; justify-content: center;
-    font-size: 28px; margin: 0 auto 20px;
+    margin: 0 auto 20px;
   }
+  .form-success-icon svg { width: 28px; height: 28px; color: var(--success); }
   .form-success h3 { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
   .form-success p { font-size: 15px; color: var(--text-secondary); }
 
-  /* Error banner */
   .form-error-banner {
     display: none; background: rgba(255,71,87,0.1);
     border: 1px solid rgba(255,71,87,0.2); border-radius: 10px;
@@ -427,6 +432,7 @@
     font-size: 14px; color: var(--error); align-items: center; gap: 10px;
   }
   .form-error-banner.show { display: flex; }
+  .form-error-banner svg { width: 18px; height: 18px; flex-shrink: 0; }
   .form-error-banner button {
     background: none; border: none; color: var(--error);
     text-decoration: underline; cursor: pointer; font-size: 14px;
@@ -481,11 +487,118 @@
 </head>
 <body>
 
+<!-- SVG icon definitions (hidden) -->
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none;">
+  <defs>
+    <!-- Revolut wordmark logo -->
+    <symbol id="revolut-logo" viewBox="0 0 450 101">
+      <path fill="#FFFFFF" d="M84.7 0H18.3C8.2 0 0 8.2 0 18.3v64.3C0 92.8 8.2 101 18.3 101h66.3c10.1 0 18.3-8.2 18.3-18.3V18.3C103 8.2 94.8 0 84.7 0zm-9.4 74.9c-2.8 4.8-8 7.8-13.6 7.8H41.4c-5.6 0-10.8-3-13.6-7.8L14.2 50.5 27.9 26c2.8-4.8 8-7.8 13.6-7.8h20.2c5.6 0 10.8 3 13.6 7.8l13.6 24.4-13.6 24.5z"/>
+      <path fill="#FFFFFF" d="M160.4 28.5c-4.4 0-8.2 1-11.3 3.1V30h-13.9v70.9h14.4V67.2c2.9 2 6.5 3 10.6 3 12.9 0 22.8-10.6 22.8-21.5v-.7c0-10.9-9.5-19.5-22.6-19.5zm8.1 20.8c0 5.4-3.8 9.2-9.2 9.2-5.4 0-9.3-3.8-9.3-9.2v-.7c0-5.4 3.8-8.8 9.3-8.8s9.2 3.4 9.2 8.8v.7z"/>
+      <path fill="#FFFFFF" d="M213.8 28.5c-14 0-24 8.8-24 21.1v.7c0 12.5 9.6 20.9 24.2 20.9 8.7 0 15.6-3.2 19.8-8.9l-9.5-7c-2.4 2.9-5.7 4.3-9.7 4.3-5.4 0-9.2-2.5-10.5-6.8h31.7c.2-1.2.3-2.5.3-3.8 0-12.2-8.8-20.5-22.3-20.5zm-9.5 16.9c1.2-4.1 4.6-6.5 9.3-6.5 4.8 0 8 2.4 8.6 6.5h-17.9z"/>
+      <path fill="#FFFFFF" d="M273.2 30l-11.8 27.8L249.1 30h-15.6l20.1 40.7h13.6L287 30z"/>
+      <path fill="#FFFFFF" d="M315.5 28.5c-14.6 0-24.6 8.7-24.6 21.1v.7c0 12.4 10 21 24.6 21s24.6-8.6 24.6-21v-.7c0-12.4-10-21.1-24.6-21.1zm10 21.4c0 5.5-4.1 9.2-10 9.2s-10-3.7-10-9.2v-.7c0-5.5 4.1-9 10-9s10 3.5 10 9v.7z"/>
+      <path fill="#FFFFFF" d="M365.3 28.5c-5.2 0-9.4 2-12.1 5.3V11.1h-14.4v59.2h14.4V49.5c0-5.6 3.8-9.1 9.2-9.1 5.4 0 8.7 3.3 8.7 9v20.9h14.4V47.1c0-11.4-7.6-18.6-20.2-18.6z"/>
+      <path fill="#FFFFFF" d="M419.5 57.8c-3.6 1.2-5.7.1-5.7-3.8V40.8h9.8V30h-9.8V17.3h-14.4V30h-6.8v10.8h6.8v16.5c0 10.2 6 15 15.2 15 3.5 0 6.7-.6 9.3-1.8l-4.4-12.7z"/>
+    </symbol>
+    <!-- Check circle -->
+    <symbol id="icon-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="20 6 9 17 4 12"/>
+    </symbol>
+    <!-- Arrow up -->
+    <symbol id="icon-arrow-up" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/>
+    </symbol>
+    <!-- Arrow down -->
+    <symbol id="icon-arrow-down" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/>
+    </symbol>
+    <!-- Arrows left-right (exchange) -->
+    <symbol id="icon-arrows-lr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="17 1 21 5 17 9"/><line x1="3" y1="5" x2="21" y2="5"/><polyline points="7 23 3 19 7 15"/><line x1="21" y1="19" x2="3" y2="19"/>
+    </symbol>
+    <!-- Arrow right -->
+    <symbol id="icon-arrow-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+    </symbol>
+    <!-- Globe -->
+    <symbol id="icon-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+    </symbol>
+    <!-- Zap (lightning) -->
+    <symbol id="icon-zap" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+    </symbol>
+    <!-- Vault / Safe -->
+    <symbol id="icon-vault" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="2" y="4" width="20" height="16" rx="2"/><circle cx="12" cy="12" r="4"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="12" x2="14" y2="10"/>
+    </symbol>
+    <!-- Bar chart -->
+    <symbol id="icon-bar-chart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/>
+    </symbol>
+    <!-- Trending up -->
+    <symbol id="icon-trending-up" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>
+    </symbol>
+    <!-- Shield -->
+    <symbol id="icon-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+    </symbol>
+    <!-- Lock -->
+    <symbol id="icon-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+    </symbol>
+    <!-- Fingerprint / scan -->
+    <symbol id="icon-scan" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><line x1="8" y1="12" x2="16" y2="12"/>
+    </symbol>
+    <!-- Snowflake / freeze -->
+    <symbol id="icon-snowflake" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="12" y1="2" x2="12" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/><line x1="19.07" y1="4.93" x2="4.93" y2="19.07"/>
+    </symbol>
+    <!-- Bell -->
+    <symbol id="icon-bell" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+    </symbol>
+    <!-- Shield check -->
+    <symbol id="icon-shield-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/>
+    </symbol>
+    <!-- Building -->
+    <symbol id="icon-building" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="4" y="2" width="16" height="20" rx="1"/><line x1="9" y1="6" x2="9" y2="6.01"/><line x1="15" y1="6" x2="15" y2="6.01"/><line x1="9" y1="10" x2="9" y2="10.01"/><line x1="15" y1="10" x2="15" y2="10.01"/><line x1="9" y1="14" x2="9" y2="14.01"/><line x1="15" y1="14" x2="15" y2="14.01"/><line x1="9" y1="22" x2="9" y2="18"/><line x1="15" y1="22" x2="15" y2="18"/>
+    </symbol>
+    <!-- Shopping bag -->
+    <symbol id="icon-shopping" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/>
+    </symbol>
+    <!-- Banknote -->
+    <symbol id="icon-banknote" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/>
+    </symbol>
+    <!-- Star -->
+    <symbol id="icon-star" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1">
+      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+    </symbol>
+    <!-- Target -->
+    <symbol id="icon-target" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>
+    </symbol>
+    <!-- Alert triangle -->
+    <symbol id="icon-alert" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+    </symbol>
+    <!-- Check circle filled -->
+    <symbol id="icon-check-circle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+    </symbol>
+  </defs>
+</svg>
+
 <!-- ===== NAVIGATION ===== -->
 <nav>
   <a class="nav-logo" href="#">
-    <svg viewBox="0 0 28 28" fill="none"><circle cx="14" cy="14" r="14" fill="#0666EB"/><path d="M8 14l4 4 8-8" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-    Revolut
+    <svg height="24" width="120"><use href="#revolut-logo"/></svg>
   </a>
   <div class="nav-links">
     <a href="#benefits">Benefits</a>
@@ -503,7 +616,7 @@
       <h1>One app.<br>All things <span class="gradient">money.</span></h1>
       <p>Send, spend, save, and invest — all from one beautifully simple app. Join millions who've already made the switch.</p>
       <div class="hero-actions">
-        <a href="#signup" class="btn-primary" data-track="hero-signup-cta">Sign up free →</a>
+        <a href="#signup" class="btn-primary" data-track="hero-signup-cta">Sign up free<svg class="icon-sm" style="width:16px;height:16px;margin-left:4px;"><use href="#icon-arrow-right"/></svg></a>
         <a href="#benefits" class="btn-secondary" data-track="hero-learn-cta">Learn more</a>
       </div>
     </div>
@@ -515,37 +628,37 @@
           <div class="phone-greeting">Good morning</div>
           <div class="phone-name">Alex</div>
           <div class="phone-balance-label">Total balance</div>
-          <div class="phone-balance">£12,840.50</div>
+          <div class="phone-balance">&pound;12,840.50</div>
           <div class="phone-actions">
             <div class="phone-action">
-              <div class="phone-action-icon" style="background:rgba(6,102,235,0.15);">↑</div>
+              <div class="phone-action-icon" style="background:rgba(6,102,235,0.15);"><svg style="color:#4D9FFF;"><use href="#icon-arrow-up"/></svg></div>
               <div class="phone-action-label">Send</div>
             </div>
             <div class="phone-action">
-              <div class="phone-action-icon" style="background:rgba(0,196,140,0.15);">↓</div>
+              <div class="phone-action-icon" style="background:rgba(0,196,140,0.15);"><svg style="color:#00C48C;"><use href="#icon-arrow-down"/></svg></div>
               <div class="phone-action-label">Request</div>
             </div>
             <div class="phone-action">
-              <div class="phone-action-icon" style="background:rgba(255,184,0,0.15);">⇄</div>
+              <div class="phone-action-icon" style="background:rgba(255,184,0,0.15);"><svg style="color:#FFB800;"><use href="#icon-arrows-lr"/></svg></div>
               <div class="phone-action-label">Exchange</div>
             </div>
           </div>
           <div class="phone-card">
             <div class="phone-card-row">
-              <div class="phone-card-icon" style="background:rgba(6,102,235,0.15);">🛒</div>
+              <div class="phone-card-icon" style="background:rgba(6,102,235,0.15);"><svg style="color:#4D9FFF;"><use href="#icon-shopping"/></svg></div>
               <div class="phone-card-info">
                 <div class="phone-card-title">Tesco</div>
                 <div class="phone-card-sub">Today, 09:14</div>
               </div>
-              <div class="phone-card-amount negative">-£34.20</div>
+              <div class="phone-card-amount negative">-&pound;34.20</div>
             </div>
             <div class="phone-card-row">
-              <div class="phone-card-icon" style="background:rgba(0,196,140,0.15);">💰</div>
+              <div class="phone-card-icon" style="background:rgba(0,196,140,0.15);"><svg style="color:#00C48C;"><use href="#icon-banknote"/></svg></div>
               <div class="phone-card-info">
                 <div class="phone-card-title">Salary</div>
                 <div class="phone-card-sub">Yesterday</div>
               </div>
-              <div class="phone-card-amount positive">+£3,200.00</div>
+              <div class="phone-card-amount positive">+&pound;3,200.00</div>
             </div>
           </div>
         </div>
@@ -572,32 +685,32 @@
     <div class="section-subtitle">Revolut gives you a smarter way to manage your money, with tools designed for how you actually live.</div>
     <div class="benefits-grid">
       <div class="benefit-card">
-        <div class="benefit-icon" style="background:rgba(6,102,235,0.1); color:#4D9FFF;">💱</div>
+        <div class="benefit-icon" style="background:rgba(6,102,235,0.1);"><svg style="color:#4D9FFF;"><use href="#icon-globe"/></svg></div>
         <h3>Spend globally</h3>
         <p>Use your card in 200+ countries with the real exchange rate. No markups, no surprises.</p>
       </div>
       <div class="benefit-card">
-        <div class="benefit-icon" style="background:rgba(0,196,140,0.1); color:#00C48C;">⚡</div>
+        <div class="benefit-icon" style="background:rgba(0,196,140,0.1);"><svg style="color:#00C48C;"><use href="#icon-zap"/></svg></div>
         <h3>Instant transfers</h3>
         <p>Send money to friends or abroad in seconds. Over 30 currencies supported instantly.</p>
       </div>
       <div class="benefit-card">
-        <div class="benefit-icon" style="background:rgba(255,184,0,0.1); color:#FFB800;">🏦</div>
+        <div class="benefit-icon" style="background:rgba(255,184,0,0.1);"><svg style="color:#FFB800;"><use href="#icon-vault"/></svg></div>
         <h3>Savings Vaults</h3>
         <p>Automatically set aside money with round-ups, recurring deposits, and competitive rates.</p>
       </div>
       <div class="benefit-card">
-        <div class="benefit-icon" style="background:rgba(157,78,221,0.1); color:#9D4EDD;">📊</div>
+        <div class="benefit-icon" style="background:rgba(157,78,221,0.1);"><svg style="color:#9D4EDD;"><use href="#icon-bar-chart"/></svg></div>
         <h3>Smart budgeting</h3>
         <p>Track spending by category with real-time analytics. Know exactly where your money goes.</p>
       </div>
       <div class="benefit-card">
-        <div class="benefit-icon" style="background:rgba(255,71,87,0.1); color:#FF4757;">📈</div>
+        <div class="benefit-icon" style="background:rgba(255,71,87,0.1);"><svg style="color:#FF4757;"><use href="#icon-trending-up"/></svg></div>
         <h3>Invest with ease</h3>
-        <p>Start investing from just £1 in stocks, crypto, and commodities — right from the app.</p>
+        <p>Start investing from just &pound;1 in stocks, crypto, and commodities — right from the app.</p>
       </div>
       <div class="benefit-card">
-        <div class="benefit-icon" style="background:rgba(0,196,140,0.1); color:#00C48C;">🛡️</div>
+        <div class="benefit-icon" style="background:rgba(0,196,140,0.1);"><svg style="color:#00C48C;"><use href="#icon-shield"/></svg></div>
         <h3>Protected funds</h3>
         <p>Your money is safeguarded with bank-grade encryption, 3D Secure, and instant card freeze.</p>
       </div>
@@ -616,12 +729,12 @@
       <div class="feature-visual">
         <div class="currency-display">
           <div class="currency-pair">
-            <div class="currency-flag">🇬🇧</div>
-            <div class="currency-arrow">→</div>
-            <div class="currency-flag">🇪🇺</div>
+            <div class="currency-flag">GBP</div>
+            <div class="currency-arrow"><svg><use href="#icon-arrow-right"/></svg></div>
+            <div class="currency-flag">EUR</div>
           </div>
-          <div class="currency-rate">£1 = €1.1642</div>
-          <div class="currency-label">Real interbank rate · No hidden fees</div>
+          <div class="currency-rate">&pound;1 = &euro;1.1642</div>
+          <div class="currency-label">Real interbank rate &middot; No hidden fees</div>
         </div>
       </div>
       <div class="feature-content">
@@ -629,9 +742,9 @@
         <h3>Exchange at the real rate</h3>
         <p>Get the interbank exchange rate with no hidden markups. Hold, convert, and send 30+ currencies instantly.</p>
         <ul class="feature-list">
-          <li>Real mid-market exchange rate</li>
-          <li>Free exchanges up to £1,000/month</li>
-          <li>Set rate alerts and auto-exchange</li>
+          <li><svg><use href="#icon-check"/></svg> Real mid-market exchange rate</li>
+          <li><svg><use href="#icon-check"/></svg> Free exchanges up to &pound;1,000/month</li>
+          <li><svg><use href="#icon-check"/></svg> Set rate alerts and auto-exchange</li>
         </ul>
       </div>
     </div>
@@ -640,11 +753,9 @@
       <div class="feature-visual">
         <div class="revolut-card">
           <div class="revolut-card-logo">Revolut</div>
-          <div class="revolut-card-number">•••• •••• •••• 4829</div>
+          <div class="revolut-card-number">&bull;&bull;&bull;&bull; &bull;&bull;&bull;&bull; &bull;&bull;&bull;&bull; 4829</div>
           <div class="revolut-card-bottom">
-            <div>
-              <div class="revolut-card-name">ALEX JOHNSON</div>
-            </div>
+            <div><div class="revolut-card-name">ALEX JOHNSON</div></div>
             <div class="revolut-card-type">ULTRA</div>
           </div>
         </div>
@@ -654,9 +765,9 @@
         <h3>Cards that work for you</h3>
         <p>Virtual and physical cards with instant notifications, disposable cards for online shopping, and customisable spending limits.</p>
         <ul class="feature-list">
-          <li>Instant spending notifications</li>
-          <li>Disposable virtual cards</li>
-          <li>Apple Pay & Google Pay ready</li>
+          <li><svg><use href="#icon-check"/></svg> Instant spending notifications</li>
+          <li><svg><use href="#icon-check"/></svg> Disposable virtual cards</li>
+          <li><svg><use href="#icon-check"/></svg> Apple Pay &amp; Google Pay ready</li>
         </ul>
       </div>
     </div>
@@ -664,13 +775,13 @@
     <div class="feature-row">
       <div class="feature-visual">
         <div class="vault-visual">
-          <div class="vault-icon">🎯</div>
-          <div class="vault-amount">£4,230</div>
-          <div class="vault-label">Holiday fund · 84% of goal</div>
+          <div class="vault-visual-icon"><svg><use href="#icon-target"/></svg></div>
+          <div class="vault-amount">&pound;4,230</div>
+          <div class="vault-label">Holiday fund &middot; 84% of goal</div>
           <div class="vault-bar"><div class="vault-fill" style="width:84%"></div></div>
           <div style="display:flex; justify-content:space-between; margin-top:8px;">
-            <span style="font-size:12px; color:var(--text-secondary);">£0</span>
-            <span style="font-size:12px; color:var(--text-secondary);">£5,000</span>
+            <span style="font-size:12px; color:var(--text-secondary);">&pound;0</span>
+            <span style="font-size:12px; color:var(--text-secondary);">&pound;5,000</span>
           </div>
         </div>
       </div>
@@ -679,9 +790,9 @@
         <h3>Save without thinking</h3>
         <p>Create Vaults for your goals and let round-ups, recurring deposits, and salary sorting do the heavy lifting.</p>
         <ul class="feature-list">
-          <li>Round-up spare change automatically</li>
-          <li>Earn interest on savings</li>
-          <li>Group Vaults with friends</li>
+          <li><svg><use href="#icon-check"/></svg> Round-up spare change automatically</li>
+          <li><svg><use href="#icon-check"/></svg> Earn interest on savings</li>
+          <li><svg><use href="#icon-check"/></svg> Group Vaults with friends</li>
         </ul>
       </div>
     </div>
@@ -696,44 +807,44 @@
     <div class="section-subtitle">We use the same level of security as the world's biggest banks, plus a few extras.</div>
     <div class="security-grid">
       <div class="security-item">
-        <div class="security-icon">🔒</div>
+        <div class="security-icon"><svg><use href="#icon-lock"/></svg></div>
         <div>
           <h4>Bank-grade encryption</h4>
           <p>All data is encrypted in transit and at rest with AES-256 encryption.</p>
         </div>
       </div>
       <div class="security-item">
-        <div class="security-icon">📱</div>
+        <div class="security-icon"><svg><use href="#icon-scan"/></svg></div>
         <div>
           <h4>Biometric login</h4>
           <p>Face ID, fingerprint, and passcode protection on every login.</p>
         </div>
       </div>
       <div class="security-item">
-        <div class="security-icon">❄️</div>
+        <div class="security-icon"><svg><use href="#icon-snowflake"/></svg></div>
         <div>
           <h4>Instant card freeze</h4>
           <p>Freeze and unfreeze your card with a single tap, anytime.</p>
         </div>
       </div>
       <div class="security-item">
-        <div class="security-icon">🔔</div>
+        <div class="security-icon"><svg><use href="#icon-bell"/></svg></div>
         <div>
           <h4>Real-time alerts</h4>
           <p>Instant push notifications for every transaction, so nothing slips by.</p>
         </div>
       </div>
       <div class="security-item">
-        <div class="security-icon">🛡️</div>
+        <div class="security-icon"><svg><use href="#icon-shield-check"/></svg></div>
         <div>
           <h4>3D Secure payments</h4>
           <p>Extra verification layer for online purchases to prevent fraud.</p>
         </div>
       </div>
       <div class="security-item">
-        <div class="security-icon">🏛️</div>
+        <div class="security-icon"><svg><use href="#icon-building"/></svg></div>
         <div>
-          <h4>Regulated & licenced</h4>
+          <h4>Regulated &amp; licenced</h4>
           <p>Authorised by the Bank of Lithuania and regulated across the EEA.</p>
         </div>
       </div>
@@ -756,19 +867,19 @@
     </div>
     <div class="trust-cards">
       <div class="trust-card">
-        <div class="trust-card-stars">★★★★★</div>
+        <div class="trust-card-stars"><svg><use href="#icon-star"/></svg><svg><use href="#icon-star"/></svg><svg><use href="#icon-star"/></svg><svg><use href="#icon-star"/></svg><svg><use href="#icon-star"/></svg></div>
         <p>"I've been using Revolut for two years and haven't looked back. The exchange rates alone save me hundreds each year."</p>
         <div class="trust-card-author">Sarah M.</div>
         <div class="trust-card-role">Frequent traveller</div>
       </div>
       <div class="trust-card">
-        <div class="trust-card-stars">★★★★★</div>
+        <div class="trust-card-stars"><svg><use href="#icon-star"/></svg><svg><use href="#icon-star"/></svg><svg><use href="#icon-star"/></svg><svg><use href="#icon-star"/></svg><svg><use href="#icon-star"/></svg></div>
         <p>"Finally, an app that makes budgeting easy without being annoying. The spending analytics are genuinely useful."</p>
         <div class="trust-card-author">James K.</div>
         <div class="trust-card-role">Small business owner</div>
       </div>
       <div class="trust-card">
-        <div class="trust-card-stars">★★★★★</div>
+        <div class="trust-card-stars"><svg><use href="#icon-star"/></svg><svg><use href="#icon-star"/></svg><svg><use href="#icon-star"/></svg><svg><use href="#icon-star"/></svg><svg><use href="#icon-star"/></svg></div>
         <p>"Sending money to my family abroad used to take days and cost a fortune. With Revolut it's instant and nearly free."</p>
         <div class="trust-card-author">Maria L.</div>
         <div class="trust-card-role">Revolut customer since 2021</div>
@@ -787,7 +898,8 @@
     <div class="form-wrapper">
       <form id="signupForm" novalidate>
         <div class="form-error-banner" id="formErrorBanner">
-          <span>⚠ Something went wrong. Please try again.</span>
+          <svg><use href="#icon-alert"/></svg>
+          <span>Something went wrong. Please try again.</span>
           <button type="button" onclick="retrySubmit()">Retry</button>
         </div>
 
@@ -830,7 +942,7 @@
       </form>
 
       <div class="form-success" id="formSuccess">
-        <div class="form-success-icon">✓</div>
+        <div class="form-success-icon"><svg><use href="#icon-check-circle"/></svg></div>
         <h3>You're in!</h3>
         <p>Check your inbox for a verification link to activate your Revolut account.</p>
       </div>
@@ -844,8 +956,7 @@
     <div class="footer-top">
       <div>
         <a class="nav-logo" href="#" style="margin-bottom:8px;">
-          <svg viewBox="0 0 28 28" fill="none" width="28" height="28"><circle cx="14" cy="14" r="14" fill="#0666EB"/><path d="M8 14l4 4 8-8" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          Revolut
+          <svg height="24" width="120"><use href="#icon-revolut-logo"/></svg>
         </a>
         <div class="footer-brand-desc">One app to send, spend, save, and invest. Join 50 million customers building a brighter financial future.</div>
       </div>
@@ -863,8 +974,8 @@
       </div>
     </div>
     <div class="footer-bottom">
-      <span>© 2026 Revolut Ltd. All rights reserved.</span>
-      <span>Prototype — Not an official Revolut page</span>
+      <span>&copy; 2026 Revolut Ltd. All rights reserved.</span>
+      <span>Prototype &mdash; Not an official Revolut page</span>
     </div>
   </div>
 </footer>
@@ -886,7 +997,6 @@ const phoneInput = document.getElementById('phone');
 const passwordInput = document.getElementById('password');
 const submitBtn = document.getElementById('submitBtn');
 
-// Inline validation
 emailInput.addEventListener('blur', () => validateEmail());
 emailInput.addEventListener('input', () => {
   if (emailInput.classList.contains('error')) validateEmail();
@@ -903,7 +1013,6 @@ passwordInput.addEventListener('input', () => {
 });
 passwordInput.addEventListener('blur', () => validatePassword());
 
-// Track form start
 let formStarted = false;
 [emailInput, phoneInput, passwordInput].forEach(input => {
   input.addEventListener('focus', () => {
@@ -920,7 +1029,7 @@ function validateEmail() {
 }
 
 function validatePhone() {
-  if (!phoneInput.value) return true; // optional
+  if (!phoneInput.value) return true;
   const valid = /^[\+]?[\d\s\-()]{7,}$/.test(phoneInput.value);
   phoneInput.classList.toggle('error', !valid);
   phoneInput.classList.toggle('valid', valid);
@@ -960,7 +1069,6 @@ function togglePassword() {
   }
 }
 
-// Form submit
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
   trackEvent('form_submit_attempt');
@@ -975,10 +1083,8 @@ form.addEventListener('submit', async (e) => {
   submitBtn.disabled = true;
   document.getElementById('formErrorBanner').classList.remove('show');
 
-  // Simulate API call
   await new Promise(r => setTimeout(r, 1800));
 
-  // 90% success rate for demo
   if (Math.random() > 0.1) {
     trackEvent('form_submit_success');
     form.style.display = 'none';
@@ -996,7 +1102,6 @@ function retrySubmit() {
   form.dispatchEvent(new Event('submit'));
 }
 
-// Smooth scroll for anchor links
 document.querySelectorAll('a[href^="#"]').forEach(a => {
   a.addEventListener('click', e => {
     e.preventDefault();
