@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Revolut — One app, all things money</title>
+<style>
+  :root {
+    --bg-dark: #0D0D0D;
+    --bg-surface: #161616;
+    --bg-card: #1C1C1E;
+    --text-primary: #FFFFFF;
+    --text-secondary: #A0A0A6;
+    --accent: #0666EB;
+    --accent-hover: #0555C8;
+    --success: #00C48C;
+    --error: #FF4757;
+    --border: rgba(255,255,255,0.08);
+    --radius: 12px;
+    --font: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', system-ui, sans-serif;
+  }
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--font);
+    background: var(--bg-dark);
+    color: var(--text-primary);
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.5;
+    overflow-x: hidden;
+  }
+
+  /* ===== NAV ===== */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    padding: 0 40px; height: 64px;
+    display: flex; align-items: center; justify-content: space-between;
+    background: rgba(13,13,13,0.85);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-logo {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 20px; font-weight: 700; letter-spacing: -0.3px;
+    text-decoration: none; color: var(--text-primary);
+  }
+  .nav-logo svg { width: 28px; height: 28px; }
+  .nav-links { display: flex; gap: 32px; align-items: center; }
+  .nav-links a {
+    color: var(--text-secondary); text-decoration: none;
+    font-size: 14px; font-weight: 500; transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--text-primary); }
+  .nav-cta {
+    background: var(--accent); color: #fff !important;
+    padding: 8px 20px; border-radius: 100px; font-weight: 600;
+    transition: background 0.2s;
+  }
+  .nav-cta:hover { background: var(--accent-hover); }
+
+  /* ===== HERO ===== */
+  .hero {
+    min-height: 100vh; display: flex; align-items: center;
+    padding: 120px 40px 80px;
+    position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: ''; position: absolute; top: -40%; right: -20%;
+    width: 800px; height: 800px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(6,102,235,0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero::after {
+    content: ''; position: absolute; bottom: -30%; left: -10%;
+    width: 600px; height: 600px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(0,196,140,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-inner {
+    max-width: 1200px; margin: 0 auto; width: 100%;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center;
+    position: relative; z-index: 1;
+  }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(6,102,235,0.12); border: 1px solid rgba(6,102,235,0.2);
+    padding: 6px 14px; border-radius: 100px; font-size: 13px;
+    font-weight: 500; color: #4D9FFF; margin-bottom: 24px;
+    width: fit-content;
+  }
+  .hero-badge span { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+  .hero h1 {
+    font-size: 60px; line-height: 1.05; font-weight: 700;
+    letter-spacing: -2px; margin-bottom: 20px;
+  }
+  .hero h1 .gradient {
+    background: linear-gradient(135deg, #0666EB, #00C48C);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .hero p {
+    font-size: 18px; color: var(--text-secondary);
+    max-width: 460px; margin-bottom: 36px; line-height: 1.6;
+  }
+  .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+  .btn-primary {
+    background: var(--accent); color: #fff; border: none;
+    padding: 14px 32px; border-radius: 100px; font-size: 16px;
+    font-weight: 600; cursor: pointer; transition: all 0.2s;
+    text-decoration: none; display: inline-flex; align-items: center; gap: 8px;
+  }
+  .btn-primary:hover { background: var(--accent-hover); transform: translateY(-1px); }
+  .btn-secondary {
+    background: transparent; color: var(--text-primary);
+    border: 1px solid rgba(255,255,255,0.15);
+    padding: 14px 32px; border-radius: 100px; font-size: 16px;
+    font-weight: 600; cursor: pointer; transition: all 0.2s;
+    text-decoration: none; display: inline-flex; align-items: center; gap: 8px;
+  }
+  .btn-secondary:hover { border-color: rgba(255,255,255,0.3); background: rgba(255,255,255,0.04); }
+
+  /* Hero phone mockup */
+  .hero-visual {
+    display: flex; justify-content: center; align-items: center;
+    position: relative;
+  }
+  .phone-mockup {
+    width: 280px; height: 560px; border-radius: 40px;
+    background: var(--bg-surface); border: 2px solid rgba(255,255,255,0.1);
+    box-shadow: 0 40px 80px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.05);
+    overflow: hidden; position: relative;
+  }
+  .phone-notch {
+    width: 120px; height: 28px; background: var(--bg-dark);
+    border-radius: 0 0 18px 18px; margin: 0 auto; position: relative; z-index: 2;
+  }
+  .phone-screen { padding: 20px; }
+  .phone-greeting { font-size: 13px; color: var(--text-secondary); margin-bottom: 4px; }
+  .phone-name { font-size: 22px; font-weight: 700; margin-bottom: 24px; }
+  .phone-balance-label { font-size: 12px; color: var(--text-secondary); margin-bottom: 4px; }
+  .phone-balance { font-size: 36px; font-weight: 700; letter-spacing: -1px; margin-bottom: 24px; }
+  .phone-actions { display: flex; gap: 12px; margin-bottom: 28px; }
+  .phone-action {
+    flex: 1; text-align: center; background: rgba(255,255,255,0.06);
+    border-radius: 14px; padding: 14px 8px;
+  }
+  .phone-action-icon {
+    width: 32px; height: 32px; border-radius: 50%; margin: 0 auto 8px;
+    display: flex; align-items: center; justify-content: center; font-size: 16px;
+  }
+  .phone-action-label { font-size: 11px; color: var(--text-secondary); }
+  .phone-card {
+    background: rgba(255,255,255,0.04); border-radius: 16px; padding: 16px;
+    border: 1px solid var(--border);
+  }
+  .phone-card-row { display: flex; align-items: center; gap: 12px; }
+  .phone-card-row + .phone-card-row { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); }
+  .phone-card-icon {
+    width: 36px; height: 36px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center; font-size: 18px;
+    flex-shrink: 0;
+  }
+  .phone-card-info { flex: 1; }
+  .phone-card-title { font-size: 14px; font-weight: 600; }
+  .phone-card-sub { font-size: 12px; color: var(--text-secondary); }
+  .phone-card-amount { font-size: 14px; font-weight: 600; text-align: right; }
+  .phone-card-amount.negative { color: var(--text-primary); }
+  .phone-card-amount.positive { color: var(--success); }
+
+  .glow-ring {
+    position: absolute; width: 340px; height: 340px; border-radius: 50%;
+    border: 1px solid rgba(6,102,235,0.15);
+    top: 50%; left: 50%; transform: translate(-50%, -50%);
+    animation: pulse-ring 4s ease-in-out infinite;
+  }
+  @keyframes pulse-ring {
+    0%, 100% { opacity: 0.3; transform: translate(-50%,-50%) scale(1); }
+    50% { opacity: 0.6; transform: translate(-50%,-50%) scale(1.05); }
+  }
+
+  /* ===== STATS BAR ===== */
+  .stats {
+    border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+    padding: 48px 40px;
+  }
+  .stats-inner {
+    max-width: 1200px; margin: 0 auto;
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 40px;
+    text-align: center;
+  }
+  .stat-number { font-size: 36px; font-weight: 700; letter-spacing: -1px; }
+  .stat-label { font-size: 14px; color: var(--text-secondary); margin-top: 4px; }
+
+  /* ===== SECTION COMMON ===== */
+  section { padding: 100px 40px; }
+  .section-inner { max-width: 1200px; margin: 0 auto; }
+  .section-label {
+    font-size: 13px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 1.5px; color: var(--accent); margin-bottom: 12px;
+  }
+  .section-title {
+    font-size: 44px; font-weight: 700; letter-spacing: -1.5px;
+    margin-bottom: 16px; line-height: 1.1;
+  }
+  .section-subtitle {
+    font-size: 18px; color: var(--text-secondary); max-width: 540px;
+    margin-bottom: 56px; line-height: 1.6;
+  }
+
+  /* ===== BENEFITS ===== */
+  .benefits-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;
+  }
+  .benefit-card {
+    background: var(--bg-surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 32px;
+    transition: border-color 0.3s, transform 0.3s;
+  }
+  .benefit-card:hover { border-color: rgba(6,102,235,0.3); transform: translateY(-4px); }
+  .benefit-icon {
+    width: 48px; height: 48px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; margin-bottom: 20px;
+  }
+  .benefit-card h3 { font-size: 18px; font-weight: 600; margin-bottom: 10px; }
+  .benefit-card p { font-size: 15px; color: var(--text-secondary); line-height: 1.6; }
+
+  /* ===== FEATURES SHOWCASE ===== */
+  .features { background: var(--bg-surface); }
+  .feature-row {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 80px;
+    align-items: center; margin-bottom: 80px;
+  }
+  .feature-row:last-child { margin-bottom: 0; }
+  .feature-row.reverse { direction: rtl; }
+  .feature-row.reverse > * { direction: ltr; }
+  .feature-visual {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 20px; padding: 40px; min-height: 320px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .feature-tag {
+    display: inline-flex; padding: 4px 10px; border-radius: 6px;
+    font-size: 12px; font-weight: 600; margin-bottom: 16px;
+  }
+  .feature-content h3 { font-size: 32px; font-weight: 700; letter-spacing: -1px; margin-bottom: 16px; }
+  .feature-content p { font-size: 16px; color: var(--text-secondary); line-height: 1.7; margin-bottom: 24px; }
+  .feature-list { list-style: none; }
+  .feature-list li {
+    font-size: 15px; color: var(--text-secondary); padding: 8px 0;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .feature-list li::before { content: '✓'; color: var(--success); font-weight: 700; }
+
+  /* Currency display */
+  .currency-display { text-align: center; }
+  .currency-pair { display: flex; align-items: center; gap: 16px; justify-content: center; margin-bottom: 16px; }
+  .currency-flag {
+    width: 48px; height: 48px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px; background: rgba(255,255,255,0.06);
+  }
+  .currency-arrow { color: var(--text-secondary); font-size: 20px; }
+  .currency-rate { font-size: 28px; font-weight: 700; }
+  .currency-label { font-size: 14px; color: var(--text-secondary); }
+
+  /* Card visual */
+  .revolut-card {
+    width: 280px; height: 176px; border-radius: 16px;
+    background: linear-gradient(135deg, #1A1A2E, #16213E, #0F3460);
+    padding: 24px; display: flex; flex-direction: column; justify-content: space-between;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+    position: relative; overflow: hidden;
+  }
+  .revolut-card::after {
+    content: ''; position: absolute; top: -50%; right: -50%;
+    width: 200%; height: 200%; border-radius: 50%;
+    background: radial-gradient(circle, rgba(6,102,235,0.1) 0%, transparent 50%);
+  }
+  .revolut-card-logo { font-size: 18px; font-weight: 700; position: relative; z-index: 1; }
+  .revolut-card-number { font-size: 16px; letter-spacing: 3px; color: var(--text-secondary); position: relative; z-index: 1; }
+  .revolut-card-bottom { display: flex; justify-content: space-between; align-items: flex-end; position: relative; z-index: 1; }
+  .revolut-card-name { font-size: 12px; color: var(--text-secondary); }
+  .revolut-card-type { font-size: 14px; font-weight: 700; color: var(--accent); }
+
+  /* Vault visual */
+  .vault-visual { text-align: center; }
+  .vault-icon { font-size: 48px; margin-bottom: 20px; }
+  .vault-bar {
+    width: 100%; height: 8px; background: rgba(255,255,255,0.08);
+    border-radius: 4px; margin: 12px 0; overflow: hidden;
+  }
+  .vault-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--accent), var(--success)); }
+  .vault-amount { font-size: 24px; font-weight: 700; margin-bottom: 4px; }
+  .vault-label { font-size: 13px; color: var(--text-secondary); }
+
+  /* ===== TRUST / SOCIAL PROOF ===== */
+  .trust { text-align: center; }
+  .trust-logos {
+    display: flex; justify-content: center; gap: 48px; align-items: center;
+    margin-bottom: 64px; flex-wrap: wrap; opacity: 0.5;
+  }
+  .trust-logo { font-size: 18px; font-weight: 700; letter-spacing: 1px; color: var(--text-secondary); }
+  .trust-cards {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;
+    max-width: 1000px; margin: 0 auto;
+  }
+  .trust-card {
+    background: var(--bg-surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 32px; text-align: left;
+  }
+  .trust-card-stars { color: #FFB800; font-size: 16px; margin-bottom: 16px; letter-spacing: 2px; }
+  .trust-card p { font-size: 15px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 20px; }
+  .trust-card-author { font-size: 14px; font-weight: 600; }
+  .trust-card-role { font-size: 13px; color: var(--text-secondary); }
+
+  /* ===== SECURITY ===== */
+  .security-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;
+  }
+  .security-item {
+    display: flex; align-items: flex-start; gap: 16px;
+    background: var(--bg-surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 24px;
+  }
+  .security-icon {
+    width: 40px; height: 40px; border-radius: 10px;
+    background: rgba(0,196,140,0.1); color: var(--success);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; flex-shrink: 0;
+  }
+  .security-item h4 { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+  .security-item p { font-size: 14px; color: var(--text-secondary); line-height: 1.5; }
+
+  /* ===== SIGN-UP FORM ===== */
+  .signup { background: var(--bg-surface); }
+  .signup-inner {
+    max-width: 520px; margin: 0 auto; text-align: center;
+  }
+  .signup .section-title { margin-bottom: 8px; }
+  .signup .section-subtitle { margin: 0 auto 40px; }
+
+  .form-wrapper {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 16px; padding: 36px;
+  }
+  .form-group { margin-bottom: 20px; text-align: left; }
+  .form-label {
+    display: block; font-size: 13px; font-weight: 600;
+    margin-bottom: 8px; color: var(--text-secondary);
+  }
+  .form-input {
+    width: 100%; padding: 14px 16px; border-radius: 10px;
+    border: 1px solid var(--border); background: rgba(255,255,255,0.04);
+    color: var(--text-primary); font-size: 15px; font-family: var(--font);
+    outline: none; transition: border-color 0.2s;
+  }
+  .form-input:focus { border-color: var(--accent); }
+  .form-input.error { border-color: var(--error); }
+  .form-input.valid { border-color: var(--success); }
+  .form-error {
+    font-size: 12px; color: var(--error); margin-top: 6px;
+    display: none; align-items: center; gap: 4px;
+  }
+  .form-error.show { display: flex; }
+  .form-hint { font-size: 12px; color: var(--text-secondary); margin-top: 6px; }
+
+  .password-wrapper { position: relative; }
+  .password-toggle {
+    position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+    background: none; border: none; color: var(--text-secondary);
+    cursor: pointer; font-size: 14px; padding: 4px;
+  }
+  .password-strength { display: flex; gap: 4px; margin-top: 8px; }
+  .strength-bar {
+    flex: 1; height: 3px; border-radius: 2px;
+    background: rgba(255,255,255,0.08); transition: background 0.3s;
+  }
+
+  .form-consent {
+    font-size: 13px; color: var(--text-secondary); line-height: 1.5;
+    text-align: left; margin-bottom: 24px;
+  }
+  .form-consent a { color: var(--accent); text-decoration: none; }
+  .form-consent a:hover { text-decoration: underline; }
+
+  .btn-submit {
+    width: 100%; padding: 16px; border-radius: 100px;
+    background: var(--accent); color: #fff; border: none;
+    font-size: 16px; font-weight: 600; cursor: pointer;
+    transition: all 0.2s; position: relative; font-family: var(--font);
+  }
+  .btn-submit:hover:not(:disabled) { background: var(--accent-hover); }
+  .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+  .btn-submit .spinner {
+    display: none; width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: #fff; border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+    position: absolute; left: 50%; top: 50%; margin: -10px 0 0 -10px;
+  }
+  .btn-submit.loading .btn-text { visibility: hidden; }
+  .btn-submit.loading .spinner { display: block; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Success state */
+  .form-success {
+    display: none; text-align: center; padding: 40px 20px;
+  }
+  .form-success.show { display: block; }
+  .form-success-icon {
+    width: 64px; height: 64px; border-radius: 50%;
+    background: rgba(0,196,140,0.12); color: var(--success);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px; margin: 0 auto 20px;
+  }
+  .form-success h3 { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+  .form-success p { font-size: 15px; color: var(--text-secondary); }
+
+  /* Error banner */
+  .form-error-banner {
+    display: none; background: rgba(255,71,87,0.1);
+    border: 1px solid rgba(255,71,87,0.2); border-radius: 10px;
+    padding: 14px 16px; margin-bottom: 20px; text-align: left;
+    font-size: 14px; color: var(--error); align-items: center; gap: 10px;
+  }
+  .form-error-banner.show { display: flex; }
+  .form-error-banner button {
+    background: none; border: none; color: var(--error);
+    text-decoration: underline; cursor: pointer; font-size: 14px;
+    font-family: var(--font); margin-left: auto; white-space: nowrap;
+  }
+
+  /* ===== FOOTER ===== */
+  footer {
+    border-top: 1px solid var(--border); padding: 60px 40px 40px;
+  }
+  .footer-inner { max-width: 1200px; margin: 0 auto; }
+  .footer-top {
+    display: grid; grid-template-columns: 2fr repeat(3, 1fr); gap: 40px;
+    margin-bottom: 48px;
+  }
+  .footer-brand-desc { font-size: 14px; color: var(--text-secondary); margin-top: 12px; line-height: 1.6; max-width: 280px; }
+  .footer-col h4 { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; color: var(--text-secondary); }
+  .footer-col a { display: block; font-size: 14px; color: var(--text-secondary); text-decoration: none; padding: 4px 0; transition: color 0.2s; }
+  .footer-col a:hover { color: var(--text-primary); }
+  .footer-bottom {
+    display: flex; justify-content: space-between; align-items: center;
+    padding-top: 24px; border-top: 1px solid var(--border);
+    font-size: 13px; color: var(--text-secondary);
+  }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 1024px) {
+    .hero-inner { grid-template-columns: 1fr; gap: 48px; text-align: center; }
+    .hero h1 { font-size: 44px; }
+    .hero p { margin: 0 auto 36px; }
+    .hero-actions { justify-content: center; }
+    .benefits-grid, .trust-cards, .security-grid { grid-template-columns: repeat(2, 1fr); }
+    .feature-row, .feature-row.reverse { grid-template-columns: 1fr; direction: ltr; }
+    .stats-inner { grid-template-columns: repeat(2, 1fr); }
+    .footer-top { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 640px) {
+    nav { padding: 0 20px; }
+    .nav-links a:not(.nav-cta) { display: none; }
+    section, .hero, .stats, footer { padding-left: 20px; padding-right: 20px; }
+    .hero h1 { font-size: 36px; letter-spacing: -1.5px; }
+    .hero p { font-size: 16px; }
+    .benefits-grid, .trust-cards, .security-grid { grid-template-columns: 1fr; }
+    .stats-inner { grid-template-columns: repeat(2, 1fr); gap: 24px; }
+    .stat-number { font-size: 28px; }
+    .section-title { font-size: 32px; }
+    .footer-top { grid-template-columns: 1fr; }
+    .footer-bottom { flex-direction: column; gap: 12px; text-align: center; }
+    .form-wrapper { padding: 24px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== NAVIGATION ===== -->
+<nav>
+  <a class="nav-logo" href="#">
+    <svg viewBox="0 0 28 28" fill="none"><circle cx="14" cy="14" r="14" fill="#0666EB"/><path d="M8 14l4 4 8-8" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    Revolut
+  </a>
+  <div class="nav-links">
+    <a href="#benefits">Benefits</a>
+    <a href="#features">Features</a>
+    <a href="#security">Security</a>
+    <a href="#signup" class="nav-cta" data-track="nav-cta">Get started</a>
+  </div>
+</nav>
+
+<!-- ===== HERO ===== -->
+<section class="hero">
+  <div class="hero-inner">
+    <div>
+      <div class="hero-badge"><span></span> Trusted by 50M+ customers worldwide</div>
+      <h1>One app.<br>All things <span class="gradient">money.</span></h1>
+      <p>Send, spend, save, and invest — all from one beautifully simple app. Join millions who've already made the switch.</p>
+      <div class="hero-actions">
+        <a href="#signup" class="btn-primary" data-track="hero-signup-cta">Sign up free →</a>
+        <a href="#benefits" class="btn-secondary" data-track="hero-learn-cta">Learn more</a>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="glow-ring"></div>
+      <div class="phone-mockup">
+        <div class="phone-notch"></div>
+        <div class="phone-screen">
+          <div class="phone-greeting">Good morning</div>
+          <div class="phone-name">Alex</div>
+          <div class="phone-balance-label">Total balance</div>
+          <div class="phone-balance">£12,840.50</div>
+          <div class="phone-actions">
+            <div class="phone-action">
+              <div class="phone-action-icon" style="background:rgba(6,102,235,0.15);">↑</div>
+              <div class="phone-action-label">Send</div>
+            </div>
+            <div class="phone-action">
+              <div class="phone-action-icon" style="background:rgba(0,196,140,0.15);">↓</div>
+              <div class="phone-action-label">Request</div>
+            </div>
+            <div class="phone-action">
+              <div class="phone-action-icon" style="background:rgba(255,184,0,0.15);">⇄</div>
+              <div class="phone-action-label">Exchange</div>
+            </div>
+          </div>
+          <div class="phone-card">
+            <div class="phone-card-row">
+              <div class="phone-card-icon" style="background:rgba(6,102,235,0.15);">🛒</div>
+              <div class="phone-card-info">
+                <div class="phone-card-title">Tesco</div>
+                <div class="phone-card-sub">Today, 09:14</div>
+              </div>
+              <div class="phone-card-amount negative">-£34.20</div>
+            </div>
+            <div class="phone-card-row">
+              <div class="phone-card-icon" style="background:rgba(0,196,140,0.15);">💰</div>
+              <div class="phone-card-info">
+                <div class="phone-card-title">Salary</div>
+                <div class="phone-card-sub">Yesterday</div>
+              </div>
+              <div class="phone-card-amount positive">+£3,200.00</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== STATS ===== -->
+<div class="stats">
+  <div class="stats-inner">
+    <div><div class="stat-number">50M+</div><div class="stat-label">Customers worldwide</div></div>
+    <div><div class="stat-number">200+</div><div class="stat-label">Countries supported</div></div>
+    <div><div class="stat-number">30+</div><div class="stat-label">Currencies</div></div>
+    <div><div class="stat-number">0</div><div class="stat-label">Hidden fees</div></div>
+  </div>
+</div>
+
+<!-- ===== BENEFITS ===== -->
+<section id="benefits">
+  <div class="section-inner">
+    <div class="section-label">Benefits</div>
+    <div class="section-title">Everything your bank<br>should already do.</div>
+    <div class="section-subtitle">Revolut gives you a smarter way to manage your money, with tools designed for how you actually live.</div>
+    <div class="benefits-grid">
+      <div class="benefit-card">
+        <div class="benefit-icon" style="background:rgba(6,102,235,0.1); color:#4D9FFF;">💱</div>
+        <h3>Spend globally</h3>
+        <p>Use your card in 200+ countries with the real exchange rate. No markups, no surprises.</p>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-icon" style="background:rgba(0,196,140,0.1); color:#00C48C;">⚡</div>
+        <h3>Instant transfers</h3>
+        <p>Send money to friends or abroad in seconds. Over 30 currencies supported instantly.</p>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-icon" style="background:rgba(255,184,0,0.1); color:#FFB800;">🏦</div>
+        <h3>Savings Vaults</h3>
+        <p>Automatically set aside money with round-ups, recurring deposits, and competitive rates.</p>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-icon" style="background:rgba(157,78,221,0.1); color:#9D4EDD;">📊</div>
+        <h3>Smart budgeting</h3>
+        <p>Track spending by category with real-time analytics. Know exactly where your money goes.</p>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-icon" style="background:rgba(255,71,87,0.1); color:#FF4757;">📈</div>
+        <h3>Invest with ease</h3>
+        <p>Start investing from just £1 in stocks, crypto, and commodities — right from the app.</p>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-icon" style="background:rgba(0,196,140,0.1); color:#00C48C;">🛡️</div>
+        <h3>Protected funds</h3>
+        <p>Your money is safeguarded with bank-grade encryption, 3D Secure, and instant card freeze.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FEATURES SHOWCASE ===== -->
+<section id="features" class="features">
+  <div class="section-inner">
+    <div class="section-label">Features</div>
+    <div class="section-title">Designed to simplify<br>your financial life.</div>
+    <div class="section-subtitle">Powerful tools, beautifully packaged. Here's what's inside.</div>
+
+    <div class="feature-row">
+      <div class="feature-visual">
+        <div class="currency-display">
+          <div class="currency-pair">
+            <div class="currency-flag">🇬🇧</div>
+            <div class="currency-arrow">→</div>
+            <div class="currency-flag">🇪🇺</div>
+          </div>
+          <div class="currency-rate">£1 = €1.1642</div>
+          <div class="currency-label">Real interbank rate · No hidden fees</div>
+        </div>
+      </div>
+      <div class="feature-content">
+        <div class="feature-tag" style="background:rgba(6,102,235,0.12); color:#4D9FFF;">Currency</div>
+        <h3>Exchange at the real rate</h3>
+        <p>Get the interbank exchange rate with no hidden markups. Hold, convert, and send 30+ currencies instantly.</p>
+        <ul class="feature-list">
+          <li>Real mid-market exchange rate</li>
+          <li>Free exchanges up to £1,000/month</li>
+          <li>Set rate alerts and auto-exchange</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="feature-row reverse">
+      <div class="feature-visual">
+        <div class="revolut-card">
+          <div class="revolut-card-logo">Revolut</div>
+          <div class="revolut-card-number">•••• •••• •••• 4829</div>
+          <div class="revolut-card-bottom">
+            <div>
+              <div class="revolut-card-name">ALEX JOHNSON</div>
+            </div>
+            <div class="revolut-card-type">ULTRA</div>
+          </div>
+        </div>
+      </div>
+      <div class="feature-content">
+        <div class="feature-tag" style="background:rgba(157,78,221,0.12); color:#9D4EDD;">Cards</div>
+        <h3>Cards that work for you</h3>
+        <p>Virtual and physical cards with instant notifications, disposable cards for online shopping, and customisable spending limits.</p>
+        <ul class="feature-list">
+          <li>Instant spending notifications</li>
+          <li>Disposable virtual cards</li>
+          <li>Apple Pay & Google Pay ready</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="feature-row">
+      <div class="feature-visual">
+        <div class="vault-visual">
+          <div class="vault-icon">🎯</div>
+          <div class="vault-amount">£4,230</div>
+          <div class="vault-label">Holiday fund · 84% of goal</div>
+          <div class="vault-bar"><div class="vault-fill" style="width:84%"></div></div>
+          <div style="display:flex; justify-content:space-between; margin-top:8px;">
+            <span style="font-size:12px; color:var(--text-secondary);">£0</span>
+            <span style="font-size:12px; color:var(--text-secondary);">£5,000</span>
+          </div>
+        </div>
+      </div>
+      <div class="feature-content">
+        <div class="feature-tag" style="background:rgba(0,196,140,0.12); color:#00C48C;">Savings</div>
+        <h3>Save without thinking</h3>
+        <p>Create Vaults for your goals and let round-ups, recurring deposits, and salary sorting do the heavy lifting.</p>
+        <ul class="feature-list">
+          <li>Round-up spare change automatically</li>
+          <li>Earn interest on savings</li>
+          <li>Group Vaults with friends</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SECURITY ===== -->
+<section id="security">
+  <div class="section-inner">
+    <div class="section-label">Security</div>
+    <div class="section-title">Your money is safe.<br>Full stop.</div>
+    <div class="section-subtitle">We use the same level of security as the world's biggest banks, plus a few extras.</div>
+    <div class="security-grid">
+      <div class="security-item">
+        <div class="security-icon">🔒</div>
+        <div>
+          <h4>Bank-grade encryption</h4>
+          <p>All data is encrypted in transit and at rest with AES-256 encryption.</p>
+        </div>
+      </div>
+      <div class="security-item">
+        <div class="security-icon">📱</div>
+        <div>
+          <h4>Biometric login</h4>
+          <p>Face ID, fingerprint, and passcode protection on every login.</p>
+        </div>
+      </div>
+      <div class="security-item">
+        <div class="security-icon">❄️</div>
+        <div>
+          <h4>Instant card freeze</h4>
+          <p>Freeze and unfreeze your card with a single tap, anytime.</p>
+        </div>
+      </div>
+      <div class="security-item">
+        <div class="security-icon">🔔</div>
+        <div>
+          <h4>Real-time alerts</h4>
+          <p>Instant push notifications for every transaction, so nothing slips by.</p>
+        </div>
+      </div>
+      <div class="security-item">
+        <div class="security-icon">🛡️</div>
+        <div>
+          <h4>3D Secure payments</h4>
+          <p>Extra verification layer for online purchases to prevent fraud.</p>
+        </div>
+      </div>
+      <div class="security-item">
+        <div class="security-icon">🏛️</div>
+        <div>
+          <h4>Regulated & licenced</h4>
+          <p>Authorised by the Bank of Lithuania and regulated across the EEA.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SOCIAL PROOF ===== -->
+<section class="trust">
+  <div class="section-inner">
+    <div class="section-label">Trusted worldwide</div>
+    <div class="section-title">Millions love Revolut.</div>
+    <div class="section-subtitle" style="margin:0 auto 56px;">See why customers are making the switch.</div>
+    <div class="trust-logos">
+      <div class="trust-logo">FORBES</div>
+      <div class="trust-logo">TECHCRUNCH</div>
+      <div class="trust-logo">WIRED</div>
+      <div class="trust-logo">FINANCIAL TIMES</div>
+      <div class="trust-logo">THE GUARDIAN</div>
+    </div>
+    <div class="trust-cards">
+      <div class="trust-card">
+        <div class="trust-card-stars">★★★★★</div>
+        <p>"I've been using Revolut for two years and haven't looked back. The exchange rates alone save me hundreds each year."</p>
+        <div class="trust-card-author">Sarah M.</div>
+        <div class="trust-card-role">Frequent traveller</div>
+      </div>
+      <div class="trust-card">
+        <div class="trust-card-stars">★★★★★</div>
+        <p>"Finally, an app that makes budgeting easy without being annoying. The spending analytics are genuinely useful."</p>
+        <div class="trust-card-author">James K.</div>
+        <div class="trust-card-role">Small business owner</div>
+      </div>
+      <div class="trust-card">
+        <div class="trust-card-stars">★★★★★</div>
+        <p>"Sending money to my family abroad used to take days and cost a fortune. With Revolut it's instant and nearly free."</p>
+        <div class="trust-card-author">Maria L.</div>
+        <div class="trust-card-role">Revolut customer since 2021</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SIGN-UP FORM ===== -->
+<section id="signup" class="signup">
+  <div class="signup-inner">
+    <div class="section-label">Get started</div>
+    <div class="section-title">Open your account<br>in minutes.</div>
+    <div class="section-subtitle">No branches. No paperwork. No hidden fees. Just download and go.</div>
+
+    <div class="form-wrapper">
+      <form id="signupForm" novalidate>
+        <div class="form-error-banner" id="formErrorBanner">
+          <span>⚠ Something went wrong. Please try again.</span>
+          <button type="button" onclick="retrySubmit()">Retry</button>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="email">Email address</label>
+          <input class="form-input" type="email" id="email" placeholder="you@example.com" autocomplete="email" required>
+          <div class="form-error" id="emailError">Please enter a valid email address</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="phone">Phone number</label>
+          <input class="form-input" type="tel" id="phone" placeholder="+44 7XXX XXXXXX" autocomplete="tel">
+          <div class="form-hint">We'll send a verification code to this number</div>
+          <div class="form-error" id="phoneError">Please enter a valid phone number</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="password">Create password</label>
+          <div class="password-wrapper">
+            <input class="form-input" type="password" id="password" placeholder="At least 8 characters" autocomplete="new-password" required>
+            <button type="button" class="password-toggle" onclick="togglePassword()" aria-label="Show password">Show</button>
+          </div>
+          <div class="password-strength" id="passwordStrength">
+            <div class="strength-bar"></div>
+            <div class="strength-bar"></div>
+            <div class="strength-bar"></div>
+            <div class="strength-bar"></div>
+          </div>
+          <div class="form-error" id="passwordError">Password must be at least 8 characters</div>
+        </div>
+
+        <div class="form-consent">
+          By creating an account, you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>. You confirm you're at least 18 years old and consent to receiving account-related communications.
+        </div>
+
+        <button type="submit" class="btn-submit" id="submitBtn" data-track="form-submit">
+          <span class="btn-text">Create account</span>
+          <span class="spinner"></span>
+        </button>
+      </form>
+
+      <div class="form-success" id="formSuccess">
+        <div class="form-success-icon">✓</div>
+        <h3>You're in!</h3>
+        <p>Check your inbox for a verification link to activate your Revolut account.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FOOTER ===== -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div>
+        <a class="nav-logo" href="#" style="margin-bottom:8px;">
+          <svg viewBox="0 0 28 28" fill="none" width="28" height="28"><circle cx="14" cy="14" r="14" fill="#0666EB"/><path d="M8 14l4 4 8-8" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Revolut
+        </a>
+        <div class="footer-brand-desc">One app to send, spend, save, and invest. Join 50 million customers building a brighter financial future.</div>
+      </div>
+      <div class="footer-col">
+        <h4>Product</h4>
+        <a href="#">Accounts</a><a href="#">Cards</a><a href="#">Currency exchange</a><a href="#">Crypto</a><a href="#">Savings</a>
+      </div>
+      <div class="footer-col">
+        <h4>Company</h4>
+        <a href="#">About us</a><a href="#">Careers</a><a href="#">Press</a><a href="#">Blog</a>
+      </div>
+      <div class="footer-col">
+        <h4>Support</h4>
+        <a href="#">Help centre</a><a href="#">Community</a><a href="#">Contact us</a><a href="#">Security</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Revolut Ltd. All rights reserved.</span>
+      <span>Prototype — Not an official Revolut page</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+// ===== ANALYTICS HOOKS =====
+function trackEvent(action, data) {
+  console.log('[Analytics]', action, data || '');
+}
+
+document.querySelectorAll('[data-track]').forEach(el => {
+  el.addEventListener('click', () => trackEvent('cta_click', { id: el.dataset.track }));
+});
+
+// ===== FORM LOGIC =====
+const form = document.getElementById('signupForm');
+const emailInput = document.getElementById('email');
+const phoneInput = document.getElementById('phone');
+const passwordInput = document.getElementById('password');
+const submitBtn = document.getElementById('submitBtn');
+
+// Inline validation
+emailInput.addEventListener('blur', () => validateEmail());
+emailInput.addEventListener('input', () => {
+  if (emailInput.classList.contains('error')) validateEmail();
+});
+
+phoneInput.addEventListener('blur', () => validatePhone());
+phoneInput.addEventListener('input', () => {
+  if (phoneInput.classList.contains('error')) validatePhone();
+});
+
+passwordInput.addEventListener('input', () => {
+  updatePasswordStrength();
+  if (passwordInput.classList.contains('error')) validatePassword();
+});
+passwordInput.addEventListener('blur', () => validatePassword());
+
+// Track form start
+let formStarted = false;
+[emailInput, phoneInput, passwordInput].forEach(input => {
+  input.addEventListener('focus', () => {
+    if (!formStarted) { formStarted = true; trackEvent('form_start'); }
+  });
+});
+
+function validateEmail() {
+  const valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailInput.value);
+  emailInput.classList.toggle('error', !valid && emailInput.value.length > 0);
+  emailInput.classList.toggle('valid', valid);
+  document.getElementById('emailError').classList.toggle('show', !valid && emailInput.value.length > 0);
+  return valid;
+}
+
+function validatePhone() {
+  if (!phoneInput.value) return true; // optional
+  const valid = /^[\+]?[\d\s\-()]{7,}$/.test(phoneInput.value);
+  phoneInput.classList.toggle('error', !valid);
+  phoneInput.classList.toggle('valid', valid);
+  document.getElementById('phoneError').classList.toggle('show', !valid);
+  return valid;
+}
+
+function validatePassword() {
+  const valid = passwordInput.value.length >= 8;
+  passwordInput.classList.toggle('error', !valid && passwordInput.value.length > 0);
+  passwordInput.classList.toggle('valid', valid);
+  document.getElementById('passwordError').classList.toggle('show', !valid && passwordInput.value.length > 0);
+  return valid;
+}
+
+function updatePasswordStrength() {
+  const pw = passwordInput.value;
+  let score = 0;
+  if (pw.length >= 8) score++;
+  if (/[A-Z]/.test(pw)) score++;
+  if (/[0-9]/.test(pw)) score++;
+  if (/[^A-Za-z0-9]/.test(pw)) score++;
+
+  const bars = document.querySelectorAll('.strength-bar');
+  const colors = ['', '#FF4757', '#FFB800', '#00C48C', '#00C48C'];
+  bars.forEach((bar, i) => {
+    bar.style.background = i < score ? colors[score] : 'rgba(255,255,255,0.08)';
+  });
+}
+
+function togglePassword() {
+  const btn = document.querySelector('.password-toggle');
+  if (passwordInput.type === 'password') {
+    passwordInput.type = 'text'; btn.textContent = 'Hide';
+  } else {
+    passwordInput.type = 'password'; btn.textContent = 'Show';
+  }
+}
+
+// Form submit
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  trackEvent('form_submit_attempt');
+
+  const emailOk = validateEmail();
+  const phoneOk = validatePhone();
+  const passOk = validatePassword();
+
+  if (!emailOk || !phoneOk || !passOk) return;
+
+  submitBtn.classList.add('loading');
+  submitBtn.disabled = true;
+  document.getElementById('formErrorBanner').classList.remove('show');
+
+  // Simulate API call
+  await new Promise(r => setTimeout(r, 1800));
+
+  // 90% success rate for demo
+  if (Math.random() > 0.1) {
+    trackEvent('form_submit_success');
+    form.style.display = 'none';
+    document.getElementById('formSuccess').classList.add('show');
+  } else {
+    trackEvent('form_submit_failure');
+    submitBtn.classList.remove('loading');
+    submitBtn.disabled = false;
+    document.getElementById('formErrorBanner').classList.add('show');
+  }
+});
+
+function retrySubmit() {
+  document.getElementById('formErrorBanner').classList.remove('show');
+  form.dispatchEvent(new Event('submit'));
+}
+
+// Smooth scroll for anchor links
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    e.preventDefault();
+    const target = document.querySelector(a.getAttribute('href'));
+    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+});
+</script>
+</body>
+</html>
