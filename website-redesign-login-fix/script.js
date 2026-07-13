@@ -27,7 +27,7 @@ setInterval(tickClock, 30_000);
 const SCENARIOS = {
 	holiday: [
 		{ who: "user", text: "How much did I spend on my Lisbon trip?" },
-		{ who: "air", text: "You spent £642.18 in Lisbon between 2–6 July. Here’s the breakdown:" },
+		{ who: "air", text: "You spent £642.18 in Lisbon between 2–6 July. Here's the breakdown:" },
 		{ who: "card", html: `
 			<div class="card-title">Lisbon · 2–6 Jul</div>
 			<div class="card-big">£642.18</div>
@@ -35,21 +35,21 @@ const SCENARIOS = {
 			<div class="card-row"><span>🏨 Stays</span><b>£221.00</b></div>
 			<div class="card-row"><span>🚕 Transport</span><b>£96.78</b></div>
 			<div class="card-bar"><i></i></div>` },
-		{ who: "air", text: "That’s 12% under the budget you set. Want me to create a budget for your next trip?" },
+		{ who: "air", text: "That's 12% under the budget you set. Want me to create a budget for your next trip?" },
 	],
 	travel: [
-		{ who: "user", text: "I’m flying to Tokyo on Friday. What do I need?" },
-		{ who: "air", text: "Exciting! ✈️ Here’s what I can sort out for you right now:" },
+		{ who: "user", text: "I'm flying to Tokyo on Friday. What do I need?" },
+		{ who: "air", text: "Exciting! ✈️ Here's what I can sort out for you right now:" },
 		{ who: "card", html: `
 			<div class="card-title">Tokyo essentials</div>
 			<div class="card-row"><span>📶 eSIM · 5GB, 7 days</span><b>£9.50</b></div>
 			<div class="card-row"><span>💴 GBP → JPY</span><b>1 = ¥192.40</b></div>
 			<div class="card-row"><span>🛡 Travel insurance</span><b class="up">Included</b></div>` },
-		{ who: "air", text: "Want me to activate the eSIM so it’s ready when you land?" },
+		{ who: "air", text: "Want me to activate the eSIM so it's ready when you land?" },
 	],
 	portfolio: [
 		{ who: "user", text: "How are my investments doing this month?" },
-		{ who: "air", text: "Your portfolio is up 2.4% this month. Here’s the snapshot:" },
+		{ who: "air", text: "Your portfolio is up 2.4% this month. Here's the snapshot:" },
 		{ who: "card", html: `
 			<div class="card-title">Portfolio · July</div>
 			<div class="card-big">£5,830.12 <span class="up" style="font-size:14px">▲ 2.4%</span></div>
@@ -59,7 +59,7 @@ const SCENARIOS = {
 		{ who: "air", text: "Your best performer is Apple. Capital at risk — want the full report?" },
 	],
 	cards: [
-		{ who: "user", text: "I can’t find my card. Freeze it please!" },
+		{ who: "user", text: "I can't find my card. Freeze it please!" },
 		{ who: "air", text: "Done — your Metal card ending in 4921 is frozen. 🧊 No payments can go through." },
 		{ who: "card", html: `
 			<div class="card-title">Card status</div>
@@ -75,10 +75,10 @@ const SCENARIOS = {
 		{ who: "card", html: `
 			<div class="card-title">Subscriptions · monthly</div>
 			<div class="card-big">£58.94</div>
-			<div class="card-row"><span>🎨 Streaming</span><b>£17.98</b></div>
+			<div class="card-row"><span>🎬 Streaming</span><b>£17.98</b></div>
 			<div class="card-row"><span>🎧 Music</span><b>£11.99</b></div>
 			<div class="card-row"><span>☁️ Cloud storage</span><b>£7.99</b></div>` },
-		{ who: "air", text: "You haven’t used one of them since April. Want me to pause it?" },
+		{ who: "air", text: "You haven't used one of them since April. Want me to pause it?" },
 	],
 };
 
@@ -149,66 +149,207 @@ function stopAutoRotate() {
 // kick off
 playScenario("holiday");
 
-// ---------- Login Modal ----------
-const loginBtn = document.getElementById("loginBtn");
+// ---------- Login modal ----------
 const loginModal = document.getElementById("loginModal");
-const loginClose = document.getElementById("loginClose");
 const loginForm = document.getElementById("loginForm");
-const loginError = document.getElementById("loginError");
-const loginEmail = document.getElementById("loginEmail");
-const loginPassword = document.getElementById("loginPassword");
-const loginSignupLink = document.getElementById("loginSignupLink");
+const emailInput = document.getElementById("loginEmail");
+const passwordInput = document.getElementById("loginPassword");
+const emailError = document.getElementById("emailError");
+const passwordError = document.getElementById("passwordError");
+const formError = document.getElementById("formError");
+const submitBtn = document.getElementById("loginSubmit");
+const togglePassword = document.getElementById("togglePassword");
+const navRight = document.getElementById("navRight");
 
-function openLogin() {
+let lastFocused = null;
+
+function focusable() {
+	return [...loginModal.querySelectorAll(
+		'button, [href], input, [tabindex]:not([tabindex="-1"])'
+	)].filter((el) => !el.disabled && el.offsetParent !== null);
+}
+
+function openLogin(trigger) {
+	lastFocused = trigger || document.activeElement;
 	loginModal.hidden = false;
-	// Force reflow so the transition fires
-	loginModal.offsetHeight;
-	loginModal.classList.add("is-open");
-	loginEmail.focus();
-	document.body.style.overflow = "hidden";
+	document.body.classList.add("modal-open");
+	// focus first input once the dialog is painted
+	requestAnimationFrame(() => emailInput.focus());
 }
 
 function closeLogin() {
-	loginModal.classList.remove("is-open");
-	document.body.style.overflow = "";
-	loginModal.addEventListener("transitionend", function handler() {
-		loginModal.removeEventListener("transitionend", handler);
-		loginModal.hidden = true;
-	});
-	loginForm.reset();
-	loginError.hidden = true;
-	loginBtn.focus();
+	if (loginModal.hidden) return;
+	loginModal.hidden = true;
+	document.body.classList.remove("modal-open");
+	clearErrors();
+	if (lastFocused && document.body.contains(lastFocused)) lastFocused.focus();
 }
 
-loginBtn.addEventListener("click", openLogin);
-loginClose.addEventListener("click", closeLogin);
+function clearErrors() {
+	[["email", emailError, emailInput], ["password", passwordError, passwordInput]].forEach(
+		([, err, input]) => {
+			err.hidden = true;
+			input.closest(".field").classList.remove("field--invalid");
+		}
+	);
+	formError.hidden = true;
+}
 
-// Close on overlay click
-loginModal.addEventListener("click", (e) => {
-	if (e.target === loginModal) closeLogin();
+// Open triggers (nav + mobile menu)
+document.querySelectorAll("[data-open-login]").forEach((btn) => {
+	btn.addEventListener("click", (e) => {
+		e.preventDefault();
+		mobileMenu.classList.remove("is-open");
+		burger.setAttribute("aria-expanded", "false");
+		openLogin(e.currentTarget);
+	});
 });
 
-// Close on Escape
+// Close triggers (X button, overlay, "Create account")
+loginModal.querySelectorAll("[data-close-login]").forEach((el) => {
+	el.addEventListener("click", closeLogin);
+});
+
+// ESC to close + focus trap
 document.addEventListener("keydown", (e) => {
-	if (e.key === "Escape" && loginModal.classList.contains("is-open")) closeLogin();
+	if (loginModal.hidden) return;
+	if (e.key === "Escape") { closeLogin(); return; }
+	if (e.key === "Tab") {
+		const items = focusable();
+		if (!items.length) return;
+		const first = items[0];
+		const last = items[items.length - 1];
+		if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+		else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+	}
 });
 
-// Close modal on sign-up link click
-loginSignupLink.addEventListener("click", closeLogin);
+// Show / hide password
+togglePassword.addEventListener("click", () => {
+	const show = passwordInput.type === "password";
+	passwordInput.type = show ? "text" : "password";
+	togglePassword.textContent = show ? "Hide" : "Show";
+	togglePassword.setAttribute("aria-pressed", String(show));
+	togglePassword.setAttribute("aria-label", show ? "Hide password" : "Show password");
+	passwordInput.focus();
+});
 
-// Form validation & submit
+// Clear a field's error as the user corrects it
+[emailInput, passwordInput].forEach((input) => {
+	input.addEventListener("input", () => {
+		input.closest(".field").classList.remove("field--invalid");
+		(input === emailInput ? emailError : passwordError).hidden = true;
+		formError.hidden = true;
+	});
+});
+
+function validate() {
+	let ok = true;
+	const email = emailInput.value.trim();
+	if (!email) {
+		emailError.textContent = "Please enter your email.";
+		emailError.hidden = false;
+		emailInput.closest(".field").classList.add("field--invalid");
+		ok = false;
+	} else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+		emailError.textContent = "Please enter a valid email address.";
+		emailError.hidden = false;
+		emailInput.closest(".field").classList.add("field--invalid");
+		ok = false;
+	}
+	if (!passwordInput.value) {
+		passwordError.hidden = false;
+		passwordInput.closest(".field").classList.add("field--invalid");
+		ok = false;
+	}
+	return ok;
+}
+
+// Submit (stubbed — no backend). Any valid credentials succeed;
+// use password "wrong" to preview the failure state.
 loginForm.addEventListener("submit", (e) => {
 	e.preventDefault();
-	const email = loginEmail.value.trim();
-	const pass = loginPassword.value;
-
-	if (!email || !pass) {
-		loginError.textContent = "Please enter your email and password.";
-		loginError.hidden = false;
+	formError.hidden = true;
+	if (!validate()) {
+		loginModal.querySelector(".field--invalid .field__input")?.focus();
 		return;
 	}
 
-	// Simulate auth check (demo only)
-	loginError.textContent = "Invalid email or password. Please try again.";
-	loginError.hidden = false;
+	submitBtn.setAttribute("aria-busy", "true");
+	submitBtn.disabled = true;
+	submitBtn.innerHTML = '<span class="spinner"></span> Logging in…';
+
+	setTimeout(() => {
+		const failed = passwordInput.value === "wrong";
+		submitBtn.removeAttribute("aria-busy");
+		submitBtn.disabled = false;
+		submitBtn.textContent = "Log in";
+
+		if (failed) {
+			formError.textContent = "Incorrect email or password. Please try again.";
+			formError.hidden = false;
+			passwordInput.focus();
+			return;
+		}
+
+		const email = emailInput.value.trim();
+		closeLogin();
+		loginForm.reset();
+		setLoggedIn(email);
+	}, 900);
 });
+
+function setLoggedIn(email) {
+	const initial = (email[0] || "U").toUpperCase();
+	navRight.innerHTML = `
+		<span class="account" title="${email}">
+			<span class="account__avatar">${initial}</span>
+			<span class="account__label">Account</span>
+		</span>
+		<button type="button" class="btn btn--outline btn--sm" id="logoutBtn">Log out</button>`;
+	document.getElementById("logoutBtn").addEventListener("click", () => {
+		navRight.innerHTML = `
+			<button type="button" class="btn btn--ghost btn--sm" id="loginBtn" data-open-login>Log in</button>
+			<a href="#signup" class="btn btn--white btn--sm">Sign up</a>`;
+		navRight.querySelector("[data-open-login]").addEventListener("click", (e) => {
+			e.preventDefault();
+			openLogin(e.currentTarget);
+		});
+	});
+}
+
+// Decorative QR pattern (matches the design reference)
+(function buildQR() {
+	const grid = document.getElementById("qrGrid");
+	if (!grid) return;
+	const N = 21;
+	const isFinder = (r, c) => {
+		const inBox = (br, bc) => r >= br && r < br + 7 && c >= bc && c < bc + 7;
+		return inBox(0, 0) || inBox(0, N - 7) || inBox(N - 7, 0);
+	};
+	const finderOn = (r, c) => {
+		const rel = (br, bc) => { const x = r - br, y = c - bc; return (x === 0 || x === 6 || y === 0 || y === 6) || (x >= 2 && x <= 4 && y >= 2 && y <= 4); };
+		if (r < 7 && c < 7) return rel(0, 0);
+		if (r < 7 && c >= N - 7) return rel(0, N - 7);
+		if (r >= N - 7 && c < 7) return rel(N - 7, 0);
+		return false;
+	};
+	// deterministic pseudo-random fill so the code looks consistent
+	let seed = 7;
+	const rand = () => (seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff;
+	const center = (r, c) => r >= 8 && r <= 12 && c >= 8 && c <= 12;
+	const frag = document.createDocumentFragment();
+	for (let r = 0; r < N; r++) {
+		for (let c = 0; c < N; c++) {
+			const cell = document.createElement("i");
+			const on = isFinder(r, c) ? finderOn(r, c) : (center(r, c) ? false : rand() > 0.5);
+			if (!on) cell.style.background = "transparent";
+			frag.appendChild(cell);
+		}
+	}
+	grid.appendChild(frag);
+	const logo = document.createElement("span");
+	logo.className = "qr-logo";
+	logo.textContent = "R";
+	grid.appendChild(logo);
+})();
