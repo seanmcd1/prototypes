@@ -1,0 +1,1271 @@
+<!DOCTYPE html>
+<html lang="en-GB" data-theme="dark">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>AIR | AI by Revolut — Clone</title>
+	<meta name="description" content="Educational clone of the AIR (AI by Revolut) landing page. Not affiliated with Revolut." />
+	<link rel="preconnect" href="https://fonts.googleapis.com" />
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+	<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+	<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='white'/%3E%3Ctext x='16' y='22' font-family='Arial' font-weight='bold' font-size='16' fill='black' text-anchor='middle'%3ER%3C/text%3E%3C/svg%3E" />
+<style>
+/* AIR by Revolut — clone styles */
+
+:root {
+	--bg: #000000;
+	--bg-raised: #121212;
+	--bg-card: #191919;
+	--text: #ffffff;
+	--text-dim: #8b959e;
+	--line: rgba(255, 255, 255, 0.12);
+	--accent-a: #7c8cf8;
+	--accent-b: #4bd0ee;
+	--radius: 20px;
+	--font-display: "Inter Tight", "Aeonik Pro", -apple-system, sans-serif;
+	--font-body: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+	background: var(--bg);
+	color: var(--text);
+	font-family: var(--font-body);
+	font-size: 16px;
+	line-height: 1.55;
+	-webkit-font-smoothing: antialiased;
+}
+
+body.modal-open { overflow: hidden; }
+
+h1, h2, h3, .btn { font-family: var(--font-display); }
+
+sup { font-size: 0.55em; }
+
+/* ---------- Buttons ---------- */
+.btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	padding: 14px 28px;
+	border-radius: 999px;
+	border: none;
+	font-size: 16px;
+	font-weight: 600;
+	text-decoration: none;
+	cursor: pointer;
+	transition: transform 0.15s ease, background 0.15s ease, opacity 0.15s ease;
+	white-space: nowrap;
+}
+.btn:hover { transform: scale(1.03); }
+.btn:active { transform: scale(0.98); }
+.btn--white { background: #fff; color: #000; }
+.btn--white:hover { background: #e8e8e8; }
+.btn--ghost { background: transparent; color: #fff; }
+.btn--ghost:hover { background: rgba(255, 255, 255, 0.1); }
+.btn--outline { background: transparent; color: #fff; box-shadow: inset 0 0 0 1.5px var(--line); }
+.btn--outline:hover { box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.4); }
+.btn--sm { padding: 9px 18px; font-size: 14px; }
+.btn--lg { padding: 16px 36px; font-size: 17px; }
+.btn--block { width: 100%; }
+
+/* ---------- Nav ---------- */
+.nav {
+	position: fixed;
+	inset: 0 0 auto 0;
+	z-index: 100;
+	backdrop-filter: blur(16px);
+	-webkit-backdrop-filter: blur(16px);
+	background: rgba(0, 0, 0, 0.55);
+	border-bottom: 1px solid transparent;
+	transition: border-color 0.2s ease;
+}
+.nav.is-scrolled { border-bottom-color: var(--line); }
+.nav__inner {
+	max-width: 1280px;
+	margin: 0 auto;
+	padding: 14px 24px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+.nav__left { display: flex; align-items: center; gap: 32px; }
+.nav__logo {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	color: #fff;
+	text-decoration: none;
+}
+.nav__wordmark {
+	font-family: var(--font-display);
+	font-weight: 700;
+	font-size: 20px;
+	letter-spacing: -0.02em;
+}
+.nav__links { display: flex; gap: 4px; }
+.nav__link {
+	padding: 8px 14px;
+	border-radius: 999px;
+	color: var(--text-dim);
+	background: none;
+	border: none;
+	font: 500 15px var(--font-body);
+	text-decoration: none;
+	cursor: pointer;
+	transition: color 0.15s, background 0.15s;
+}
+.nav__link:hover { color: #fff; background: rgba(255, 255, 255, 0.08); }
+.nav__link--active { color: #fff; }
+.nav__right { display: flex; align-items: center; gap: 10px; }
+
+.nav__burger {
+	display: none;
+	flex-direction: column;
+	gap: 6px;
+	background: none;
+	border: none;
+	padding: 10px 6px;
+	cursor: pointer;
+}
+.nav__burger span { width: 22px; height: 2px; background: #fff; border-radius: 2px; transition: transform 0.2s, opacity 0.2s; }
+.nav__burger[aria-expanded="true"] span:first-child { transform: translateY(4px) rotate(45deg); }
+.nav__burger[aria-expanded="true"] span:last-child { transform: translateY(-4px) rotate(-45deg); }
+
+.nav__mobile {
+	display: none;
+	flex-direction: column;
+	gap: 6px;
+	padding: 12px 24px 24px;
+	border-top: 1px solid var(--line);
+}
+.nav__mobile.is-open { display: flex; }
+.nav__mobile-link {
+	padding: 14px 6px;
+	color: #fff;
+	text-decoration: none;
+	font-weight: 500;
+	border-bottom: 1px solid var(--line);
+}
+
+/* ---------- Login Modal ---------- */
+.login-overlay {
+	position: fixed;
+	inset: 0;
+	z-index: 200;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: rgba(0, 0, 0, 0.7);
+	backdrop-filter: blur(8px);
+	-webkit-backdrop-filter: blur(8px);
+	opacity: 0;
+	visibility: hidden;
+	transition: opacity 0.25s ease, visibility 0.25s ease;
+}
+.login-overlay.is-visible {
+	opacity: 1;
+	visibility: visible;
+}
+.login-modal {
+	position: relative;
+	width: 100%;
+	max-width: 420px;
+	margin: 16px;
+	background: var(--bg-card);
+	border: 1px solid var(--line);
+	border-radius: 24px;
+	padding: 40px 32px 32px;
+	transform: translateY(20px) scale(0.96);
+	transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.login-overlay.is-visible .login-modal {
+	transform: translateY(0) scale(1);
+}
+.login-modal__close {
+	position: absolute;
+	top: 16px;
+	right: 16px;
+	width: 36px;
+	height: 36px;
+	border: none;
+	background: rgba(255, 255, 255, 0.06);
+	border-radius: 50%;
+	color: var(--text-dim);
+	font-size: 20px;
+	cursor: pointer;
+	display: grid;
+	place-items: center;
+	transition: background 0.15s, color 0.15s;
+}
+.login-modal__close:hover {
+	background: rgba(255, 255, 255, 0.12);
+	color: #fff;
+}
+.login-modal__header {
+	text-align: center;
+	margin-bottom: 28px;
+}
+.login-modal__logo {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	margin-bottom: 16px;
+	color: #fff;
+}
+.login-modal__logo svg { flex-shrink: 0; }
+.login-modal__logo span {
+	font-family: var(--font-display);
+	font-weight: 700;
+	font-size: 18px;
+}
+.login-modal__title {
+	font-family: var(--font-display);
+	font-size: 24px;
+	font-weight: 700;
+	letter-spacing: -0.02em;
+	margin-bottom: 6px;
+}
+.login-modal__subtitle {
+	font-size: 14px;
+	color: var(--text-dim);
+}
+.login-modal__form {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+}
+.login-modal__field {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+.login-modal__label {
+	font-size: 13px;
+	font-weight: 500;
+	color: var(--text-dim);
+}
+.login-modal__input {
+	width: 100%;
+	padding: 13px 16px;
+	background: rgba(255, 255, 255, 0.06);
+	border: 1px solid var(--line);
+	border-radius: 12px;
+	color: #fff;
+	font-family: var(--font-body);
+	font-size: 15px;
+	outline: none;
+	transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.login-modal__input::placeholder {
+	color: rgba(255, 255, 255, 0.25);
+}
+.login-modal__input:focus {
+	border-color: var(--accent-a);
+	box-shadow: 0 0 0 3px rgba(124, 140, 248, 0.15);
+}
+.login-modal__submit {
+	margin-top: 4px;
+	padding: 14px 28px;
+	border-radius: 999px;
+	border: none;
+	background: #fff;
+	color: #000;
+	font-family: var(--font-display);
+	font-size: 16px;
+	font-weight: 600;
+	cursor: pointer;
+	transition: transform 0.15s ease, background 0.15s ease;
+}
+.login-modal__submit:hover {
+	background: #e8e8e8;
+	transform: scale(1.02);
+}
+.login-modal__submit:active {
+	transform: scale(0.98);
+}
+.login-modal__footer {
+	text-align: center;
+	margin-top: 20px;
+	font-size: 13px;
+	color: var(--text-dim);
+}
+.login-modal__footer a {
+	color: var(--accent-a);
+	text-decoration: none;
+	font-weight: 500;
+}
+.login-modal__footer a:hover {
+	text-decoration: underline;
+}
+.login-modal__divider {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	margin: 4px 0;
+	font-size: 12px;
+	color: var(--text-dim);
+}
+.login-modal__divider::before,
+.login-modal__divider::after {
+	content: "";
+	flex: 1;
+	height: 1px;
+	background: var(--line);
+}
+
+/* ---------- Hero ---------- */
+.hero {
+	position: relative;
+	padding: 150px 24px 60px;
+	overflow: hidden;
+}
+.hero__glow {
+	position: absolute;
+	top: -30%;
+	left: 50%;
+	transform: translateX(-50%);
+	width: 1100px;
+	height: 700px;
+	background:
+		radial-gradient(ellipse at 35% 40%, rgba(124, 140, 248, 0.28), transparent 60%),
+		radial-gradient(ellipse at 65% 55%, rgba(75, 208, 238, 0.18), transparent 60%);
+	filter: blur(40px);
+	pointer-events: none;
+}
+.hero__inner {
+	position: relative;
+	max-width: 1180px;
+	margin: 0 auto;
+	display: grid;
+	grid-template-columns: 1.05fr 0.95fr;
+	align-items: center;
+	gap: 48px;
+}
+.hero__eyebrow {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	font-weight: 600;
+	font-size: 14px;
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
+	color: transparent;
+	background: linear-gradient(90deg, var(--accent-a), var(--accent-b));
+	-webkit-background-clip: text;
+	background-clip: text;
+	margin-bottom: 20px;
+}
+.hero__title {
+	font-size: clamp(42px, 6vw, 76px);
+	font-weight: 800;
+	letter-spacing: -0.03em;
+	line-height: 1.02;
+	margin-bottom: 22px;
+}
+.hero__sub {
+	font-size: 19px;
+	color: var(--text-dim);
+	max-width: 480px;
+	margin-bottom: 34px;
+}
+.hero__tabs {
+	position: relative;
+	max-width: 1180px;
+	margin: 56px auto 0;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px;
+	justify-content: center;
+}
+.chip {
+	padding: 11px 20px;
+	border-radius: 999px;
+	border: 1px solid var(--line);
+	background: rgba(255, 255, 255, 0.04);
+	color: var(--text-dim);
+	font: 500 15px var(--font-body);
+	cursor: pointer;
+	transition: all 0.2s ease;
+}
+.chip:hover { color: #fff; border-color: rgba(255, 255, 255, 0.35); }
+.chip[aria-selected="true"] {
+	background: #fff;
+	border-color: #fff;
+	color: #000;
+	font-weight: 600;
+}
+
+/* ---------- Phone mockup ---------- */
+.hero__demo { display: flex; justify-content: center; }
+.phone {
+	position: relative;
+	width: 320px;
+	height: 650px;
+	border-radius: 48px;
+	background: #1a1a1c;
+	box-shadow:
+		inset 0 0 0 2px #3a3a3e,
+		inset 0 0 0 7px #000,
+		0 40px 80px rgba(0, 0, 0, 0.6),
+		0 0 120px rgba(124, 140, 248, 0.15);
+	padding: 12px;
+}
+.phone__notch {
+	position: absolute;
+	top: 20px;
+	left: 50%;
+	transform: translateX(-50%);
+	width: 110px;
+	height: 28px;
+	border-radius: 999px;
+	background: #000;
+	z-index: 3;
+}
+.phone__screen {
+	width: 100%;
+	height: 100%;
+	border-radius: 38px;
+	background: linear-gradient(175deg, #101014 0%, #0a0a0d 100%);
+	overflow: hidden;
+	display: flex;
+	flex-direction: column;
+}
+.phone__statusbar {
+	display: flex;
+	justify-content: space-between;
+	padding: 16px 26px 4px;
+	font-size: 13px;
+	font-weight: 600;
+}
+.phone__signal { letter-spacing: 2px; font-size: 8px; align-self: center; }
+.phone__header {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 18px 20px 14px;
+	border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+.phone__avatar {
+	width: 38px;
+	height: 38px;
+	border-radius: 50%;
+	display: grid;
+	place-items: center;
+	font-size: 17px;
+	background: linear-gradient(135deg, var(--accent-a), var(--accent-b));
+}
+.phone__name { font-weight: 700; font-size: 16px; }
+.phone__status { font-size: 12px; color: var(--text-dim); }
+
+.chat {
+	flex: 1;
+	padding: 16px 14px;
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	overflow: hidden;
+	justify-content: flex-end;
+}
+.msg {
+	max-width: 82%;
+	padding: 11px 14px;
+	border-radius: 18px;
+	font-size: 13.5px;
+	line-height: 1.45;
+	opacity: 0;
+	transform: translateY(12px);
+	animation: msgIn 0.45s ease forwards;
+}
+@keyframes msgIn { to { opacity: 1; transform: translateY(0); } }
+.msg--user {
+	align-self: flex-end;
+	background: linear-gradient(135deg, #4b5bd6, #5a6cf0);
+	border-bottom-right-radius: 6px;
+}
+.msg--air {
+	align-self: flex-start;
+	background: #1f1f24;
+	border-bottom-left-radius: 6px;
+}
+.msg--card {
+	align-self: flex-start;
+	width: 82%;
+	background: #17171c;
+	border: 1px solid rgba(255, 255, 255, 0.09);
+	border-radius: 16px;
+	padding: 13px 14px;
+}
+.msg--card .card-title { font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
+.msg--card .card-big { font-size: 21px; font-weight: 700; font-family: var(--font-display); }
+.msg--card .card-row { display: flex; justify-content: space-between; font-size: 12.5px; color: var(--text-dim); margin-top: 7px; }
+.msg--card .card-row b { color: #fff; font-weight: 600; }
+.msg--card .up { color: #46d68c; }
+.msg--card .down { color: #f36a71; }
+.msg--card .card-bar { height: 6px; border-radius: 4px; background: #2a2a30; margin-top: 10px; overflow: hidden; }
+.msg--card .card-bar i { display: block; height: 100%; width: 68%; border-radius: 4px; background: linear-gradient(90deg, var(--accent-a), var(--accent-b)); }
+
+.typing {
+	align-self: flex-start;
+	display: flex;
+	gap: 4px;
+	padding: 13px 16px;
+	background: #1f1f24;
+	border-radius: 18px;
+	border-bottom-left-radius: 6px;
+}
+.typing i {
+	width: 6px; height: 6px;
+	border-radius: 50%;
+	background: var(--text-dim);
+	animation: blink 1s infinite;
+}
+.typing i:nth-child(2) { animation-delay: 0.18s; }
+.typing i:nth-child(3) { animation-delay: 0.36s; }
+@keyframes blink { 0%, 60%, 100% { opacity: 0.25; } 30% { opacity: 1; } }
+
+.phone__input {
+	margin: 10px 14px 18px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	background: #1a1a20;
+	border: 1px solid rgba(255, 255, 255, 0.08);
+	border-radius: 999px;
+	padding: 8px 8px 8px 18px;
+	color: var(--text-dim);
+	font-size: 13.5px;
+}
+.phone__input button {
+	width: 32px; height: 32px;
+	border-radius: 50%;
+	border: none;
+	background: linear-gradient(135deg, var(--accent-a), var(--accent-b));
+	color: #fff;
+	font-size: 15px;
+	cursor: pointer;
+}
+
+/* ---------- Split sections ---------- */
+.split { padding: 90px 24px; }
+.split__inner {
+	max-width: 1080px;
+	margin: 0 auto;
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 64px;
+	align-items: center;
+}
+.split--reverse .split__media { order: 2; }
+.split--reverse .split__copy { order: 1; }
+.split__copy h2 {
+	font-size: clamp(30px, 3.6vw, 44px);
+	font-weight: 800;
+	letter-spacing: -0.02em;
+	line-height: 1.08;
+	margin-bottom: 18px;
+}
+.split__copy p { color: var(--text-dim); margin-bottom: 16px; font-size: 17px; }
+.split__copy p strong { color: #fff; }
+.split__copy .btn { margin-top: 12px; }
+.split__media {
+	border-radius: 28px;
+	min-height: 420px;
+	display: grid;
+	place-items: center;
+	overflow: hidden;
+}
+.split__media--gradient {
+	background:
+		radial-gradient(ellipse at 20% 20%, rgba(124, 140, 248, 0.35), transparent 55%),
+		radial-gradient(ellipse at 80% 80%, rgba(75, 208, 238, 0.25), transparent 55%),
+		var(--bg-raised);
+}
+.split__media--dark {
+	background:
+		radial-gradient(ellipse at 50% 50%, rgba(124, 140, 248, 0.14), transparent 65%),
+		var(--bg-raised);
+}
+
+.swipe-demo { display: flex; flex-direction: column; align-items: center; gap: 20px; }
+.swipe-demo__card {
+	width: 250px;
+	background: rgba(0, 0, 0, 0.55);
+	border: 1px solid rgba(255, 255, 255, 0.12);
+	border-radius: 22px;
+	padding: 20px;
+	backdrop-filter: blur(8px);
+}
+.swipe-demo__balance-label { font-size: 12px; color: var(--text-dim); margin-bottom: 6px; }
+.swipe-demo__balance { font-family: var(--font-display); font-size: 30px; font-weight: 800; margin-bottom: 16px; }
+.swipe-demo__pills { display: flex; gap: 6px; }
+.swipe-demo__pills span {
+	font-size: 11px;
+	padding: 6px 10px;
+	border-radius: 999px;
+	background: rgba(255, 255, 255, 0.1);
+	white-space: nowrap;
+}
+.swipe-demo__hint { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.swipe-demo__arrow { font-size: 22px; color: var(--text-dim); animation: bob 1.6s ease-in-out infinite; }
+@keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(8px); } }
+.swipe-demo__air {
+	padding: 10px 22px;
+	border-radius: 999px;
+	font-weight: 700;
+	background: linear-gradient(135deg, var(--accent-a), var(--accent-b));
+}
+
+.shield { animation: floaty 5s ease-in-out infinite; }
+@keyframes floaty { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+
+/* ---------- Banner ---------- */
+.banner { padding: 40px 24px; }
+.banner__inner {
+	max-width: 1080px;
+	margin: 0 auto;
+	border-radius: 32px;
+	padding: 72px 48px;
+	text-align: center;
+	background:
+		radial-gradient(ellipse at 30% 0%, rgba(124, 140, 248, 0.4), transparent 60%),
+		radial-gradient(ellipse at 75% 100%, rgba(75, 208, 238, 0.3), transparent 60%),
+		#101016;
+	border: 1px solid rgba(255, 255, 255, 0.08);
+}
+.banner__inner h2 {
+	font-size: clamp(28px, 3.6vw, 44px);
+	font-weight: 800;
+	letter-spacing: -0.02em;
+	max-width: 700px;
+	margin: 0 auto 30px;
+}
+
+/* ---------- Fine print ---------- */
+.fineprint { max-width: 1080px; margin: 0 auto; padding: 28px 24px 8px; }
+.fineprint p { font-size: 12.5px; color: #6b747c; }
+
+/* ---------- Plans ---------- */
+.plans { padding: 90px 24px; }
+.plans__title {
+	text-align: center;
+	font-size: clamp(30px, 4vw, 48px);
+	font-weight: 800;
+	letter-spacing: -0.02em;
+	margin-bottom: 48px;
+}
+.plans__grid {
+	max-width: 1280px;
+	margin: 0 auto;
+	display: grid;
+	grid-template-columns: repeat(5, 1fr);
+	gap: 16px;
+}
+.plan {
+	background: var(--bg-card);
+	border: 1px solid var(--line);
+	border-radius: var(--radius);
+	padding: 26px 22px;
+	display: flex;
+	flex-direction: column;
+	transition: transform 0.2s ease, border-color 0.2s ease;
+}
+.plan:hover { transform: translateY(-6px); border-color: rgba(255, 255, 255, 0.3); }
+.plan--featured { border-color: rgba(124, 140, 248, 0.6); }
+.plan__swatch { width: 44px; height: 30px; border-radius: 7px; margin-bottom: 18px; }
+.plan__swatch--standard { background: linear-gradient(135deg, #7f8ea3, #aebdd2); }
+.plan__swatch--plus { background: linear-gradient(135deg, #c56ee0, #8f7bf2); }
+.plan__swatch--premium { background: linear-gradient(135deg, #47494e, #17181c); border: 1px solid #3c3e44; }
+.plan__swatch--metal { background: linear-gradient(135deg, #e8e9ec, #9fa3ab); }
+.plan__swatch--ultra { background: linear-gradient(135deg, #2b2447, #6b5be6); }
+.plan__name { font-size: 21px; font-weight: 700; margin-bottom: 4px; }
+.plan__price { font-family: var(--font-display); font-weight: 600; color: var(--text-dim); margin-bottom: 14px; }
+.plan__desc { font-size: 13.5px; color: var(--text-dim); flex: 1; margin-bottom: 20px; }
+
+/* ---------- Footer ---------- */
+.footer { border-top: 1px solid var(--line); padding: 64px 24px 40px; }
+.footer__cols {
+	max-width: 1280px;
+	margin: 0 auto 56px;
+	display: grid;
+	grid-template-columns: repeat(4, 1fr);
+	gap: 36px 24px;
+}
+.footer__col { display: flex; flex-direction: column; gap: 10px; }
+.footer__col h4 {
+	font-family: var(--font-display);
+	font-size: 14px;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.06em;
+	margin-bottom: 4px;
+}
+.footer__col h4:not(:first-child) { margin-top: 18px; }
+.footer__col a {
+	color: var(--text-dim);
+	text-decoration: none;
+	font-size: 14px;
+	transition: color 0.15s;
+}
+.footer__col a:hover { color: #fff; }
+.footer__legal {
+	max-width: 1280px;
+	margin: 0 auto;
+	border-top: 1px solid var(--line);
+	padding-top: 32px;
+}
+.footer__meta {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 20px;
+}
+.footer__brand { display: inline-flex; align-items: center; gap: 8px; font-family: var(--font-display); font-weight: 700; }
+.footer__country { font-size: 14px; color: var(--text-dim); }
+.footer__legal p { font-size: 12.5px; color: #6b747c; margin-bottom: 20px; max-width: 900px; }
+.footer__links { display: flex; flex-wrap: wrap; gap: 20px; }
+.footer__links a { color: var(--text-dim); font-size: 13px; text-decoration: none; }
+.footer__links a:hover { color: #fff; }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1080px) {
+	.plans__grid { grid-template-columns: repeat(3, 1fr); }
+	.footer__cols { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 900px) {
+	.nav__links { display: none; }
+	.nav__burger { display: flex; }
+	.nav__right .btn--ghost { display: none; }
+	.hero { padding-top: 120px; }
+	.hero__inner { grid-template-columns: 1fr; text-align: center; }
+	.hero__sub { margin-inline: auto; }
+	.split__inner { grid-template-columns: 1fr; gap: 36px; }
+	.split--reverse .split__media { order: 0; }
+	.split--reverse .split__copy { order: 1; }
+	/* Show Log in in mobile menu */
+	.nav__mobile .nav__mobile-login {
+		padding: 14px 6px;
+		color: #fff;
+		text-decoration: none;
+		font-weight: 500;
+		border-bottom: 1px solid var(--line);
+		cursor: pointer;
+		background: none;
+		border-top: none;
+		border-left: none;
+		border-right: none;
+		font-family: var(--font-body);
+		font-size: 16px;
+		text-align: left;
+	}
+}
+@media (max-width: 680px) {
+	.plans__grid { grid-template-columns: 1fr; max-width: 420px; }
+	.footer__cols { grid-template-columns: repeat(2, 1fr); }
+	.phone { width: 290px; height: 590px; }
+	.banner__inner { padding: 56px 24px; }
+	.footer__meta { flex-direction: column; gap: 10px; align-items: flex-start; }
+	.login-modal { padding: 32px 20px 24px; }
+}
+</style>
+</head>
+<body>
+
+	<!-- ============ NAV ============ -->
+	<header class="nav" id="nav">
+		<div class="nav__inner">
+			<div class="nav__left">
+				<a class="nav__logo" href="#" aria-label="Home">
+					<svg viewBox="0 0 24 30" width="20" height="25" fill="currentColor" aria-hidden="true">
+						<path d="M21.6 8.2C21.6 3.7 17.9 0 13.4 0H0v29.4h6.3V16.4h4.5l6.9 13h7L17.2 15.7c2.7-1.3 4.4-4.2 4.4-7.5ZM13.4 5.6c1.5 0 2.7 1.2 2.7 2.6 0 1.5-1.2 2.7-2.7 2.7H6.3V5.6h7.1Z"/>
+					</svg>
+					<span class="nav__wordmark">Revolut</span>
+				</a>
+				<nav class="nav__links" aria-label="Primary">
+					<a href="#" class="nav__link nav__link--active">Personal</a>
+					<a href="#" class="nav__link">Business</a>
+					<button class="nav__link" type="button">Kids &amp; Teens</button>
+					<a href="#" class="nav__link">Company</a>
+				</nav>
+			</div>
+			<div class="nav__right">
+				<button class="btn btn--ghost btn--sm" type="button" id="loginBtn">Log in</button>
+				<a href="#signup" class="btn btn--white btn--sm">Sign up</a>
+				<button class="nav__burger" id="burger" type="button" aria-label="Open menu" aria-expanded="false">
+					<span></span><span></span>
+				</button>
+			</div>
+		</div>
+		<div class="nav__mobile" id="mobileMenu">
+			<button class="nav__mobile-login" type="button" id="mobileLoginBtn">Log in</button>
+			<a href="#" class="nav__mobile-link">Personal</a>
+			<a href="#" class="nav__mobile-link">Business</a>
+			<a href="#" class="nav__mobile-link">Kids &amp; Teens</a>
+			<a href="#" class="nav__mobile-link">Company</a>
+			<a href="#signup" class="btn btn--white">Sign up</a>
+		</div>
+	</header>
+
+	<!-- ============ LOGIN MODAL ============ -->
+	<div class="login-overlay" id="loginOverlay" role="dialog" aria-modal="true" aria-label="Log in to Revolut">
+		<div class="login-modal" id="loginModal">
+			<button class="login-modal__close" id="loginClose" type="button" aria-label="Close login">&#x2715;</button>
+			<div class="login-modal__header">
+				<div class="login-modal__logo">
+					<svg viewBox="0 0 24 30" width="18" height="22" fill="currentColor" aria-hidden="true">
+						<path d="M21.6 8.2C21.6 3.7 17.9 0 13.4 0H0v29.4h6.3V16.4h4.5l6.9 13h7L17.2 15.7c2.7-1.3 4.4-4.2 4.4-7.5ZM13.4 5.6c1.5 0 2.7 1.2 2.7 2.6 0 1.5-1.2 2.7-2.7 2.7H6.3V5.6h7.1Z"/>
+					</svg>
+					<span>Revolut</span>
+				</div>
+				<h2 class="login-modal__title">Welcome back</h2>
+				<p class="login-modal__subtitle">Log in to your account</p>
+			</div>
+			<form class="login-modal__form" id="loginForm" novalidate>
+				<div class="login-modal__field">
+					<label class="login-modal__label" for="loginEmail">Email or username</label>
+					<input class="login-modal__input" type="email" id="loginEmail" placeholder="you@example.com" autocomplete="username" />
+				</div>
+				<div class="login-modal__field">
+					<label class="login-modal__label" for="loginPassword">Password</label>
+					<input class="login-modal__input" type="password" id="loginPassword" placeholder="Enter your password" autocomplete="current-password" />
+				</div>
+				<button class="login-modal__submit" type="submit">Log in</button>
+			</form>
+			<div class="login-modal__divider">or</div>
+			<div class="login-modal__footer">
+				Don't have an account? <a href="#signup">Sign up</a>
+			</div>
+		</div>
+	</div>
+
+	<main>
+		<!-- ============ HERO ============ -->
+		<section class="hero">
+			<div class="hero__glow" aria-hidden="true"></div>
+			<div class="hero__inner">
+				<div class="hero__copy">
+					<p class="hero__eyebrow">AIR<span class="hero__eyebrow-dot">·</span>AI by Revolut</p>
+					<h1 class="hero__title">Ask, and AIR makes it happen</h1>
+					<p class="hero__sub">One chat. Total control. Manage your cards and subscriptions, check your investments<sup>1</sup>, and even plan your next trip, with just a conversation.</p>
+					<div class="hero__cta">
+						<a href="#signup" class="btn btn--white btn--lg">Get started</a>
+					</div>
+				</div>
+				<div class="hero__demo">
+					<div class="phone" aria-label="Phone showing a chat with AIR">
+						<div class="phone__notch"></div>
+						<div class="phone__screen">
+							<div class="phone__statusbar"><span id="phoneClock">9:41</span><span class="phone__signal">●●●</span></div>
+							<div class="phone__header">
+								<div class="phone__avatar">✦</div>
+								<div>
+									<div class="phone__name">AIR</div>
+									<div class="phone__status">AI by Revolut</div>
+								</div>
+							</div>
+							<div class="chat" id="chat" aria-live="polite"></div>
+							<div class="phone__input">
+								<span>Ask AIR anything…</span>
+								<button type="button" aria-label="Send">↑</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="hero__tabs" role="tablist" aria-label="AIR use cases">
+				<button class="chip" role="tab" data-scenario="holiday" aria-selected="true" type="button">Holiday budgeting</button>
+				<button class="chip" role="tab" data-scenario="travel" aria-selected="false" type="button">Travel essentials</button>
+				<button class="chip" role="tab" data-scenario="portfolio" aria-selected="false" type="button">Portfolio performance</button>
+				<button class="chip" role="tab" data-scenario="cards" aria-selected="false" type="button">Card controls</button>
+				<button class="chip" role="tab" data-scenario="subs" aria-selected="false" type="button">Subscription management</button>
+			</div>
+		</section>
+
+		<!-- ============ MONEY INTELLIGENCE ============ -->
+		<section class="split">
+			<div class="split__inner">
+				<div class="split__media split__media--gradient">
+					<div class="swipe-demo" aria-hidden="true">
+						<div class="swipe-demo__card">
+							<div class="swipe-demo__balance-label">Personal · GBP</div>
+							<div class="swipe-demo__balance">£2,458.20</div>
+							<div class="swipe-demo__pills"><span>+ Add money</span><span>Move</span><span>Details</span></div>
+						</div>
+						<div class="swipe-demo__hint">
+							<div class="swipe-demo__arrow">↓</div>
+							<div class="swipe-demo__air">✦ AIR</div>
+						</div>
+					</div>
+				</div>
+				<div class="split__copy">
+					<h2>Enter a new era of money intelligence</h2>
+					<p>Start your first conversation with AIR in seconds. Just swipe down from the middle of your app screen, or go to <strong>Profile → Chats → AIR</strong> to get started.</p>
+					<a href="#signup" class="btn btn--white">Join Revolut</a>
+				</div>
+			</div>
+		</section>
+
+		<!-- ============ SECURITY ============ -->
+		<section class="split split--reverse">
+			<div class="split__inner">
+				<div class="split__media split__media--dark">
+					<div class="shield" aria-hidden="true">
+						<svg viewBox="0 0 120 140" width="140" height="164">
+							<defs>
+								<linearGradient id="shieldGrad" x1="0" y1="0" x2="1" y2="1">
+									<stop offset="0" stop-color="#7c8cf8"/><stop offset="1" stop-color="#4bd0ee"/>
+								</linearGradient>
+							</defs>
+							<path d="M60 4 112 26v40c0 38-24 60-52 70C32 126 8 104 8 66V26L60 4Z" fill="none" stroke="url(#shieldGrad)" stroke-width="4"/>
+							<path d="M38 70l16 16 30-34" fill="none" stroke="url(#shieldGrad)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+						</svg>
+					</div>
+				</div>
+				<div class="split__copy">
+					<h2>Chat with AIR, securely</h2>
+					<p>AIR runs on the same protections as the rest of the Revolut app, and it can only see the account data you can already see — nothing more.</p>
+					<p>A strict zero-data-retention policy means your information is never stored by AI partners or used to train models. Sensitive actions always ask you first, so you stay in the driver's seat.</p>
+					<a href="#" class="btn btn--outline">Learn more</a>
+				</div>
+			</div>
+		</section>
+
+		<!-- ============ CTA BANNER ============ -->
+		<section class="banner" id="signup">
+			<div class="banner__inner">
+				<h2>Sign up with Revolut for your chance to experience AIR</h2>
+				<a href="#" class="btn btn--white btn--lg">Get started</a>
+			</div>
+		</section>
+
+		<!-- ============ DISCLAIMER ============ -->
+		<section class="fineprint">
+			<p><sup>1</sup>Capital at risk. Investment services in the real product are provided on a non-advised basis; the value of investments can go down as well as up. This page is an unofficial educational recreation and offers no financial products or advice.</p>
+		</section>
+
+		<!-- ============ PLANS ============ -->
+		<section class="plans">
+			<h2 class="plans__title">Choose your plan</h2>
+			<div class="plans__grid">
+				<article class="plan">
+					<div class="plan__swatch plan__swatch--standard"></div>
+					<h3 class="plan__name">Standard</h3>
+					<p class="plan__price">Free</p>
+					<p class="plan__desc">For the financial basics — everything you need for better money management, all in one place.</p>
+					<a href="#" class="btn btn--outline btn--block">Get Standard</a>
+				</article>
+				<article class="plan">
+					<div class="plan__swatch plan__swatch--plus"></div>
+					<h3 class="plan__name">Plus</h3>
+					<p class="plan__price">£3.99/month</p>
+					<p class="plan__desc">For the smart spender — extra benefits like better limits abroad and cover for your purchases.</p>
+					<a href="#" class="btn btn--outline btn--block">Get Plus</a>
+				</article>
+				<article class="plan plan--featured">
+					<div class="plan__swatch plan__swatch--premium"></div>
+					<h3 class="plan__name">Premium</h3>
+					<p class="plan__price">£7.99/month</p>
+					<p class="plan__desc">For elevating every day — exclusive subscriptions, better savings rates, and unlimited currency exchange.</p>
+					<a href="#" class="btn btn--white btn--block">Get Premium</a>
+				</article>
+				<article class="plan">
+					<div class="plan__swatch plan__swatch--metal"></div>
+					<h3 class="plan__name">Metal</h3>
+					<p class="plan__price">£14.99/month</p>
+					<p class="plan__desc">For global travellers and traders — travel insurance, enhanced limits, and partner subscriptions.</p>
+					<a href="#" class="btn btn--outline btn--block">Get Metal</a>
+				</article>
+				<article class="plan">
+					<div class="plan__swatch plan__swatch--ultra"></div>
+					<h3 class="plan__name">Ultra</h3>
+					<p class="plan__price">£55/month</p>
+					<p class="plan__desc">For the best of everything — unlimited lounge access, monthly global data, and top-tier benefits.</p>
+					<a href="#" class="btn btn--outline btn--block">Get Ultra</a>
+				</article>
+			</div>
+		</section>
+	</main>
+
+	<!-- ============ FOOTER ============ -->
+	<footer class="footer">
+		<div class="footer__cols">
+			<div class="footer__col">
+				<h4>Plans</h4>
+				<a href="#">Standard</a><a href="#">Plus</a><a href="#">Premium</a><a href="#">Metal</a><a href="#">Ultra</a><a href="#">Compare Plans</a>
+			</div>
+			<div class="footer__col">
+				<h4>Accounts</h4>
+				<a href="#">Bank Account</a><a href="#">Joint Account</a><a href="#">Professional Account</a><a href="#">Savings Account</a><a href="#">For ages 16–17</a><a href="#">Parents and guardians</a>
+			</div>
+			<div class="footer__col">
+				<h4>Smart Spending</h4>
+				<a href="#">Cards</a><a href="#">Send &amp; Receive</a><a href="#">Money Management</a><a href="#">RevPoints</a><a href="#">Linked Accounts</a><a href="#">Shops</a>
+			</div>
+			<div class="footer__col">
+				<h4>Investments</h4>
+				<a href="#">Stocks</a><a href="#">Stocks &amp; Shares ISA</a><a href="#">Commodities</a>
+				<h4>Crypto</h4>
+				<a href="#">Revolut Ramp</a><a href="#">Revolut X</a>
+			</div>
+			<div class="footer__col">
+				<h4>Global Finances</h4>
+				<a href="#">International Transfers</a><a href="#">Lounges</a><a href="#">Insurance</a>
+				<h4>Mobile &amp; Connectivity</h4>
+				<a href="#">Mobile Plans</a><a href="#">Data Plans</a>
+			</div>
+			<div class="footer__col">
+				<h4>Revolut AI</h4>
+				<a href="#">AIR</a>
+				<h4>Company</h4>
+				<a href="#">Sustainability</a><a href="#">Code of Conduct</a>
+			</div>
+			<div class="footer__col">
+				<h4>Help</h4>
+				<a href="#">Contact Us</a><a href="#">Help Centre</a><a href="#">System Status</a><a href="#">Developers API</a><a href="#">Site Map</a>
+			</div>
+			<div class="footer__col">
+				<h4>Security &amp; Protection</h4>
+				<a href="#">How We Protect Your Money</a><a href="#">Report Lost Device</a><a href="#">Learn About Fraud &amp; Scams</a><a href="#">Security Bugs</a>
+			</div>
+		</div>
+		<div class="footer__legal">
+			<div class="footer__meta">
+				<span class="footer__brand">
+					<svg viewBox="0 0 24 30" width="14" height="18" fill="currentColor" aria-hidden="true"><path d="M21.6 8.2C21.6 3.7 17.9 0 13.4 0H0v29.4h6.3V16.4h4.5l6.9 13h7L17.2 15.7c2.7-1.3 4.4-4.2 4.4-7.5ZM13.4 5.6c1.5 0 2.7 1.2 2.7 2.6 0 1.5-1.2 2.7-2.7 2.7H6.3V5.6h7.1Z"/></svg>
+					Revolut (clone)
+				</span>
+				<span class="footer__country">🇬🇧 United Kingdom</span>
+			</div>
+			<p>This is an unofficial, educational recreation of the AIR landing page. It is not affiliated with, endorsed by, or connected to Revolut Ltd or any Revolut group company. No financial services are offered here. All trademarks belong to their respective owners.</p>
+			<div class="footer__links">
+				<a href="#">Website Terms</a><a href="#">Legal Agreements</a><a href="#">Complaints</a><a href="#">Privacy</a>
+			</div>
+		</div>
+	</footer>
+
+<script>
+// AIR by Revolut clone — interactions
+
+// ---------- Nav scroll state ----------
+const nav = document.getElementById("nav");
+window.addEventListener("scroll", () => {
+	nav.classList.toggle("is-scrolled", window.scrollY > 10);
+}, { passive: true });
+
+// ---------- Mobile menu ----------
+const burger = document.getElementById("burger");
+const mobileMenu = document.getElementById("mobileMenu");
+burger.addEventListener("click", () => {
+	const open = mobileMenu.classList.toggle("is-open");
+	burger.setAttribute("aria-expanded", String(open));
+});
+
+// ---------- Phone clock ----------
+function tickClock() {
+	const d = new Date();
+	document.getElementById("phoneClock").textContent =
+		`${d.getHours()}:${String(d.getMinutes()).padStart(2, "0")}`;
+}
+tickClock();
+setInterval(tickClock, 30_000);
+
+// ---------- Login Modal ----------
+const loginOverlay = document.getElementById("loginOverlay");
+const loginModal = document.getElementById("loginModal");
+const loginBtn = document.getElementById("loginBtn");
+const mobileLoginBtn = document.getElementById("mobileLoginBtn");
+const loginClose = document.getElementById("loginClose");
+const loginForm = document.getElementById("loginForm");
+const loginEmail = document.getElementById("loginEmail");
+
+function openLogin() {
+	loginOverlay.classList.add("is-visible");
+	document.body.classList.add("modal-open");
+	// Close mobile menu if open
+	mobileMenu.classList.remove("is-open");
+	burger.setAttribute("aria-expanded", "false");
+	// Focus first input
+	requestAnimationFrame(() => loginEmail.focus());
+}
+
+function closeLogin() {
+	loginOverlay.classList.remove("is-visible");
+	document.body.classList.remove("modal-open");
+}
+
+// Open triggers
+loginBtn.addEventListener("click", openLogin);
+mobileLoginBtn.addEventListener("click", openLogin);
+
+// Close: X button
+loginClose.addEventListener("click", closeLogin);
+
+// Close: click backdrop
+loginOverlay.addEventListener("click", (e) => {
+	if (e.target === loginOverlay) closeLogin();
+});
+
+// Close: Esc key
+document.addEventListener("keydown", (e) => {
+	if (e.key === "Escape" && loginOverlay.classList.contains("is-visible")) {
+		closeLogin();
+	}
+});
+
+// Focus trap within modal
+loginModal.addEventListener("keydown", (e) => {
+	if (e.key !== "Tab") return;
+	const focusable = loginModal.querySelectorAll(
+		'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+	);
+	const first = focusable[0];
+	const last = focusable[focusable.length - 1];
+
+	if (e.shiftKey) {
+		if (document.activeElement === first) {
+			e.preventDefault();
+			last.focus();
+		}
+	} else {
+		if (document.activeElement === last) {
+			e.preventDefault();
+			first.focus();
+		}
+	}
+});
+
+// Form submit — no-op, just close modal (auth out of scope)
+loginForm.addEventListener("submit", (e) => {
+	e.preventDefault();
+	closeLogin();
+});
+
+// ---------- Chat scenarios (one per hero tab) ----------
+const SCENARIOS = {
+	holiday: [
+		{ who: "user", text: "How much did I spend on my Lisbon trip?" },
+		{ who: "air", text: "You spent £642.18 in Lisbon between 2–6 July. Here's the breakdown:" },
+		{ who: "card", html: `
+			<div class="card-title">Lisbon · 2–6 Jul</div>
+			<div class="card-big">£642.18</div>
+			<div class="card-row"><span>🍽 Eating out</span><b>£248.40</b></div>
+			<div class="card-row"><span>🏨 Stays</span><b>£221.00</b></div>
+			<div class="card-row"><span>🚕 Transport</span><b>£96.78</b></div>
+			<div class="card-bar"><i></i></div>` },
+		{ who: "air", text: "That's 12% under the budget you set. Want me to create a budget for your next trip?" },
+	],
+	travel: [
+		{ who: "user", text: "I'm flying to Tokyo on Friday. What do I need?" },
+		{ who: "air", text: "Exciting! ✈️ Here's what I can sort out for you right now:" },
+		{ who: "card", html: `
+			<div class="card-title">Tokyo essentials</div>
+			<div class="card-row"><span>📶 eSIM · 5GB, 7 days</span><b>£9.50</b></div>
+			<div class="card-row"><span>💴 GBP → JPY</span><b>1 = ¥192.40</b></div>
+			<div class="card-row"><span>🛡 Travel insurance</span><b class="up">Included</b></div>` },
+		{ who: "air", text: "Want me to activate the eSIM so it's ready when you land?" },
+	],
+	portfolio: [
+		{ who: "user", text: "How are my investments doing this month?" },
+		{ who: "air", text: "Your portfolio is up 2.4% this month. Here's the snapshot:" },
+		{ who: "card", html: `
+			<div class="card-title">Portfolio · July</div>
+			<div class="card-big">£5,830.12 <span class="up" style="font-size:14px">▲ 2.4%</span></div>
+			<div class="card-row"><span>AAPL</span><b class="up">+4.1%</b></div>
+			<div class="card-row"><span>VUSA</span><b class="up">+1.8%</b></div>
+			<div class="card-row"><span>TSLA</span><b class="down">−0.9%</b></div>` },
+		{ who: "air", text: "Your best performer is Apple. Capital at risk — want the full report?" },
+	],
+	cards: [
+		{ who: "user", text: "I can't find my card. Freeze it please!" },
+		{ who: "air", text: "Done — your Metal card ending in 4921 is frozen. 🧊 No payments can go through." },
+		{ who: "card", html: `
+			<div class="card-title">Card status</div>
+			<div class="card-big">Frozen ❄️</div>
+			<div class="card-row"><span>Metal ·· 4921</span><b>Frozen just now</b></div>
+			<div class="card-row"><span>Online payments</span><b class="down">Blocked</b></div>
+			<div class="card-row"><span>ATM withdrawals</span><b class="down">Blocked</b></div>` },
+		{ who: "air", text: "If it turns up, just ask me to unfreeze it. Should I order a replacement in the meantime?" },
+	],
+	subs: [
+		{ who: "user", text: "Which subscriptions am I paying for?" },
+		{ who: "air", text: "You have 6 active subscriptions totalling £58.94/month. The biggest ones:" },
+		{ who: "card", html: `
+			<div class="card-title">Subscriptions · monthly</div>
+			<div class="card-big">£58.94</div>
+			<div class="card-row"><span>🎬 Streaming</span><b>£17.98</b></div>
+			<div class="card-row"><span>🎧 Music</span><b>£11.99</b></div>
+			<div class="card-row"><span>☁️ Cloud storage</span><b>£7.99</b></div>` },
+		{ who: "air", text: "You haven't used one of them since April. Want me to pause it?" },
+	],
+};
+
+const chatEl = document.getElementById("chat");
+const tabs = document.querySelectorAll(".chip");
+let playToken = 0;
+
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+
+async function playScenario(key) {
+	const token = ++playToken;
+	const script = SCENARIOS[key];
+	chatEl.innerHTML = "";
+
+	for (const step of script) {
+		if (token !== playToken) return;
+
+		if (step.who !== "user") {
+			const typing = document.createElement("div");
+			typing.className = "typing";
+			typing.innerHTML = "<i></i><i></i><i></i>";
+			chatEl.appendChild(typing);
+			await wait(850);
+			typing.remove();
+			if (token !== playToken) return;
+		}
+
+		const el = document.createElement("div");
+		if (step.who === "card") {
+			el.className = "msg msg--card";
+			el.innerHTML = step.html;
+		} else {
+			el.className = `msg msg--${step.who}`;
+			el.textContent = step.text;
+		}
+		chatEl.appendChild(el);
+		await wait(step.who === "user" ? 900 : 1300);
+	}
+
+	await wait(4000);
+	if (token === playToken) playScenario(key);
+}
+
+tabs.forEach((tab) => {
+	tab.addEventListener("click", () => {
+		tabs.forEach((t) => t.setAttribute("aria-selected", "false"));
+		tab.setAttribute("aria-selected", "true");
+		stopAutoRotate();
+		playScenario(tab.dataset.scenario);
+	});
+});
+
+// ---------- Auto-rotate tabs ----------
+const KEYS = [...tabs].map((t) => t.dataset.scenario);
+let autoIndex = 0;
+let autoTimer = setInterval(() => {
+	autoIndex = (autoIndex + 1) % KEYS.length;
+	tabs.forEach((t, i) => t.setAttribute("aria-selected", String(i === autoIndex)));
+	playScenario(KEYS[autoIndex]);
+}, 14_000);
+
+function stopAutoRotate() {
+	if (autoTimer) { clearInterval(autoTimer); autoTimer = null; }
+}
+
+playScenario("holiday");
+</script>
+</body>
+</html>
