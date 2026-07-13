@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en-GB" data-theme="dark">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>AIR | AI by Revolut — Clone</title>
+	<meta name="description" content="Educational clone of the AIR (AI by Revolut) landing page. Not affiliated with Revolut." />
+	<link rel="preconnect" href="https://fonts.googleapis.com" />
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+	<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+	<link rel="stylesheet" href="styles.css" />
+	<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='white'/%3E%3Ctext x='16' y='22' font-family='Arial' font-weight='bold' font-size='16' fill='black' text-anchor='middle'%3ER%3C/text%3E%3C/svg%3E" />
+</head>
+<body>
+
+	<!-- ============ NAV ============ -->
+	<header class="nav" id="nav">
+		<div class="nav__inner">
+			<div class="nav__left">
+				<a class="nav__logo" href="#" aria-label="Home">
+					<svg viewBox="0 0 24 30" width="20" height="25" fill="currentColor" aria-hidden="true">
+						<path d="M21.6 8.2C21.6 3.7 17.9 0 13.4 0H0v29.4h6.3V16.4h4.5l6.9 13h7L17.2 15.7c2.7-1.3 4.4-4.2 4.4-7.5ZM13.4 5.6c1.5 0 2.7 1.2 2.7 2.6 0 1.5-1.2 2.7-2.7 2.7H6.3V5.6h7.1Z"/>
+					</svg>
+					<span class="nav__wordmark">Revolut</span>
+				</a>
+				<nav class="nav__links" aria-label="Primary">
+					<a href="#" class="nav__link nav__link--active">Personal</a>
+					<a href="#" class="nav__link">Business</a>
+					<button class="nav__link" type="button">Kids &amp; Teens</button>
+					<a href="#" class="nav__link">Company</a>
+				</nav>
+			</div>
+			<div class="nav__right">
+				<button class="btn btn--ghost btn--sm" id="loginBtn" type="button">Log in</button>
+				<a href="#signup" class="btn btn--white btn--sm">Sign up</a>
+				<button class="nav__burger" id="burger" type="button" aria-label="Open menu" aria-expanded="false">
+					<span></span><span></span>
+				</button>
+			</div>
+		</div>
+		<div class="nav__mobile" id="mobileMenu">
+			<a href="#" class="nav__mobile-link">Personal</a>
+			<a href="#" class="nav__mobile-link">Business</a>
+			<a href="#" class="nav__mobile-link">Kids &amp; Teens</a>
+			<a href="#" class="nav__mobile-link">Company</a>
+			<a href="#signup" class="btn btn--white">Sign up</a>
+		</div>
+	</header>
+
+	<main>
+		<!-- ============ HERO ============ -->
+		<section class="hero">
+			<div class="hero__glow" aria-hidden="true"></div>
+			<div class="hero__inner">
+				<div class="hero__copy">
+					<p class="hero__eyebrow">AIR<span class="hero__eyebrow-dot">·</span>AI by Revolut</p>
+					<h1 class="hero__title">Ask, and AIR makes it happen</h1>
+					<p class="hero__sub">One chat. Total control. Manage your cards and subscriptions, check your investments<sup>1</sup>, and even plan your next trip, with just a conversation.</p>
+					<div class="hero__cta">
+						<a href="#signup" class="btn btn--white btn--lg">Get started</a>
+					</div>
+				</div>
+				<div class="hero__demo">
+					<div class="phone" aria-label="Phone showing a chat with AIR">
+						<div class="phone__notch"></div>
+						<div class="phone__screen">
+							<div class="phone__statusbar"><span id="phoneClock">9:41</span><span class="phone__signal">●●●</span></div>
+							<div class="phone__header">
+								<div class="phone__avatar">✦</div>
+								<div>
+									<div class="phone__name">AIR</div>
+									<div class="phone__status">AI by Revolut</div>
+								</div>
+							</div>
+							<div class="chat" id="chat" aria-live="polite"></div>
+							<div class="phone__input">
+								<span>Ask AIR anything…</span>
+								<button type="button" aria-label="Send">↑</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="hero__tabs" role="tablist" aria-label="AIR use cases">
+				<button class="chip" role="tab" data-scenario="holiday" aria-selected="true" type="button">Holiday budgeting</button>
+				<button class="chip" role="tab" data-scenario="travel" aria-selected="false" type="button">Travel essentials</button>
+				<button class="chip" role="tab" data-scenario="portfolio" aria-selected="false" type="button">Portfolio performance</button>
+				<button class="chip" role="tab" data-scenario="cards" aria-selected="false" type="button">Card controls</button>
+				<button class="chip" role="tab" data-scenario="subs" aria-selected="false" type="button">Subscription management</button>
+			</div>
+		</section>
+
+		<!-- ============ MONEY INTELLIGENCE ============ -->
+		<section class="split">
+			<div class="split__inner">
+				<div class="split__media split__media--gradient">
+					<div class="swipe-demo" aria-hidden="true">
+						<div class="swipe-demo__card">
+							<div class="swipe-demo__balance-label">Personal · GBP</div>
+							<div class="swipe-demo__balance">£2,458.20</div>
+							<div class="swipe-demo__pills"><span>+ Add money</span><span>Move</span><span>Details</span></div>
+						</div>
+						<div class="swipe-demo__hint">
+							<div class="swipe-demo__arrow">↓</div>
+							<div class="swipe-demo__air">✦ AIR</div>
+						</div>
+					</div>
+				</div>
+				<div class="split__copy">
+					<h2>Enter a new era of money intelligence</h2>
+					<p>Start your first conversation with AIR in seconds. Just swipe down from the middle of your app screen, or go to <strong>Profile → Chats → AIR</strong> to get started.</p>
+					<a href="#signup" class="btn btn--white">Join Revolut</a>
+				</div>
+			</div>
+		</section>
+
+		<!-- ============ SECURITY ============ -->
+		<section class="split split--reverse">
+			<div class="split__inner">
+				<div class="split__media split__media--dark">
+					<div class="shield" aria-hidden="true">
+						<svg viewBox="0 0 120 140" width="140" height="164">
+							<defs>
+								<linearGradient id="shieldGrad" x1="0" y1="0" x2="1" y2="1">
+									<stop offset="0" stop-color="#7c8cf8"/><stop offset="1" stop-color="#4bd0ee"/>
+								</linearGradient>
+							</defs>
+							<path d="M60 4 112 26v40c0 38-24 60-52 70C32 126 8 104 8 66V26L60 4Z" fill="none" stroke="url(#shieldGrad)" stroke-width="4"/>
+							<path d="M38 70l16 16 30-34" fill="none" stroke="url(#shieldGrad)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+						</svg>
+					</div>
+				</div>
+				<div class="split__copy">
+					<h2>Chat with AIR, securely</h2>
+					<p>AIR runs on the same protections as the rest of the Revolut app, and it can only see the account data you can already see — nothing more.</p>
+					<p>A strict zero-data-retention policy means your information is never stored by AI partners or used to train models. Sensitive actions always ask you first, so you stay in the driver’s seat.</p>
+					<a href="#" class="btn btn--outline">Learn more</a>
+				</div>
+			</div>
+		</section>
+
+		<!-- ============ CTA BANNER ============ -->
+		<section class="banner" id="signup">
+			<div class="banner__inner">
+				<h2>Sign up with Revolut for your chance to experience AIR</h2>
+				<a href="#" class="btn btn--white btn--lg">Get started</a>
+			</div>
+		</section>
+
+		<!-- ============ DISCLAIMER ============ -->
+		<section class="fineprint">
+			<p><sup>1</sup>Capital at risk. Investment services in the real product are provided on a non-advised basis; the value of investments can go down as well as up. This page is an unofficial educational recreation and offers no financial products or advice.</p>
+		</section>
+
+		<!-- ============ PLANS ============ -->
+		<section class="plans">
+			<h2 class="plans__title">Choose your plan</h2>
+			<div class="plans__grid">
+				<article class="plan">
+					<div class="plan__swatch plan__swatch--standard"></div>
+					<h3 class="plan__name">Standard</h3>
+					<p class="plan__price">Free</p>
+					<p class="plan__desc">For the financial basics — everything you need for better money management, all in one place.</p>
+					<a href="#" class="btn btn--outline btn--block">Get Standard</a>
+				</article>
+				<article class="plan">
+					<div class="plan__swatch plan__swatch--plus"></div>
+					<h3 class="plan__name">Plus</h3>
+					<p class="plan__price">£3.99/month</p>
+					<p class="plan__desc">For the smart spender — extra benefits like better limits abroad and cover for your purchases.</p>
+					<a href="#" class="btn btn--outline btn--block">Get Plus</a>
+				</article>
+				<article class="plan plan--featured">
+					<div class="plan__swatch plan__swatch--premium"></div>
+					<h3 class="plan__name">Premium</h3>
+					<p class="plan__price">£7.99/month</p>
+					<p class="plan__desc">For elevating every day — exclusive subscriptions, better savings rates, and unlimited currency exchange.</p>
+					<a href="#" class="btn btn--white btn--block">Get Premium</a>
+				</article>
+				<article class="plan">
+					<div class="plan__swatch plan__swatch--metal"></div>
+					<h3 class="plan__name">Metal</h3>
+					<p class="plan__price">£14.99/month</p>
+					<p class="plan__desc">For global travellers and traders — travel insurance, enhanced limits, and partner subscriptions.</p>
+					<a href="#" class="btn btn--outline btn--block">Get Metal</a>
+				</article>
+				<article class="plan">
+					<div class="plan__swatch plan__swatch--ultra"></div>
+					<h3 class="plan__name">Ultra</h3>
+					<p class="plan__price">£55/month</p>
+					<p class="plan__desc">For the best of everything — unlimited lounge access, monthly global data, and top-tier benefits.</p>
+					<a href="#" class="btn btn--outline btn--block">Get Ultra</a>
+				</article>
+			</div>
+		</section>
+	</main>
+
+	<!-- ============ FOOTER ============ -->
+	<footer class="footer">
+		<div class="footer__cols">
+			<div class="footer__col">
+				<h4>Plans</h4>
+				<a href="#">Standard</a><a href="#">Plus</a><a href="#">Premium</a><a href="#">Metal</a><a href="#">Ultra</a><a href="#">Compare Plans</a>
+			</div>
+			<div class="footer__col">
+				<h4>Accounts</h4>
+				<a href="#">Bank Account</a><a href="#">Joint Account</a><a href="#">Professional Account</a><a href="#">Savings Account</a><a href="#">For ages 16–17</a><a href="#">Parents and guardians</a>
+			</div>
+			<div class="footer__col">
+				<h4>Smart Spending</h4>
+				<a href="#">Cards</a><a href="#">Send &amp; Receive</a><a href="#">Money Management</a><a href="#">RevPoints</a><a href="#">Linked Accounts</a><a href="#">Shops</a>
+			</div>
+			<div class="footer__col">
+				<h4>Investments</h4>
+				<a href="#">Stocks</a><a href="#">Stocks &amp; Shares ISA</a><a href="#">Commodities</a>
+				<h4>Crypto</h4>
+				<a href="#">Revolut Ramp</a><a href="#">Revolut X</a>
+			</div>
+			<div class="footer__col">
+				<h4>Global Finances</h4>
+				<a href="#">International Transfers</a><a href="#">Lounges</a><a href="#">Insurance</a>
+				<h4>Mobile &amp; Connectivity</h4>
+				<a href="#">Mobile Plans</a><a href="#">Data Plans</a>
+			</div>
+			<div class="footer__col">
+				<h4>Revolut AI</h4>
+				<a href="#">AIR</a>
+				<h4>Company</h4>
+				<a href="#">Sustainability</a><a href="#">Code of Conduct</a>
+			</div>
+			<div class="footer__col">
+				<h4>Help</h4>
+				<a href="#">Contact Us</a><a href="#">Help Centre</a><a href="#">System Status</a><a href="#">Developers API</a><a href="#">Site Map</a>
+			</div>
+			<div class="footer__col">
+				<h4>Security &amp; Protection</h4>
+				<a href="#">How We Protect Your Money</a><a href="#">Report Lost Device</a><a href="#">Learn About Fraud &amp; Scams</a><a href="#">Security Bugs</a>
+			</div>
+		</div>
+		<div class="footer__legal">
+			<div class="footer__meta">
+				<span class="footer__brand">
+					<svg viewBox="0 0 24 30" width="14" height="18" fill="currentColor" aria-hidden="true"><path d="M21.6 8.2C21.6 3.7 17.9 0 13.4 0H0v29.4h6.3V16.4h4.5l6.9 13h7L17.2 15.7c2.7-1.3 4.4-4.2 4.4-7.5ZM13.4 5.6c1.5 0 2.7 1.2 2.7 2.6 0 1.5-1.2 2.7-2.7 2.7H6.3V5.6h7.1Z"/></svg>
+					Revolut (clone)
+				</span>
+				<span class="footer__country">🇬🇧 United Kingdom</span>
+			</div>
+			<p>This is an unofficial, educational recreation of the AIR landing page. It is not affiliated with, endorsed by, or connected to Revolut Ltd or any Revolut group company. No financial services are offered here. All trademarks belong to their respective owners.</p>
+			<div class="footer__links">
+				<a href="#">Website Terms</a><a href="#">Legal Agreements</a><a href="#">Complaints</a><a href="#">Privacy</a>
+			</div>
+		</div>
+	</footer>
+
+	<!-- ============ LOGIN MODAL ============ -->
+	<div class="modal-overlay" id="loginModal" role="dialog" aria-modal="true" aria-label="Log in" hidden>
+		<div class="modal">
+			<button class="modal__close" id="loginClose" type="button" aria-label="Close">&times;</button>
+			<h2 class="modal__title">Log in</h2>
+			<form class="modal__form" id="loginForm" novalidate>
+				<div class="modal__field">
+					<label for="loginEmail">Email</label>
+					<input id="loginEmail" type="email" placeholder="you@example.com" autocomplete="email" required />
+				</div>
+				<div class="modal__field">
+					<label for="loginPassword">Password</label>
+					<input id="loginPassword" type="password" placeholder="Your password" autocomplete="current-password" required />
+				</div>
+				<p class="modal__error" id="loginError" role="alert" hidden></p>
+				<button class="btn btn--white btn--block" type="submit">Log in</button>
+			</form>
+			<p class="modal__footer">Don’t have an account? <a href="#signup" id="loginSignupLink">Sign up</a></p>
+		</div>
+	</div>
+
+	<script src="script.js"></script>
+</body>
+</html>
