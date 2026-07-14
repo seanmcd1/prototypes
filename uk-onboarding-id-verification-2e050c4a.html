@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>UK Onboarding — ID Verification Redesign</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+:root{
+  --bg:#000; --bg-raised:#101012; --bg-card:#17171a; --line:rgba(255,255,255,.12);
+  --text:#fff; --dim:#8b959e; --dimmer:#5f6772;
+  --accent-a:#7c8cf8; --accent-b:#4bd0ee; --grad:linear-gradient(100deg,#7c8cf8,#4bd0ee);
+  --good:#37d39b; --warn:#ffb020; --bad:#ff5c6c;
+  --phone-bg:#f6f7fb; --phone-ink:#0d1220; --phone-dim:#6b7280; --phone-line:#e7e9f0;
+  --font-d:"Inter Tight",-apple-system,sans-serif; --font-b:"Inter",-apple-system,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:var(--bg);color:var(--text);font-family:var(--font-b);-webkit-font-smoothing:antialiased}
+body{padding:32px 20px 64px;background:
+  radial-gradient(900px 500px at 12% -8%,rgba(124,140,248,.18),transparent 60%),
+  radial-gradient(800px 480px at 100% 0%,rgba(75,208,238,.12),transparent 55%),
+  var(--bg);
+  min-height:100vh}
+.wrap{max-width:1200px;margin:0 auto}
+.eyebrow{font-family:var(--font-d);font-weight:700;font-size:12px;letter-spacing:.14em;text-transform:uppercase;
+  background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+h1{font-family:var(--font-d);font-weight:800;font-size:clamp(26px,3.4vw,40px);line-height:1.08;letter-spacing:-.02em;margin:8px 0 10px}
+.lede{color:var(--dim);font-size:16px;max-width:720px;line-height:1.55}
+.tag{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--dim);border:1px solid var(--line);
+  border-radius:999px;padding:4px 11px;margin-top:16px}
+.tag b{color:var(--text);font-weight:600}
+.layout{display:grid;grid-template-columns:1fr 400px;gap:28px;margin-top:34px;align-items:start}
+@media (max-width:940px){.layout{grid-template-columns:1fr}}
+
+/* ---- panel ---- */
+.panel{background:var(--bg-card);border:1px solid var(--line);border-radius:20px;padding:24px}
+.panel + .panel{margin-top:20px}
+.panel h2{font-family:var(--font-d);font-weight:700;font-size:18px;letter-spacing:-.01em;display:flex;align-items:center;gap:9px}
+.panel h2 .num{width:24px;height:24px;border-radius:8px;background:var(--grad);color:#04121a;font-size:13px;font-weight:800;
+  display:grid;place-items:center;font-family:var(--font-d)}
+.panel .sub{color:var(--dim);font-size:13.5px;margin-top:6px;line-height:1.5}
+
+/* funnel */
+.funnel{margin-top:18px;display:flex;flex-direction:column;gap:9px}
+.frow{display:grid;grid-template-columns:132px 1fr 46px;align-items:center;gap:12px}
+.frow .lbl{font-size:12.5px;color:var(--dim)}
+.fbar{height:26px;border-radius:7px;background:rgba(255,255,255,.06);overflow:hidden;position:relative}
+.fbar > i{position:absolute;inset:0;width:0;background:linear-gradient(90deg,rgba(124,140,248,.55),rgba(75,208,238,.5));
+  border-radius:7px;transition:width 1.1s cubic-bezier(.2,.7,.2,1)}
+.frow .pct{font-size:12.5px;font-weight:600;color:var(--text);text-align:right;font-variant-numeric:tabular-nums}
+.frow.drop .fbar > i{background:linear-gradient(90deg,rgba(255,92,108,.75),rgba(255,176,32,.7))}
+.frow.drop .lbl{color:#fff;font-weight:600}
+.fdrop{grid-column:2/4;font-size:11.5px;color:var(--bad);margin-top:-3px;display:flex;align-items:center;gap:6px}
+.pill-hot{background:rgba(255,92,108,.16);color:#ff9aa4;border:1px solid rgba(255,92,108,.35);
+  border-radius:999px;padding:1px 8px;font-weight:600;font-size:11px}
+
+/* improvement list */
+.imp{list-style:none;margin-top:8px;display:flex;flex-direction:column;gap:14px}
+.imp li{display:grid;grid-template-columns:30px 1fr;gap:12px;align-items:start}
+.imp .ic{width:30px;height:30px;border-radius:9px;background:rgba(124,140,248,.14);border:1px solid rgba(124,140,248,.3);
+  display:grid;place-items:center;color:var(--accent-b)}
+.imp b{font-family:var(--font-d);font-weight:600;font-size:14px;display:block;margin-bottom:2px}
+.imp p{color:var(--dim);font-size:13px;line-height:1.5}
+
+/* ---- phone stage ---- */
+.stage{position:sticky;top:24px}
+.stage-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:10px;flex-wrap:wrap}
+.toggle{display:inline-flex;background:var(--bg-card);border:1px solid var(--line);border-radius:999px;padding:4px}
+.toggle button{border:0;background:transparent;color:var(--dim);font-family:var(--font-b);font-weight:600;font-size:12.5px;
+  padding:7px 14px;border-radius:999px;cursor:pointer;transition:.2s}
+.toggle button.on{color:#04121a;background:var(--grad)}
+.stage-note{font-size:11.5px;color:var(--dimmer)}
+
+.phone{width:340px;max-width:100%;margin:0 auto;background:#0b0b0d;border-radius:44px;padding:11px;
+  box-shadow:0 40px 90px -30px rgba(0,0,0,.9),0 0 0 1px rgba(255,255,255,.06);position:relative}
+.screen{background:var(--phone-bg);border-radius:34px;overflow:hidden;height:660px;position:relative;
+  display:flex;flex-direction:column;color:var(--phone-ink)}
+.notch{position:absolute;top:13px;left:50%;transform:translateX(-50%);width:120px;height:26px;background:#0b0b0d;
+  border-radius:0 0 16px 16px;z-index:40}
+/* status/app bar */
+.appbar{padding:26px 20px 10px;display:flex;align-items:center;gap:12px;background:var(--phone-bg);z-index:20}
+.back{width:30px;height:30px;border-radius:9px;border:1px solid var(--phone-line);background:#fff;display:grid;place-items:center;
+  cursor:pointer;color:var(--phone-ink);flex:none}
+.back[disabled]{opacity:.35;cursor:default}
+.prog{flex:1;height:6px;border-radius:999px;background:#e7e9f0;overflow:hidden}
+.prog > i{display:block;height:100%;width:0;background:linear-gradient(90deg,#7c8cf8,#4bd0ee);border-radius:999px;transition:width .5s}
+.step-of{font-size:11px;color:var(--phone-dim);font-weight:600;flex:none;font-variant-numeric:tabular-nums}
+
+.body{flex:1;overflow-y:auto;padding:8px 22px 20px}
+.body::-webkit-scrollbar{width:0}
+.foot{padding:14px 22px 24px;background:linear-gradient(180deg,rgba(246,247,251,0),var(--phone-bg) 30%)}
+
+.scr{display:none;animation:fade .32s ease both}
+.scr.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+h3.title{font-family:var(--font-d);font-weight:700;font-size:22px;letter-spacing:-.01em;line-height:1.15;margin:6px 0 8px}
+p.desc{color:var(--phone-dim);font-size:14px;line-height:1.5}
+.brandmark{display:flex;align-items:center;gap:9px;margin-top:4px}
+.brandmark .r{width:30px;height:30px;border-radius:9px;background:var(--phone-ink);color:#fff;display:grid;place-items:center;
+  font-family:var(--font-d);font-weight:800;font-size:16px}
+.brandmark span{font-family:var(--font-d);font-weight:700;font-size:16px}
+
+.btn{width:100%;border:0;border-radius:15px;padding:15px;font-family:var(--font-b);font-weight:600;font-size:15px;cursor:pointer;
+  transition:.18s;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-primary{background:var(--phone-ink);color:#fff}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 12px 24px -12px rgba(13,18,32,.7)}
+.btn-primary:disabled{opacity:.4;cursor:default;transform:none;box-shadow:none}
+.btn-ghost{background:transparent;color:var(--phone-dim);font-size:13.5px;padding:11px}
+.btn-soft{background:#eef0f7;color:var(--phone-ink)}
+.link{color:#4a63e7;font-weight:600;cursor:pointer;text-decoration:none;font-size:13.5px}
+
+.field{margin-top:16px}
+.field label{font-size:12.5px;font-weight:600;color:var(--phone-dim);display:block;margin-bottom:6px}
+.field .inputrow{display:flex;align-items:center;gap:8px;border:1.5px solid var(--phone-line);border-radius:13px;padding:13px 14px;background:#fff}
+.field .inputrow:focus-within{border-color:var(--accent-a)}
+.field .cc{font-weight:600;color:var(--phone-ink)}
+.field input{border:0;outline:0;font-size:15px;font-family:var(--font-b);flex:1;color:var(--phone-ink);background:transparent}
+
+/* choice cards */
+.choice{display:flex;align-items:center;gap:14px;border:1.5px solid var(--phone-line);background:#fff;border-radius:15px;
+  padding:15px;cursor:pointer;transition:.16s;margin-top:12px;text-align:left;width:100%;font-family:var(--font-b)}
+.choice:hover{border-color:#c3c9e0}
+.choice.sel{border-color:var(--accent-a);box-shadow:0 0 0 3px rgba(124,140,248,.15)}
+.choice .cic{width:44px;height:44px;border-radius:12px;background:#eef0f7;display:grid;place-items:center;flex:none}
+.choice b{font-family:var(--font-d);font-weight:600;font-size:15px;display:block}
+.choice small{color:var(--phone-dim);font-size:12.5px}
+.choice .chev{margin-left:auto;color:#c3c9e0}
+
+/* reassurance strip */
+.reassure{display:flex;gap:10px;background:#eaf7f1;border:1px solid #bfe9d6;border-radius:13px;padding:12px 13px;margin-top:14px}
+.reassure svg{flex:none;color:#12a06a;margin-top:1px}
+.reassure b{font-size:13px;display:block;font-family:var(--font-d);font-weight:600}
+.reassure p{font-size:12px;color:#3a7a5e;line-height:1.45}
+.mini{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.mini span{font-size:11.5px;color:var(--phone-dim);display:inline-flex;align-items:center;gap:5px;
+  background:#eef0f7;border-radius:999px;padding:5px 10px}
+
+/* camera viewfinder */
+.viewfinder{position:relative;border-radius:18px;overflow:hidden;margin-top:16px;height:230px;
+  background:linear-gradient(135deg,#20242e,#2c3340 60%,#3a4150);display:grid;place-items:center}
+.vf-doc{width:80%;height:130px;border-radius:12px;background:linear-gradient(135deg,#dfe6f5,#cdd6ec);position:relative;
+  box-shadow:0 10px 30px rgba(0,0,0,.35);transition:.5s;opacity:.9}
+.vf-doc::before{content:"";position:absolute;top:14px;left:14px;width:40px;height:48px;border-radius:8px;background:rgba(90,104,140,.5)}
+.vf-doc::after{content:"";position:absolute;top:16px;left:66px;right:16px;height:8px;border-radius:4px;background:rgba(90,104,140,.45);
+  box-shadow:0 16px 0 rgba(90,104,140,.35),0 32px 0 rgba(90,104,140,.28),0 48px 0 rgba(90,104,140,.2)}
+.vf-frame{position:absolute;inset:22px 20px;border-radius:14px;pointer-events:none}
+.vf-frame span{position:absolute;width:26px;height:26px;border:3px solid #fff;opacity:.92}
+.vf-frame .tl{top:0;left:0;border-right:0;border-bottom:0;border-radius:10px 0 0 0}
+.vf-frame .tr{top:0;right:0;border-left:0;border-bottom:0;border-radius:0 10px 0 0}
+.vf-frame .bl{bottom:0;left:0;border-right:0;border-top:0;border-radius:0 0 0 10px}
+.vf-frame .br{bottom:0;right:0;border-left:0;border-top:0;border-radius:0 0 10px 0}
+.vf-frame.ok span{border-color:var(--good)}
+.scanline{position:absolute;left:12%;right:12%;height:2px;background:linear-gradient(90deg,transparent,#4bd0ee,transparent);
+  top:20%;opacity:0;filter:drop-shadow(0 0 6px #4bd0ee)}
+.scanning .scanline{animation:scan 1.1s ease-in-out infinite;opacity:1}
+@keyframes scan{0%{top:20%}50%{top:78%}100%{top:20%}}
+.vf-status{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);white-space:nowrap;
+  background:rgba(6,10,18,.72);backdrop-filter:blur(6px);color:#fff;font-size:12.5px;font-weight:600;
+  padding:7px 14px;border-radius:999px;display:flex;align-items:center;gap:7px;transition:.25s}
+.vf-status.ok{background:rgba(19,160,106,.92)}
+.vf-status .dot{width:7px;height:7px;border-radius:50%;background:var(--warn);animation:pulse 1s infinite}
+.vf-status.ok .dot{background:#fff;animation:none}
+@keyframes pulse{50%{opacity:.35}}
+.autocap{text-align:center;font-size:12px;color:var(--phone-dim);margin-top:10px}
+
+/* quality check result */
+.qc{margin-top:16px;border-radius:15px;border:1px solid #bfe9d6;background:#eaf7f1;padding:14px}
+.qc.head{display:flex;align-items:center;gap:10px}
+.qc .badge{width:34px;height:34px;border-radius:50%;background:#12a06a;display:grid;place-items:center;color:#fff;flex:none}
+.qc b{font-family:var(--font-d);font-weight:700;font-size:15px}
+.qc ul{list-style:none;margin-top:10px;display:flex;flex-direction:column;gap:7px}
+.qc li{display:flex;align-items:center;gap:8px;font-size:12.5px;color:#2f6b52}
+.qc li svg{color:#12a06a;flex:none}
+
+/* liveness */
+.liveness{margin:20px auto 4px;width:210px;height:210px;border-radius:50%;position:relative;display:grid;place-items:center;
+  background:radial-gradient(circle at 50% 40%,#eef0f7,#dfe4f2)}
+.liveness .ring{position:absolute;inset:-6px;border-radius:50%;border:5px solid #e7e9f0}
+.liveness .ring i{position:absolute;inset:-5px;border-radius:50%;border:5px solid transparent;border-top-color:var(--accent-a);
+  border-right-color:var(--accent-b);opacity:0;transition:opacity .3s}
+.liveness.run .ring i{opacity:1;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.face{width:120px;height:130px;border-radius:60px 60px 58px 58px;background:linear-gradient(135deg,#f4c9a8,#e9b892);position:relative}
+.face::before{content:"";position:absolute;top:46px;left:30px;width:12px;height:12px;border-radius:50%;background:#5b4636;
+  box-shadow:38px 0 0 #5b4636}
+.face::after{content:"";position:absolute;top:80px;left:44px;width:32px;height:14px;border-radius:0 0 20px 20px;background:#c98b6a}
+.live-check{position:absolute;bottom:8px;right:14px;width:44px;height:44px;border-radius:50%;background:var(--good);
+  display:grid;place-items:center;color:#fff;opacity:0;transform:scale(.5);transition:.3s}
+.liveness.done .live-check{opacity:1;transform:scale(1)}
+
+/* processing */
+.proc{text-align:center;padding-top:26px}
+.proc .spin{width:64px;height:64px;margin:0 auto 20px;border-radius:50%;border:5px solid #e7e9f0;border-top-color:var(--accent-a);
+  animation:spin 1s linear infinite}
+.checklist{margin-top:22px;display:flex;flex-direction:column;gap:12px;text-align:left}
+.checklist .ci{display:flex;align-items:center;gap:11px;font-size:13.5px;color:var(--phone-dim);transition:.3s}
+.checklist .ci .box{width:22px;height:22px;border-radius:7px;border:2px solid #d7dbe8;display:grid;place-items:center;flex:none;transition:.3s}
+.checklist .ci.done{color:var(--phone-ink);font-weight:600}
+.checklist .ci.done .box{background:var(--good);border-color:var(--good);color:#fff}
+
+/* success */
+.success{text-align:center;padding-top:30px}
+.success .tick{width:96px;height:96px;border-radius:50%;margin:0 auto 22px;background:var(--good);display:grid;place-items:center;color:#fff;
+  box-shadow:0 20px 45px -12px rgba(55,211,155,.7);animation:pop .5s cubic-bezier(.2,1.4,.4,1) both}
+@keyframes pop{from{transform:scale(.4);opacity:0}to{transform:scale(1);opacity:1}}
+.confetti{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.confetti i{position:absolute;top:-12px;width:8px;height:12px;border-radius:2px;opacity:.9;animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(700px) rotate(540deg);opacity:0}}
+
+/* CURRENT (friction) version styling */
+.cur-note{background:#fff3f3;border:1px solid #ffd0d5;border-radius:12px;padding:11px 12px;margin-top:14px;
+  display:flex;gap:9px;font-size:12px;color:#b0313d;line-height:1.45}
+.cur-note svg{flex:none;color:var(--bad);margin-top:1px}
+.dropbox{margin-top:16px;border:2px dashed #cfd4e4;border-radius:14px;background:#fff;padding:30px 16px;text-align:center;color:var(--phone-dim)}
+.dropbox svg{color:#b9c0d6}
+.dropbox p{font-size:13px;margin-top:8px}
+.err{margin-top:14px;background:#fdecec;border:1px solid #f5b5bb;border-radius:12px;padding:13px;color:#c1303c;font-size:13px;
+  display:flex;gap:9px;align-items:flex-start}
+.err svg{flex:none;margin-top:1px}
+.instr-small{font-size:11px;color:#9aa1b4;margin-top:10px;line-height:1.5}
+
+.annot{margin-top:14px;background:rgba(124,140,248,.08);border:1px solid rgba(124,140,248,.28);border-radius:12px;padding:11px 13px}
+.annot b{font-family:var(--font-d);font-weight:700;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent-b)}
+.annot p{color:var(--dim);font-size:12.5px;line-height:1.5;margin-top:4px}
+.footer-note{margin-top:34px;color:var(--dimmer);font-size:12px;text-align:center;line-height:1.6}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <p class="eyebrow">Product · UK Onboarding</p>
+    <h1>Reducing ID-verification drop-off in UK onboarding</h1>
+    <p class="lede">Applicants abandon most heavily at the <b style="color:#fff">document capture</b> step. This prototype reviews the current journey, pinpoints the highest-friction step, and shows an interactive redesign that guides users to a clean capture the first time.</p>
+    <span class="tag"><b>Interactive prototype</b> · toggle Current vs Redesigned on the document step →</span>
+  </header>
+
+  <div class="layout">
+    <!-- LEFT: diagnosis + improvements -->
+    <div>
+      <section class="panel">
+        <h2><span class="num">1</span> Where users drop off</h2>
+        <p class="sub">Illustrative onboarding funnel. The single biggest fall is at ID document capture, followed by the selfie / liveness check — together they account for the majority of lost applicants.</p>
+        <div class="funnel" id="funnel">
+          <div class="frow"><span class="lbl">Start onboarding</span><div class="fbar"><i style="--w:100%"></i></div><span class="pct">100%</span></div>
+          <div class="frow"><span class="lbl">Phone &amp; email</span><div class="fbar"><i style="--w:94%"></i></div><span class="pct">94%</span></div>
+          <div class="frow"><span class="lbl">Personal details</span><div class="fbar"><i style="--w:88%"></i></div><span class="pct">88%</span></div>
+          <div class="frow"><span class="lbl">Choose document</span><div class="fbar"><i style="--w:82%"></i></div><span class="pct">82%</span></div>
+          <div class="frow drop"><span class="lbl">Capture ID document</span><div class="fbar"><i style="--w:61%"></i></div><span class="pct">61%</span></div>
+          <div class="fdrop"><span class="pill-hot">−21 pts</span> highest-friction step — blurry photos, glare, unclear retries</div>
+          <div class="frow drop"><span class="lbl">Selfie / liveness</span><div class="fbar"><i style="--w:52%"></i></div><span class="pct">52%</span></div>
+          <div class="fdrop"><span class="pill-hot">−9 pts</span> anxiety &amp; unclear "hold still" instructions</div>
+          <div class="frow"><span class="lbl">Approved</span><div class="fbar"><i style="--w:49%"></i></div><span class="pct">49%</span></div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2><span class="num">2</span> What we changed at the capture step</h2>
+        <p class="sub">Six focused changes turn a manual, error-prone photo upload into a guided, auto-captured moment with instant, friendly feedback.</p>
+        <ul class="imp">
+          <li><span class="ic">🛈</span><div><b>Set expectations up front</b><p>A short reassurance strip — "~20 seconds, encrypted, here's why we ask" — before the camera opens, lowering anxiety.</p></div></li>
+          <li><span class="ic">🎯</span><div><b>Live on-device guidance</b><p>Real-time cues (move closer, reduce glare, hold steady) replace a blind "take a photo" button.</p></div></li>
+          <li><span class="ic">⚡</span><div><b>Auto-capture when aligned</b><p>The camera fires itself the moment the document is framed and sharp — no perfect tap required.</p></div></li>
+          <li><span class="ic">✓</span><div><b>Instant quality check</b><p>Sharpness, glare and full-document checks run on-device with specific, encouraging retry guidance — never a generic "rejected".</p></div></li>
+          <li><span class="ic">↺</span><div><b>No dead-ends</b><p>Easy fallbacks: switch document type, upload from gallery, or continue on another device.</p></div></li>
+          <li><span class="ic">⏱</span><div><b>Fast, transparent processing</b><p>A live checklist shows progress so the wait never feels like a frozen dead screen.</p></div></li>
+        </ul>
+      </section>
+    </div>
+
+    <!-- RIGHT: phone -->
+    <div class="stage">
+      <div class="stage-head">
+        <div class="toggle" id="modeToggle">
+          <button data-mode="redesign" class="on">Redesigned</button>
+          <button data-mode="current">Current</button>
+        </div>
+        <span class="stage-note" id="modeNote">Redesigned flow — guided capture</span>
+      </div>
+
+      <div class="phone">
+        <div class="notch"></div>
+        <div class="screen">
+          <div class="appbar">
+            <button class="back" id="backBtn" aria-label="Back">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+            </button>
+            <div class="prog"><i id="progBar"></i></div>
+            <span class="step-of" id="stepOf">1/7</span>
+          </div>
+
+          <div class="body" id="phoneBody">
+            <!-- 0 welcome -->
+            <div class="scr active" data-step="0">
+              <div class="brandmark"><span class="r">R</span><span>Revolut</span></div>
+              <h3 class="title" style="margin-top:22px">Let's verify your identity</h3>
+              <p class="desc">To open your UK account we need to confirm who you are. It's quick — most people finish in under 2 minutes.</p>
+              <div class="mini">
+                <span>🇬🇧 UK residents</span><span>🔒 Bank-grade encryption</span><span>⏱ ~2 min</span>
+              </div>
+              <div class="reassure" style="margin-top:20px">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                <div><b>Your documents are protected</b><p>Encrypted in transit and storage. Used only to verify your identity, never shared for marketing.</p></div>
+              </div>
+            </div>
+
+            <!-- 1 phone -->
+            <div class="scr" data-step="1">
+              <h3 class="title">What's your mobile number?</h3>
+              <p class="desc">We'll text a 6-digit code to confirm it's you.</p>
+              <div class="field">
+                <label>Mobile number</label>
+                <div class="inputrow"><span class="cc">🇬🇧 +44</span><input type="tel" placeholder="7700 900123" inputmode="numeric"></div>
+              </div>
+              <div class="mini"><span>🔒 We never share your number</span></div>
+            </div>
+
+            <!-- 2 choose document -->
+            <div class="scr" data-step="2">
+              <h3 class="title">Which ID will you use?</h3>
+              <p class="desc">Pick the document you have to hand. You can switch at any time.</p>
+              <button class="choice" data-doc="Passport">
+                <span class="cic">📘</span><div><b>Passport</b><small>Fastest to verify · recommended</small></div>
+                <span class="chev">›</span>
+              </button>
+              <button class="choice" data-doc="Driving licence">
+                <span class="cic">🪪</span><div><b>UK driving licence</b><small>Photocard, front &amp; back</small></div>
+                <span class="chev">›</span>
+              </button>
+              <button class="choice" data-doc="Residence permit">
+                <span class="cic">🛂</span><div><b>Biometric residence permit</b><small>BRP card</small></div>
+                <span class="chev">›</span>
+              </button>
+            </div>
+
+            <!-- 3 capture (mode-dependent) -->
+            <div class="scr" data-step="3">
+              <div id="captureRedesign">
+                <h3 class="title">Scan your <span data-docname>passport</span></h3>
+                <p class="desc">Place it flat on a dark surface in good light. We'll capture it automatically.</p>
+                <div class="reassure">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                  <div><b>~20 seconds · fully encrypted</b><p>We check quality on your device first, so you won't get rejected later.</p></div>
+                </div>
+                <div class="viewfinder" id="viewfinder">
+                  <div class="vf-doc" id="vfDoc"></div>
+                  <div class="vf-frame" id="vfFrame"><span class="tl"></span><span class="tr"></span><span class="bl"></span><span class="br"></span></div>
+                  <div class="scanline"></div>
+                  <div class="vf-status" id="vfStatus"><span class="dot"></span><span id="vfText">Position your document in the frame</span></div>
+                </div>
+                <p class="autocap" id="autocapNote">📷 Auto-capture is on — hold steady when aligned</p>
+                <div class="qc" id="qcResult" style="display:none">
+                  <div class="head" style="display:flex;align-items:center;gap:10px">
+                    <span class="badge"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+                    <b>Looks great — clear scan</b>
+                  </div>
+                  <ul>
+                    <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg> Sharp &amp; in focus</li>
+                    <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg> No glare detected</li>
+                    <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg> All four corners visible</li>
+                  </ul>
+                </div>
+                <div class="annot">
+                  <b>Why this beats the old step</b>
+                  <p>Guidance + auto-capture + an on-device quality check mean users get a usable photo on the first try, instead of discovering a rejection minutes later.</p>
+                </div>
+              </div>
+
+              <div id="captureCurrent" style="display:none">
+                <h3 class="title">Upload your ID</h3>
+                <p class="desc">Take a photo of your document and upload it.</p>
+                <div class="cur-note">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v5M12 16h.01"/></svg>
+                  This is today's experience — kept here so reviewers can feel the friction.
+                </div>
+                <div class="dropbox">
+                  <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></svg>
+                  <p>Tap to take a photo or upload</p>
+                </div>
+                <div class="err" id="curErr" style="display:none">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v5M12 16h.01"/></svg>
+                  <div><b>Upload rejected.</b> Image could not be processed. Please try again.</div>
+                </div>
+                <p class="instr-small">Requirements: JPG or PNG under 8MB. Ensure the document is well-lit, all corners visible, no glare, no blur, not cropped, and text is legible. Rejected uploads must be retaken from the start.</p>
+              </div>
+            </div>
+
+            <!-- 4 liveness (mode-dependent) -->
+            <div class="scr" data-step="4">
+              <div id="liveRedesign">
+                <h3 class="title">Quick selfie check</h3>
+                <p class="desc">This confirms you're really here. Look at the camera — we'll do the rest, no posing needed.</p>
+                <div class="liveness" id="liveCircle">
+                  <div class="ring"><i></i></div>
+                  <div class="face"></div>
+                  <div class="live-check"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></div>
+                </div>
+                <p class="autocap" id="liveNote">Centre your face in the circle</p>
+              </div>
+              <div id="liveCurrent" style="display:none">
+                <h3 class="title">Selfie verification</h3>
+                <p class="desc">Take a selfie and hold still.</p>
+                <div class="cur-note">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v5M12 16h.01"/></svg>
+                  Today: static instructions, no live feedback, frequent "face not detected" retries.
+                </div>
+                <div class="dropbox" style="height:150px;display:grid;place-items:center">
+                  <div><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg><p>Tap to take selfie</p></div>
+                </div>
+                <p class="instr-small">Hold still for 5 seconds. Ensure your whole face is visible, remove glasses and hats, and stand against a plain background with even lighting.</p>
+              </div>
+            </div>
+
+            <!-- 5 processing -->
+            <div class="scr" data-step="5">
+              <div class="proc">
+                <div class="spin"></div>
+                <h3 class="title" style="text-align:center">Checking your details</h3>
+                <p class="desc" id="procDesc">Most checks finish in under a minute. You can keep this screen open.</p>
+              </div>
+              <div class="checklist" id="checklist">
+                <div class="ci" data-ci="0"><span class="box"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg></span> Reading your document</div>
+                <div class="ci" data-ci="1"><span class="box"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg></span> Matching your selfie</div>
+                <div class="ci" data-ci="2"><span class="box"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg></span> Confirming UK eligibility</div>
+              </div>
+            </div>
+
+            <!-- 6 success -->
+            <div class="scr" data-step="6">
+              <div class="confetti" id="confetti"></div>
+              <div class="success">
+                <div class="tick"><svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></div>
+                <h3 class="title" style="text-align:center">You're verified! 🎉</h3>
+                <p class="desc">Your UK account is ready. Welcome to Revolut — let's get you set up.</p>
+                <div class="mini" style="justify-content:center;margin-top:18px"><span>✓ Identity confirmed</span><span>✓ Account active</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="foot" id="phoneFoot">
+            <button class="btn btn-primary" id="primaryBtn">Get started</button>
+            <button class="btn btn-ghost" id="ghostBtn" style="display:none">Switch document type</button>
+          </div>
+        </div>
+      </div>
+      <p class="footer-note">Illustrative prototype for review. Funnel numbers are indicative, not live analytics.<br>Not affiliated with Revolut — used only as a house visual style.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var TOTAL = 7;
+  var step = 0;
+  var mode = 'redesign';        // 'redesign' | 'current'
+  var chosenDoc = 'passport';
+  var captureState = 'idle';    // idle -> scanning -> captured (redesign) ; idle -> error -> captured (current)
+  var liveState = 'idle';
+  var body = document.getElementById('phoneBody');
+  var progBar = document.getElementById('progBar');
+  var stepOf = document.getElementById('stepOf');
+  var backBtn = document.getElementById('backBtn');
+  var primaryBtn = document.getElementById('primaryBtn');
+  var ghostBtn = document.getElementById('ghostBtn');
+  var modeNote = document.getElementById('modeNote');
+
+  function scr(n){ return body.querySelector('.scr[data-step="'+n+'"]'); }
+
+  function show(n){
+    step = n;
+    body.querySelectorAll('.scr').forEach(function(s){ s.classList.toggle('active', +s.dataset.step===n); });
+    progBar.style.width = Math.round((n/(TOTAL-1))*100)+'%';
+    stepOf.textContent = (n+1)+'/'+TOTAL;
+    backBtn.disabled = (n===0 || n>=5);
+    body.scrollTop = 0;
+    renderFoot();
+    if(n===3) resetCapture();
+    if(n===4) resetLive();
+    if(n===5) runProcessing();
+    if(n===6) burst();
+  }
+
+  function renderFoot(){
+    ghostBtn.style.display='none';
+    primaryBtn.style.display='flex';
+    primaryBtn.disabled=false;
+    switch(step){
+      case 0: primaryBtn.textContent='Get started'; break;
+      case 1: primaryBtn.textContent='Send code'; break;
+      case 2: primaryBtn.textContent='Continue'; break;
+      case 3:
+        if(mode==='redesign'){
+          if(captureState!=='captured'){ primaryBtn.textContent='Scan document'; }
+          else { primaryBtn.textContent='Looks good — continue'; }
+        } else {
+          primaryBtn.textContent = (captureState==='captured') ? 'Continue' : 'Upload photo';
+        }
+        ghostBtn.style.display='flex'; ghostBtn.textContent='Use a different document';
+        break;
+      case 4:
+        if(mode==='redesign'){ primaryBtn.textContent = (liveState==='done')?'Continue':'Start face scan'; }
+        else { primaryBtn.textContent = (liveState==='done')?'Continue':'Take selfie'; }
+        break;
+      case 5: primaryBtn.style.display='none'; break;
+      case 6: primaryBtn.textContent='Start using my account'; break;
+    }
+  }
+
+  /* ---- capture logic ---- */
+  var vf=document.getElementById('viewfinder'), vfFrame=document.getElementById('vfFrame'),
+      vfStatus=document.getElementById('vfStatus'), vfText=document.getElementById('vfText'),
+      vfDoc=document.getElementById('vfDoc'), qc=document.getElementById('qcResult'),
+      autocap=document.getElementById('autocapNote');
+  var curErr=document.getElementById('curErr');
+  var capTimers=[];
+  function clearCap(){ capTimers.forEach(clearTimeout); capTimers=[]; }
+
+  function resetCapture(){
+    clearCap();
+    captureState='idle';
+    document.getElementById('captureRedesign').style.display = mode==='redesign'?'block':'none';
+    document.getElementById('captureCurrent').style.display = mode==='current'?'block':'none';
+    // redesign reset
+    vf.classList.remove('scanning'); vfFrame.classList.remove('ok'); vfStatus.classList.remove('ok');
+    vfText.textContent='Position your document in the frame';
+    vfDoc.style.transform=''; qc.style.display='none'; autocap.style.display='block';
+    // current reset
+    curErr.style.display='none';
+    document.querySelectorAll('[data-docname]').forEach(function(e){ e.textContent=chosenDoc.toLowerCase(); });
+    renderFoot();
+  }
+
+  function runRedesignScan(){
+    if(captureState==='scanning') return;
+    captureState='scanning';
+    primaryBtn.disabled=true; primaryBtn.textContent='Scanning…';
+    vf.classList.add('scanning');
+    var seq=[
+      [500,'Move a little closer', false],
+      [1200,'Glare detected — tilt slightly', false],
+      [2100,'Hold steady…', false],
+      [2900,'Perfect — capturing', true]
+    ];
+    seq.forEach(function(s){
+      capTimers.push(setTimeout(function(){
+        vfText.textContent=s[1];
+        if(s[2]){ vfFrame.classList.add('ok'); vfStatus.classList.add('ok'); vfDoc.style.transform='scale(1.03)'; }
+      }, s[0]));
+    });
+    capTimers.push(setTimeout(function(){
+      vf.classList.remove('scanning');
+      qc.style.display='block'; autocap.style.display='none';
+      captureState='captured';
+      primaryBtn.disabled=false; renderFoot();
+    }, 3500));
+  }
+
+  function runCurrentUpload(){
+    if(captureState==='captured') return;
+    if(captureState!=='error'){
+      // first attempt -> rejection (the friction)
+      captureState='error';
+      primaryBtn.disabled=true; primaryBtn.textContent='Uploading…';
+      capTimers.push(setTimeout(function(){
+        curErr.style.display='flex';
+        primaryBtn.disabled=false; primaryBtn.textContent='Try again';
+      },1400));
+    } else {
+      // second attempt -> succeeds
+      captureState='captured';
+      curErr.style.display='none';
+      renderFoot();
+    }
+  }
+
+  /* ---- liveness ---- */
+  var liveCircle=document.getElementById('liveCircle'), liveNote=document.getElementById('liveNote');
+  var liveTimers=[];
+  function resetLive(){
+    liveTimers.forEach(clearTimeout); liveTimers=[];
+    liveState='idle';
+    document.getElementById('liveRedesign').style.display = mode==='redesign'?'block':'none';
+    document.getElementById('liveCurrent').style.display = mode==='current'?'block':'none';
+    liveCircle.classList.remove('run','done');
+    if(liveNote) liveNote.textContent = mode==='redesign'?'Centre your face in the circle':'';
+    renderFoot();
+  }
+  function runLive(){
+    if(liveState==='run') return;
+    liveState='run';
+    primaryBtn.disabled=true; primaryBtn.textContent='Scanning…';
+    if(mode==='redesign'){
+      liveCircle.classList.add('run');
+      var notes=['Look straight ahead','Turn your head slowly →','Almost there…'];
+      notes.forEach(function(t,i){ liveTimers.push(setTimeout(function(){ liveNote.textContent=t; }, 500+i*700)); });
+      liveTimers.push(setTimeout(function(){
+        liveCircle.classList.remove('run'); liveCircle.classList.add('done');
+        liveNote.textContent='Face confirmed ✓';
+        liveState='done'; primaryBtn.disabled=false; renderFoot();
+      }, 2600));
+    } else {
+      liveTimers.push(setTimeout(function(){
+        liveState='done'; primaryBtn.disabled=false; renderFoot();
+      }, 1800));
+    }
+  }
+
+  /* ---- processing ---- */
+  var procTimers=[];
+  function runProcessing(){
+    procTimers.forEach(clearTimeout); procTimers=[];
+    var items=document.querySelectorAll('#checklist .ci');
+    items.forEach(function(i){ i.classList.remove('done'); });
+    items.forEach(function(it,i){
+      procTimers.push(setTimeout(function(){ it.classList.add('done'); }, 700+i*750));
+    });
+    procTimers.push(setTimeout(function(){ show(6); }, 700+items.length*750+600));
+  }
+
+  /* ---- confetti ---- */
+  function burst(){
+    var c=document.getElementById('confetti'); c.innerHTML='';
+    var cols=['#7c8cf8','#4bd0ee','#37d39b','#ffb020','#ff5c6c'];
+    for(var i=0;i<40;i++){
+      var s=document.createElement('i');
+      s.style.left=Math.random()*100+'%';
+      s.style.background=cols[i%cols.length];
+      s.style.animationDuration=(1.6+Math.random()*1.6)+'s';
+      s.style.animationDelay=(Math.random()*0.5)+'s';
+      c.appendChild(s);
+    }
+  }
+
+  /* ---- navigation ---- */
+  primaryBtn.addEventListener('click', function(){
+    if(step===3){
+      if(mode==='redesign'){
+        if(captureState!=='captured'){ runRedesignScan(); return; }
+      } else {
+        if(captureState!=='captured'){ runCurrentUpload(); return; }
+      }
+      show(4); return;
+    }
+    if(step===4){
+      if(liveState!=='done'){ runLive(); return; }
+      show(5); return;
+    }
+    if(step===6){ show(0); return; }
+    show(step+1);
+  });
+
+  ghostBtn.addEventListener('click', function(){ if(step===3) show(2); });
+  backBtn.addEventListener('click', function(){ if(step>0 && step<5) show(step-1); });
+
+  // choose document
+  body.querySelectorAll('.choice').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      body.querySelectorAll('.choice').forEach(function(b){ b.classList.remove('sel'); });
+      btn.classList.add('sel');
+      chosenDoc = btn.dataset.doc;
+      setTimeout(function(){ show(3); }, 220);
+    });
+  });
+
+  // mode toggle
+  document.getElementById('modeToggle').addEventListener('click', function(e){
+    var b=e.target.closest('button'); if(!b) return;
+    mode=b.dataset.mode;
+    this.querySelectorAll('button').forEach(function(x){ x.classList.toggle('on', x===b); });
+    modeNote.textContent = mode==='redesign' ? 'Redesigned flow — guided capture' : 'Current flow — manual upload';
+    // jump to the capture step so the difference is visible immediately
+    show(3);
+  });
+
+  show(0);
+
+  // animate funnel bars into place
+  requestAnimationFrame(function(){
+    setTimeout(function(){
+      document.querySelectorAll('#funnel .fbar > i').forEach(function(bar){
+        bar.style.width = getComputedStyle(bar).getPropertyValue('--w').trim();
+      });
+    }, 200);
+  });
+})();
+</script>
+</body>
+</html>
